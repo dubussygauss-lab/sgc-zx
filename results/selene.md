@@ -207,3 +207,78 @@ depolarizing: 68 runs x 2000 shots, 2 processes
 depolarizing done in 68.0 s; agree (|z|<=2): 59/68; wrote /home/claude/sgc-zx/results/selene_depolarizing.csv
 total wall time 533.5 s
 ```
+
+
+## 6. Depolarising run on the full set (gates_meas_init)
+
+[F] Script `selene/run_selene_depol_full.py`, output `results/selene_depolarizing_full.csv`. DepolarizingErrorModel(p_1q = 7.3e-05, p_2q = 0.00129, p_meas = 0.00135, p_init = 4e-05), 2000 shots, seed = seed_for(pipe, file, "depol") as in run_selene.py, 2 processes.
+[F] Runs: 468 rows, pipelines P0, P1, P2; per family and pipeline: A: P0=144, P1=144, P2=144; B1: P0=12, P1=12, P2=12.
+[F] Sum of per-run wall times 1437 s; rows with a proxy comparison 345, rows without (no proxy row for that (file, pipeline): family A n = 10, B1 n = 9, 10) 123.
+
+### 6.1 Mean F_H (Selene, depolarising) by family, n, pipeline
+
+| family | n | pipeline | runs | mean F_H | pop. sd F_H | mean n_2q | mean F_H noiseless same seed |
+|---|---|---|---|---|---|---|---|
+| A | 4 | P0 | 36 | 0.9914 | 0.0101 | 12.4 | 0.9987 |
+| A | 4 | P1 | 36 | 0.9880 | 0.0105 | 25.9 | 0.9985 |
+| A | 4 | P2 | 36 | 0.9902 | 0.0122 | 12.9 | 0.9985 |
+| A | 6 | P0 | 36 | 0.9832 | 0.0176 | 21.0 | 0.9955 |
+| A | 6 | P1 | 36 | 0.9706 | 0.0158 | 62.0 | 0.9955 |
+| A | 6 | P2 | 36 | 0.9820 | 0.0200 | 22.7 | 0.9956 |
+| A | 8 | P0 | 36 | 0.9705 | 0.0252 | 29.6 | 0.9880 |
+| A | 8 | P1 | 36 | 0.9410 | 0.0268 | 107.6 | 0.9879 |
+| A | 8 | P2 | 36 | 0.9691 | 0.0282 | 32.2 | 0.9877 |
+| A | 10 | P0 | 36 | 0.9517 | 0.0376 | 38.1 | 0.9739 |
+| A | 10 | P1 | 36 | 0.8918 | 0.0493 | 173.7 | 0.9729 |
+| A | 10 | P2 | 36 | 0.9501 | 0.0393 | 41.7 | 0.9740 |
+| B1 | 5 | P0 | 4 | 0.9722 | 0.0048 | 23.8 | 0.9997 |
+| B1 | 5 | P1 | 4 | 0.9638 | 0.0040 | 28.2 | 0.9999 |
+| B1 | 5 | P2 | 4 | 0.9739 | 0.0056 | 22.8 | 0.9999 |
+| B1 | 7 | P0 | 3 | 0.9328 | 0.0351 | 54.7 | 1.0000 |
+| B1 | 7 | P1 | 3 | 0.9210 | 0.0443 | 67.3 | 1.0000 |
+| B1 | 7 | P2 | 3 | 0.9308 | 0.0367 | 51.7 | 1.0000 |
+| B1 | 9 | P0 | 4 | 0.9121 | 0.0511 | 94.0 | 0.9975 |
+| B1 | 9 | P1 | 4 | 0.8816 | 0.0591 | 111.2 | 0.9979 |
+| B1 | 9 | P2 | 4 | 0.9109 | 0.0465 | 86.5 | 0.9982 |
+| B1 | 10 | P0 | 1 | 0.9410 | 0.0000 | 56.0 | 1.0000 |
+| B1 | 10 | P1 | 1 | 0.9260 | 0.0000 | 55.0 | 1.0000 |
+| B1 | 10 | P2 | 1 | 0.9350 | 0.0000 | 41.0 | 1.0000 |
+
+### 6.2 Agreement with the density-matrix proxy (rows with a proxy row)
+
+[F] 345 rows. |z| <= 2: 335/345 (97.1 %). mean z = -0.001, population sd of z = 0.957, max |z| = 2.82. For independent draws from the proxy's sampling distribution one expects mean 0, sd 1 and about 95.4 % within 2.
+| family | n | pipeline | rows | agree (|z|<=2) | mean z | pop. sd z | mean (F_H_selene - F_H_proxy_exact) |
+|---|---|---|---|---|---|---|---|
+| A | 4 | P0 | 36 | 34 | -0.013 | 1.090 | -0.0008 |
+| A | 4 | P1 | 36 | 35 | -0.063 | 1.054 | -0.0013 |
+| A | 4 | P2 | 36 | 35 | -0.266 | 0.968 | -0.0017 |
+| A | 6 | P0 | 36 | 35 | 0.007 | 0.815 | -0.0042 |
+| A | 6 | P1 | 36 | 35 | 0.218 | 0.889 | -0.0028 |
+| A | 6 | P2 | 36 | 36 | -0.013 | 0.836 | -0.0042 |
+| A | 8 | P0 | 36 | 36 | -0.030 | 0.808 | -0.0121 |
+| A | 8 | P1 | 36 | 34 | 0.315 | 1.031 | -0.0093 |
+| A | 8 | P2 | 36 | 36 | 0.077 | 0.837 | -0.0116 |
+| B1 | 5 | P0 | 4 | 4 | -0.184 | 0.617 | -0.0009 |
+| B1 | 5 | P1 | 4 | 4 | -0.681 | 0.641 | -0.0029 |
+| B1 | 5 | P2 | 4 | 3 | -0.117 | 1.624 | -0.0002 |
+| B1 | 7 | P0 | 3 | 3 | -0.613 | 0.469 | -0.0037 |
+| B1 | 7 | P1 | 3 | 3 | 0.427 | 0.482 | +0.0031 |
+| B1 | 7 | P2 | 3 | 2 | -1.431 | 0.807 | -0.0083 |
+
+[F] Rows with |z| > 2 (10): P2/barenco_tof_3.qasm z=-2.82; P0/ladder_n4_r4_disorder_s2.qasm z=-2.58; P2/tfim_n4_r1_disorder_s3.qasm z=-2.47; P1/xxz_n8_r4_disorder_s3.qasm z=+2.36; P1/ladder_n8_r1_disorder_s1.qasm z=+2.29; P1/tfim_n6_r1_uniform_s1.qasm z=+2.29; P2/hwb6.qasm z=-2.28; P0/ladder_n6_r1_disorder_s3.qasm z=-2.25; P1/xxz_n4_r1_uniform_s1.qasm z=+2.25; P0/xxz_n4_r1_disorder_s2.qasm z=+2.19.
+[F] z > 2: 5, z < -2: 5; z > 0: 184/345.
+
+### 6.3 Fidelity ordering per circuit
+
+[F] Circuits with all three pipelines: 156. P0 > P1 and P2 > P1 (both strict): 140; P0 > P1: 151; P2 > P1: 141; P2 > P0: 67; P2 == P0: 1.
+[F] Mean F_H over these circuits: P0 0.9716, P1 0.9459, P2 0.9702; mean P0 - P1 = +0.0256, mean P2 - P1 = +0.0243, mean P2 - P0 = -0.0013.
+  - A n=4: 36 circuits; P0>P1 33, P2>P1 29, both 28, P2>P0 15; mean P0 0.9914, P1 0.9880, P2 0.9902
+  - A n=6: 36 circuits; P0>P1 35, P2>P1 32, both 32, P2>P0 16; mean P0 0.9832, P1 0.9706, P2 0.9820
+  - A n=8: 36 circuits; P0>P1 36, P2>P1 34, both 34, P2>P0 16; mean P0 0.9705, P1 0.9410, P2 0.9691
+  - A n=10: 36 circuits; P0>P1 36, P2>P1 36, both 36, P2>P0 16; mean P0 0.9517, P1 0.8918, P2 0.9501
+  - B1 n=5: 4 circuits; P0>P1 4, P2>P1 3, both 3, P2>P0 3; mean P0 0.9722, P1 0.9638, P2 0.9739
+  - B1 n=7: 3 circuits; P0>P1 2, P2>P1 2, both 2, P2>P0 0; mean P0 0.9328, P1 0.9210, P2 0.9308
+  - B1 n=9: 4 circuits; P0>P1 4, P2>P1 4, both 4, P2>P0 1; mean P0 0.9121, P1 0.8816, P2 0.9109
+  - B1 n=10: 1 circuits; P0>P1 1, P2>P1 1, both 1, P2>P0 0; mean P0 0.9410, P1 0.9260, P2 0.9350
+[F] Circuits where P1 is not below both (16): ladder_n4_r4_disorder_s1.qasm (P0 0.9962, P1 0.9965, P2 0.9982); tfim_n4_r2_disorder_s1.qasm (P0 0.9978, P1 0.9964, P2 0.9963); xxz_n4_r1_uniform_s1.qasm (P0 0.9822, P1 0.9887, P2 0.9855); xxz_n4_r2_disorder_s1.qasm (P0 0.9830, P1 0.9737, P2 0.9730); xxz_n4_r4_disorder_s1.qasm (P0 0.9657, P1 0.9748, P2 0.9604); xxz_n4_r4_disorder_s2.qasm (P0 0.9708, P1 0.9684, P2 0.9677); xxz_n4_r4_disorder_s3.qasm (P0 0.9663, P1 0.9616, P2 0.9571); xxz_n4_r4_uniform_s1.qasm (P0 0.9707, P1 0.9650, P2 0.9637); xxz_n6_r4_disorder_s1.qasm (P0 0.9396, P1 0.9373, P2 0.9343); xxz_n6_r4_disorder_s2.qasm (P0 0.9411, P1 0.9351, P2 0.9255); xxz_n6_r4_disorder_s3.qasm (P0 0.9376, P1 0.9396, P2 0.9378); xxz_n6_r4_uniform_s1.qasm (P0 0.9443, P1 0.9396, P2 0.9358); xxz_n8_r4_disorder_s2.qasm (P0 0.9053, P1 0.9004, P2 0.8917); xxz_n8_r4_disorder_s3.qasm (P0 0.9154, P1 0.9075, P2 0.9051); barenco_tof_3.qasm (P0 0.9740, P1 0.9700, P2 0.9655); barenco_tof_4.qasm (P0 0.9470, P1 0.9490, P2 0.9450).
+[F] Sampling resolution: mean F_H_ideal_sampled_mean (noiseless, 2000 shots) = 0.9897; two draws of the same noisy circuit differ at the level of the proxy sampled sd, mean 0.0028 (rows with proxy).

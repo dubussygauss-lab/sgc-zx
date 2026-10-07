@@ -37,6 +37,43 @@ def _(mo):
     return
 
 
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ### What this notebook shows and what is pending
+
+    The scoring map of `report/report_v3.md` assigns the technical-performance
+    evidence to the count tables A1 to B2, the count-only table B1x, the proxy
+    tables A4 and A5, the Selene table S1 and this notebook.
+
+    **Shown here, read from `results/*.csv`**
+
+    | Artifact | Source file | Status |
+    |---|---|---|
+    | Table A1, A2 (family A counts) | `family_A_counts.csv` | checked rows |
+    | Table B1 (family B1 counts, hwb8 merged) | `family_B1_counts.csv` | checked rows |
+    | Table B1x (family B1x counts) | `family_B1x_counts.csv` | count-only, `ok-unchecked`, no exactness check |
+    | Table B2 (family B2 means) | `family_B2_counts.csv` | checked rows |
+    | Table B2-check (family B2 compiled QASM re-read) | `family_B2_compiled_check.csv` | 100 rows |
+    | Table A4 (local noise proxy, family A) | `family_A_proxy_h22e.csv` | proxy, not emulator |
+    | Table C (exactness-barrier certificates) | `certificates.csv` | computed |
+    | Table S (Selene noiseless runs) | `selene_noiseless.csv` | local emulator |
+    | Table M (cost model) | `cost_model_metrics.csv` | fitted on proxy rows |
+    | Figures | `report/figures/*.png`, `results/fig_*.png` | from the CSVs above |
+
+    Table A5 (proxy on family B1) and Table S1 (Selene summary with the
+    depolarising runs) are in the report only.
+
+    **Pending `[PENDING: emulator]`**
+
+    - H2-2E emulator runs through `aqora.QPU` (Section 3 below): Hellinger
+      fidelity and TVD per (circuit, pipeline). No job has been submitted.
+    - Cost model (Table M) refitted on emulator rows instead of proxy rows.
+    - Official HQC from the H2-2SC syntax checker for every compiled circuit.
+    """)
+    return
+
+
 @app.cell
 def _():
     import os
@@ -45,11 +82,24 @@ def _():
     import marimo as mo
     import pandas as pd
 
-    # Repository root: this file lives in <root>/report/.
-    ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) \
-        if "__file__" in globals() else os.getcwd()
-    if not os.path.isdir(os.path.join(ROOT, "results")):
-        ROOT = os.getcwd()
+    # Repository root. In the repository this file lives in <root>/report/ and
+    # results/ is one level up. In the Aqora workspace the notebook sits next
+    # to a results/ folder. Try the notebook's own directory first, then its
+    # parent, then the working directory and its parent, and take the first
+    # one that contains results/.
+    def _find_root():
+        _cands = []
+        if "__file__" in globals():
+            _here = os.path.dirname(os.path.abspath(__file__))
+            _cands += [_here, os.path.dirname(_here)]
+        _cwd = os.getcwd()
+        _cands += [_cwd, os.path.dirname(_cwd)]
+        for _c in _cands:
+            if os.path.isdir(os.path.join(_c, "results")):
+                return _c
+        return _cands[0]
+
+    ROOT = _find_root()
     sys.path.insert(0, os.path.join(ROOT, "pipelines"))
     sys.path.insert(0, os.path.join(ROOT, "report"))
     RESULTS = os.path.join(ROOT, "results")
@@ -87,8 +137,10 @@ def _(RESULTS, os, pd):
     certificates = _load("certificates.csv")
     selene_noiseless = _load("selene_noiseless.csv")
     cost_model_metrics = _load("cost_model_metrics.csv")
+    family_B1x = _load("family_B1x_counts.csv")
+    family_B2_check = _load("family_B2_compiled_check.csv")
     return (certificates, cost_model_metrics, family_A, family_A_proxy,
-            family_B1, family_B2, selene_noiseless)
+            family_B1, family_B1x, family_B2, family_B2_check, selene_noiseless)
 
 
 @app.cell
@@ -135,12 +187,80 @@ def _(family_B1, mo):
 
 
 @app.cell
+def _(family_B1x, mo):
+    # Table B1x: count-only family, no exactness check (results/family_B1x_counts.csv).
+    if family_B1x is None:
+        _out = mo.callout(mo.md("`results/family_B1x_counts.csv` not found. Run "
+                                "`python pipelines/run_bench_B.py --manifest bench/family_B1x/manifest.csv "
+                                "--prefix family_B1x --pipelines P0ref,P0,P2 --no-check`."), kind="warn")
+    else:
+        _status = family_B1x["status"].value_counts().to_dict()
+        _status_str = ", ".join(f"`{k}` on {v} of {len(family_B1x)} rows" for k, v in _status.items())
+        _kinds = ", ".join(f"`{k}`" for k in family_B1x["check_kind"].astype(str).unique())
+        _p = family_B1x.pivot_table(index="file", columns="pipeline", values="n_2q")
+        _t = family_B1x.pivot_table(index="file", columns="pipeline", values="t_count_zx")
+        _meta = family_B1x[family_B1x.pipeline == "P0ref"].set_index("file")[["n", "t_count_written"]]
+        _tab = _meta.join(_p[["P0ref", "P0", "P2"]].add_prefix("ZZ "))
+        _tab["P2 vs P0 %"] = (100 * (1 - _p["P2"] / _p["P0"])).round(1)
+        _tab = _tab.rename(columns={"t_count_written": "T written"})
+        _tab["T after ZX P2"] = _t["P2"]
+        _tab = _tab.sort_values(["n", "T written"]).reset_index()
+        _below = int((_p["P2"] < _p["P0"]).sum())
+        _equal = int((_p["P2"] == _p["P0"]).sum())
+        _above = int((_p["P2"] > _p["P0"]).sum())
+        _out = mo.vstack([
+            mo.md(f"`[F]` The rows of `results/family_B1x_counts.csv` are count-only. "
+                  f"Status column: {_status_str}. `check_kind` column: {_kinds}. "
+                  f"No unitary, statevector or distribution exactness check was run on them "
+                  f"(compiled with `--no-check`), only the gate-set check. "
+                  f"They are kept apart from the checked family B1 above."),
+            mo.md(f"**Table B1x.** Family B1x, {len(_tab)} circuits, ZZPhase count per circuit under "
+                  f"P0ref, P0 and P2, T-count as written and T-count after the ZX stage of P2. "
+                  f"P2 below P0 on {_below}, equal on {_equal}, above on {_above}."),
+            mo.ui.table(_tab, selection=None)])
+    _out
+    return
+
+
+@app.cell
 def _(family_B2, mo):
     _g = family_B2.groupby(["n", "eps", "pipeline"])
     _tab = _g[["t_count_written", "t_count_after_zx", "n_2q", "depth_2q", "hqc"]].mean().round(1)
     _tab["T red. %"] = (100 * (1 - _tab["t_count_after_zx"] / _tab["t_count_written"])).round(1)
     mo.vstack([mo.md("**Table B2.** Family B2, means over 5 circuits per (n, eps, pipeline)."),
                mo.ui.table(_tab.reset_index(), selection=None)])
+    return
+
+
+@app.cell
+def _(family_B2_check, mo, pd):
+    # Table B2-check: saved compiled QASM of family B2 re-read and re-simulated
+    # (results/family_B2_compiled_check.csv).
+    if family_B2_check is None:
+        _out = mo.callout(mo.md("`results/family_B2_compiled_check.csv` not found."), kind="warn")
+    else:
+        _n = len(family_B2_check)
+        _flags = ["metrics_match", "reread_native", "dist_ok"]
+        _rows = [{"check": _f,
+                  "True": int((family_B2_check[_f] == True).sum()),
+                  "False": int((family_B2_check[_f] == False).sum()),
+                  "rows": _n} for _f in _flags]
+        _summary = pd.DataFrame(_rows)
+        _bad = family_B2_check[~family_B2_check[_flags].all(axis=1)]
+        _bad_tab = _bad[["file", "pipeline", "n", "eps", "instance", "status", "dist_maxdiff"] + _flags].reset_index(drop=True)
+        _status = ", ".join(f"`{k}` {v}" for k, v in family_B2_check["status"].value_counts().items())
+        _out = mo.vstack([
+            mo.md(f"**Table B2-check.** Family B2 compiled circuits re-read from "
+                  f"the `path` column (`results/compiled/`, one folder per pipeline), {_n} rows. `metrics_match` compares the "
+                  f"re-read gate counts with the counts CSV, `reread_native` checks the gate set, "
+                  f"`dist_ok` compares the output distribution of the re-read measured QASM on |0...0> with "
+                  f"that of the uncompiled bench circuit at tolerance 1e-8 (`compile.CHECK_TOL`). Status column: {_status}."),
+            mo.ui.table(_summary, selection=None),
+            mo.md(f"Rows with any flag False: {len(_bad)}. The `dist_maxdiff` of each is shown; "
+                  f"the largest `dist_maxdiff` over all {_n} rows is "
+                  f"{family_B2_check['dist_maxdiff'].max():.3e}."),
+            mo.ui.table(_bad_tab, selection=None) if len(_bad) else mo.md("None.")])
+    _out
     return
 
 
