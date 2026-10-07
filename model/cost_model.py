@@ -423,7 +423,7 @@ def fmt_coefs(df):
     return "\n".join(lines)
 
 
-def verdict_text(m):
+def verdict_text(m, n_b1_circuits=None):
     """Generalisation verdict written from the metric rows."""
     def r(model, split, test):
         return m[(m.model == model) & (m.split == split) & (m.test == test)].iloc[0]
@@ -454,11 +454,12 @@ def verdict_text(m):
         out.append("- Reading: transfer is one-directional. Trained on A (%d rows), the best model predicts "
                    "B1 with R^2 = %.3f against %.3f for the unfitted baseline and MAE(F_H) %.4f against "
                    "%.4f. Trained on B1 (%d rows) no model predicts A. Within a family the models "
-                   "interpolate (cv5g); across families the evidence is one direction on 7 B1 circuits, "
+                   "interpolate (cv5g); across families the evidence is one direction on %d B1 circuits, "
                    "which does not establish generalisation." % (
                        int(m[(m.split == "lofo") & (m.test == "A")].n_test.iloc[0]),
                        ab[best_ab].r2_y, phys_ab.r2_y, ab[best_ab].mae_F, phys_ab.mae_F,
-                       int(m[(m.split == "lofo") & (m.test == "B1")].n_test.iloc[0])))
+                       int(m[(m.split == "lofo") & (m.test == "B1")].n_test.iloc[0]),
+                       n_b1_circuits))
     else:
         out.append("- Reading: the fitted models interpolate within a family only; neither direction of the "
                    "leave-one-family-out split reaches R^2 = 0.8.")
@@ -517,7 +518,7 @@ def write_report(path, metrics, coefs, dfA, dfB, a_path, b_path, fig):
                "measure interpolation only.\n")
     txt.append("| model | train A, test B1 | train B1, test A | cv5g, A rows | cv5g, B1 rows |\n|---|---|---|---|---|")
     txt += verdict
-    txt += verdict_text(m)
+    txt += verdict_text(m, n_b1_circuits=int(dfB["file"].nunique()))
     txt.append("## Leave-one-model-out within A\n")
     txt.append(fmt_metrics(lomo) + "\n")
     txt.append("## Coefficients\n")
