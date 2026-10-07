@@ -1,0 +1,16 @@
+file,n,n_gates,t_count_as_written,n_cx_as_written,n_h_as_written,ops_as_written,pyzx_tcount,n_gates_source,n_ccx_source,t_count_source,source_path,commit
+barenco_tof_3.qasm,5,76,28,24,24,"CX,H,T,Tdg",28,20,4,0,third_party/pyzx-fork/circuits/qasm/barenco_tof_3.qasm,e695d6d711e67b2b7223417c4714b6b1fcc09191
+mod5_4.qasm,5,79,28,28,22,"CX,H,T,Tdg,X",28,23,4,0,third_party/pyzx-fork/circuits/qasm/mod5_4.qasm,e695d6d711e67b2b7223417c4714b6b1fcc09191
+qft_4.qasm,5,187,69,46,50,"CX,H,S,Sdg,T,Tdg",69,159,2,55,third_party/pyzx-fork/circuits/qasm/qft_4.qasm,e695d6d711e67b2b7223417c4714b6b1fcc09191
+tof_3.qasm,5,57,21,18,18,"CX,H,T,Tdg",21,15,3,0,third_party/pyzx-fork/circuits/qasm/tof_3.qasm,e695d6d711e67b2b7223417c4714b6b1fcc09191
+barenco_tof_4.qasm,7,146,56,48,42,"CX,H,T,Tdg",56,34,8,0,third_party/pyzx-fork/circuits/qasm/barenco_tof_4.qasm,e695d6d711e67b2b7223417c4714b6b1fcc09191
+hwb6.qasm,7,319,105,116,90,"CX,H,T,Tdg,X",105,109,15,0,third_party/pyzx-fork/circuits/qasm/hwb6.qasm,e695d6d711e67b2b7223417c4714b6b1fcc09191
+tof_4.qasm,7,95,35,30,30,"CX,H,T,Tdg",35,25,5,0,third_party/pyzx-fork/circuits/qasm/tof_4.qasm,e695d6d711e67b2b7223417c4714b6b1fcc09191
+barenco_tof_5.qasm,9,218,84,72,62,"CX,H,T,Tdg",84,50,12,0,third_party/pyzx-fork/circuits/qasm/barenco_tof_5.qasm,e695d6d711e67b2b7223417c4714b6b1fcc09191
+grover_5.qasm,9,1023,336,288,334,"CX,H,T,Tdg,X",336,351,48,0,third_party/pyzx-fork/circuits/qasm/grover_5.qasm,e695d6d711e67b2b7223417c4714b6b1fcc09191
+mod_mult_55.qasm,9,147,49,48,42,"CX,H,T,Tdg,X",49,49,7,0,third_party/pyzx-fork/circuits/qasm/mod_mult_55.qasm,e695d6d711e67b2b7223417c4714b6b1fcc09191
+tof_5.qasm,9,133,49,42,42,"CX,H,T,Tdg",49,35,7,0,third_party/pyzx-fork/circuits/qasm/tof_5.qasm,e695d6d711e67b2b7223417c4714b6b1fcc09191
+vbe_adder_3.qasm,10,190,70,70,50,"CX,H,T,Tdg",70,50,10,0,third_party/pyzx-fork/circuits/qasm/vbe_adder_3.qasm,e695d6d711e67b2b7223417c4714b6b1fcc09191
+mod_red_21.qasm,11,346,119,105,98,"CX,H,T,Tdg,X",119,108,17,0,third_party/pyzx-fork/circuits/qasm/mod_red_21.qasm,e695d6d711e67b2b7223417c4714b6b1fcc09191
+gf2_pow_4_mult.qasm,12,289,112,99,78,"CX,H,T,Tdg",112,65,16,0,third_party/pyzx-fork/circuits/qasm/gf2^4_mult.qasm,e695d6d711e67b2b7223417c4714b6b1fcc09191
+hwb8.qasm,12,18220,5887,7129,5046,"CX,H,T,Tdg,X",5887,6446,841,0,third_party/pyzx-fork/circuits/qasm/hwb8.qasm,e695d6d711e67b2b7223417c4714b6b1fcc09191
