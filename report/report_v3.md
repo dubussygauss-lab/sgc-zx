@@ -353,7 +353,7 @@ Provisional local proxy. Density-matrix simulation with the published H2-2E emul
 
 ### 3.6 Selene runs
 
-`[F]` Table S1. Runs of the compiled circuits on Quantinuum's local emulator Selene (`selene-sim` 0.3.4, route in Section 2.6), from `results/selene_noiseless.csv` (468 rows) and `results/selene_depolarizing.csv` (68 rows). The noiseless runs cover the 144 family A circuits with n <= 10 and the 12 family B1 circuits with n <= 10 under P0, P1 and P2 at 2000 shots. The depolarising runs cover 10 family A and 7 family B1 circuits under P0 and P2 in two variants.
+`[F]` Tables S1 and S2. Runs of the compiled circuits on Quantinuum's local emulator Selene (`selene-sim` 0.3.4, route in Section 2.6), from `results/selene_noiseless.csv` (468 rows), `results/selene_depolarizing.csv` (68 rows) and `results/selene_depolarizing_full.csv` (468 rows). The noiseless runs cover the 144 family A circuits with n <= 10 and the 12 family B1 circuits with n <= 10 under P0, P1 and P2 at 2000 shots. The full depolarising run covers the same 156 circuits under P0, P1 and P2 at 2000 shots with `DepolarizingErrorModel` at the H2-2E rates p_1q = 7.3e-5, p_2q = 1.29e-3, p_meas = 1.35e-3 and p_init = 4e-5.
 
 <!-- TABLE:S1_selene -->
 Noiseless runs (IdealErrorModel, Quest backend). TVD is against the exact output distribution of the compiled QASM, TVD_scale = sqrt(support / (2 pi shots)).
@@ -377,13 +377,37 @@ Depolarising runs (DepolarizingErrorModel, p_1q = 7.3e-5, p_2q = 1.29e-3) agains
 
 `[O]` A wrong measure map or a wrong gate in the compiled QASM would put shots on zero-probability strings or push the TVD above its sampling scale. Neither happened on any of the 156 circuits under any of the three pipelines, so the compiled files run on Quantinuum's own toolchain and reproduce the distributions the local checks computed.
 
-`[F]` In the depolarising runs the like-for-like variant `gates_meas_init` agrees with the density-matrix proxy within two sampling standard deviations on 32 of 34 runs, with mean z = -0.29, population standard deviation of z 1.00 and largest |z| 2.81. The variant `gates_only` leaves readout and initialisation noiseless and agrees on 27 of 34 runs with mean z = +1.00. The mean of F_H under Selene minus the exact proxy F_H is -0.0056 in `gates_meas_init`, and that difference falls to -0.0016 once the proxy's F_H is also evaluated on 2000-shot samples, because a finite sample biases F_H downward.
+<!-- TABLE:S2_selene_depol -->
+Depolarising runs on the full set (DepolarizingErrorModel, p_1q = 7.3e-5, p_2q = 1.29e-3, p_meas = 1.35e-3, p_init = 4e-5, 2000 shots). F_H is the Hellinger fidelity of the Selene samples to the ideal distribution. P0 > P1 and P2 > P1 count circuits with a strictly higher F_H.
+
+| family | n | circuits | mean F_H P0 | mean F_H P1 | mean F_H P2 | P0 > P1 | P2 > P1 |
+|---|---|---|---|---|---|---|---|
+| A | 4 | 36 | 0.9914 | 0.9880 | 0.9902 | 33 | 29 |
+| A | 6 | 36 | 0.9832 | 0.9706 | 0.9820 | 35 | 32 |
+| A | 8 | 36 | 0.9705 | 0.9410 | 0.9691 | 36 | 34 |
+| A | 10 | 36 | 0.9517 | 0.8918 | 0.9501 | 36 | 36 |
+| B1 | 5 | 4 | 0.9722 | 0.9638 | 0.9739 | 4 | 3 |
+| B1 | 7 | 3 | 0.9328 | 0.9210 | 0.9308 | 2 | 2 |
+| B1 | 9 | 4 | 0.9121 | 0.8816 | 0.9109 | 4 | 4 |
+| B1 | 10 | 1 | 0.9410 | 0.9260 | 0.9350 | 1 | 1 |
+| all |  | 156 | 0.9716 | 0.9459 | 0.9702 | 151 | 141 |
+<!-- /TABLE:S2_selene_depol -->
+
+`[F]` Table S2. The full depolarising run has 468 runs on 156 circuits. The mean F_H over the 156 circuits is 0.9716 for P0, 0.9459 for P1 and 0.9702 for P2. P0 is strictly above P1 on 151 circuits and P2 is strictly above P1 on 141. Both P0 and P2 are strictly above P1 on 140 of the 156 circuits. The 16 exceptions are 14 family A circuits with n <= 8 and the B1 circuits barenco_tof_3 and barenco_tof_4.
+
+`[F]` The mean of F_H(P2) minus F_H(P0) over the 156 circuits is -0.0013 and P2 is strictly above P0 on 67 circuits. The single-run sampling sd of F_H at 2000 shots has mean 0.0028 over the 345 runs with a proxy row. The mean difference is therefore 0.47 single-run sampling sd. The standard error of the mean difference over the 156 circuits is 0.0004.
+
+`[O]` A single circuit's ordering of P2 against P0 is not resolved at 2000 shots. The ensemble mean favours P0 by 0.0013 in F_H, which is small next to the P1 deficit of 0.0256 against P0.
+
+`[F]` 345 of the 468 runs have a density-matrix proxy row. The 123 runs without one are the family A circuits with n = 10 and the family B1 circuits with n = 9 and n = 10. On the 345 runs |z| <= 2 holds for 335, which is 97.1 %. The mean z is -0.001 and the population sd of z is 0.957 with largest |z| 2.82. Independent draws from the proxy's sampling distribution give mean 0, sd 1 and 95.4 % within two sd. The mean of F_H under Selene minus the exact proxy F_H is -0.0051 and falls to +0.0002 against the proxy's F_H evaluated on 2000-shot samples.
+
+`[F]` An earlier 68-run comparison on 17 circuits under P0 and P2 agreed within two sd on 32 of 34 runs in `gates_meas_init` and on 27 of 34 runs in `gates_only`, which leaves readout and initialisation noiseless.
 
 `[F]` Selene's `DepolarizingErrorModel` was probed at p = 0.3 with 20000 shots per probe (`selene/calibrate_error_model.py`, `results/selene_calibration.txt`). Rz gates receive no noise. A single-qubit gate flips with probability 0.2051 +/- 0.0029 against 2p / 3 = 0.200 for a uniformly random non-identity Pauli. A ZZPhase leaves the 00 state with probability 0.2442 +/- 0.0030 against 12p / 15 = 0.240. Readout flips symmetrically at 0.306 and 0.304 and initialisation flips at 0.298. The conventions match `noise/dm_sim.py`, except that the proxy's readout flip is asymmetric and Selene's is one rate.
 
-`[O]` The positive mean z of `gates_only` is expected for a model that omits two error sources the proxy keeps. The agreement of `gates_meas_init` confirms the proxy's implementation and its handling of the measure map. The agreement says nothing about the proxy's fidelity to H2-2E, because neither model contains the emission and leakage branch, the crosstalk or the duration-based dephasing of the published H2-2E model. The Selene runs are the first use of Quantinuum tooling in this submission and the emulator runs of Section 3.7 are the second.
+`[O]` Selene's `DepolarizingErrorModel` and the proxy share one gate-level convention, so their agreement checks the proxy's implementation and its handling of the measure map. The agreement does not test fidelity to H2-2E. Neither model contains the emission and leakage branch, the crosstalk or the duration-based dephasing of the published H2-2E model. The Selene runs are the first use of Quantinuum tooling in this submission and the emulator runs of Section 3.7 are the second.
 
-`[F]` Wall time on the 2-core container was 465 s for the 468 noiseless runs with two processes and 68 s for the 68 depolarising runs. The per-run median is 1.4 s and the maximum 10.3 s (P1 on xxz_n10_r4_disorder_s1). Every TVD and F_H value was bit-identical between two complete runs of the driver.
+`[F]` Wall time on the 2-core container was 465 s for the 468 noiseless runs and 68 s for the 68-run comparison, both with two processes. The per-run wall times of the 468 full depolarising runs sum to 1437 s. Every TVD and F_H value of the noiseless runs and the 68-run comparison was bit-identical between two complete runs of the driver. `results/selene.md` records one execution of the full depolarising run.
 
 ### 3.7 Emulator runs
 
@@ -464,6 +488,29 @@ Figure 4. Learned cost model on the proxy data. Left, predicted F_H = exp(-y_hat
 `[F]` All numbers in this section come from the local proxy with the published H2-2E parameters. The proxy has no shot noise, no leakage, no crosstalk and no duration-based dephasing. The emulator F_H will be measured at 1000 shots. `[O]` Shot noise adds a floor to y that none of the seven features carries, so the refit on emulator data will need either an intercept or a shot-count term, and the coefficients of Table M2 will change.
 
 `[O]` The model has two uses in this submission. Before HQCs are spent it ranks the five pipelines of a circuit by predicted F_H from their compiled counts, so that only the pipeline the model prefers is run. The rank correlation between predicted and measured F_H across the pipelines of a circuit is the metric that matters for that use and will be reported once emulator rows exist `[PENDING: emulator]`. After the run it predicts the fidelity of any further circuit from its compiled counts and support size, which is what a user who has not yet run the circuit can supply. The support size is computed from the ideal distribution and is available for every circuit in this benchmark because the ideal outputs are stored, and it is not available for a circuit too large to simulate. A cost signal for a rewriting search is future work and is not claimed here.
+
+### 4.7 Refit on Selene depolarising data
+
+[F] The cost model of Sections 4.1 to 4.3 was refitted without code changes on the Selene depolarising runs of Section 3.6. [F] The Selene layer has 432 family A rows with n = 4, 6, 8 and 10 and 36 B1 rows from 12 circuits. [F] The proxy fit used 540 A rows with n up to 8 and 35 B1 rows from 7 circuits. [F] The target is the depolarised sampled F_H divided by the noiseless sampled F_H at the same seed. [F] On the 345 rows with a proxy value this ratio differs from the exact proxy F_H by 0.0022 in mean absolute value, and the raw sampled F_H differs by 0.0058. [O] The ratio is the closest available match to the exact fidelity that the proxy fit used.
+
+[F] Under circuit-grouped cross-validation the refit matches the proxy fit, with pooled R^2 = 0.935 for OLS and 0.974 for GBR. [F] Training on A and testing on B1 gives R^2 = 0.859 for ridge and 0.848 for GBR. [F] The unfitted physics baseline drops on B1 from R^2 = 0.785 on the proxy to 0.216 on Selene. [F] Training on B1 and testing on A still fails, with R^2 = 0.327 for GBR and negative R^2 for all other models. [F] The largest OLS terms on A remain n_qubits, log2_support and n_2q_offsupport with t = 14.7, -14.9 and 15.9. [O] The Selene layer confirms the two proxy conclusions. Transfer runs from A to B1 only, and within a family the fitted models interpolate.
+
+| model | split | R^2 proxy | R^2 Selene | MAE(F_H) proxy | MAE(F_H) Selene |
+|---|---|---|---|---|---|
+| physics | A to B1 | 0.785 | 0.216 | 0.0151 | 0.0201 |
+| ols | A to B1 | 0.560 | 0.356 | 0.0252 | 0.0333 |
+| ridge | A to B1 | 0.840 | 0.859 | 0.0150 | 0.0154 |
+| gbr | A to B1 | 0.805 | 0.848 | 0.0083 | 0.0140 |
+| physics | B1 to A | -3.513 | -3.760 | 0.0430 | 0.0464 |
+| ols | B1 to A | -261.894 | -313.944 | 0.1971 | 0.6838 |
+| ridge | B1 to A | -0.605 | -98.831 | 0.0259 | 0.2673 |
+| gbr | B1 to A | 0.326 | 0.327 | 0.0184 | 0.0234 |
+| physics | cv5g pooled | -2.739 | -2.773 | 0.0413 | 0.0444 |
+| ols | cv5g pooled | 0.938 | 0.935 | 0.0051 | 0.0065 |
+| ridge | cv5g pooled | 0.938 | 0.936 | 0.0052 | 0.0065 |
+| gbr | cv5g pooled | 0.971 | 0.974 | 0.0017 | 0.0035 |
+
+[F] Test rows: A to B1 35 proxy and 36 Selene, B1 to A 540 and 432, cv5g pooled 575 and 468. Source: `results/cost_model_selene.md`.
 
 ## 5. Reproducibility
 
@@ -645,6 +692,8 @@ Changelog, part 2 (Section 3), 7 October 2026.
 - `report/make_tables.py` now injects into `report/report_v2.md` as well.
 
 ## Changelog v2 to v3
+
+- Section 3.6 rewritten with the full Selene depolarising run (468 runs, Table S2). Section 4.7 added: cost model refit on Selene data (results/cost_model_selene.md).
 
 - 8 October 2026. `report/report_v3.md` copied from `report/report_v2.md`, which is left unchanged (md5 7fa05ebc2da26bcd084c2f9310ca52d2 before and after this edit and after the table injection). `REPORT_V3` added to the injector list of `report/make_tables.py`.
 - Family B1x added. Section 2.1 gains one paragraph listing the 8 circuits with n (rc_adder_6 14, csla_mux_3 15, gf2_pow_5_mult 15, ham15-low 17, ham15-med 17, gf2_pow_6_mult 18, barenco_tof_10 19, tof_10 19) from `bench/family_B1x/manifest.csv`, the selection window of `bench/build_family_B1x.py` (13 <= n <= 20, at most 3000 gates after expansion) and the count-only status. Section 1 and Section 2.2 state the three pipelines run on B1x. Section 2.4 states that the 24 B1x rows carry no check.

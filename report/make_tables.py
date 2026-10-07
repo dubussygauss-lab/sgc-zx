@@ -650,6 +650,38 @@ def selene():
             "depol_runs": int(len(d))}
 
 
+def selene_depol_full():
+    """Table S2: full depolarising Selene run (results/selene_depolarizing_full.csv),
+    gates_meas_init, 156 circuits x P0/P1/P2, per family and n."""
+    path = os.path.join(RESULTS, "selene_depolarizing_full.csv")
+    if not os.path.exists(path):
+        write("S2_selene_depol", "[PENDING: selene] results/selene_depolarizing_full.csv not found.\n")
+        return None
+    d = pd.read_csv(path)
+    w = d.pivot_table(index=["family", "n", "file"], columns="pipeline",
+                      values="F_H_selene_depol").reset_index()
+    rows = []
+    for (fam, n), g in w.groupby(["family", "n"]):
+        rows.append({"family": fam, "n": int(n), "circuits": int(len(g)),
+                     "mean F_H P0": float(g.P0.mean()), "mean F_H P1": float(g.P1.mean()),
+                     "mean F_H P2": float(g.P2.mean()),
+                     "P0 > P1": int((g.P0 > g.P1).sum()), "P2 > P1": int((g.P2 > g.P1).sum())})
+    rows.append({"family": "all", "n": "", "circuits": int(len(w)),
+                 "mean F_H P0": float(w.P0.mean()), "mean F_H P1": float(w.P1.mean()),
+                 "mean F_H P2": float(w.P2.mean()),
+                 "P0 > P1": int((w.P0 > w.P1).sum()), "P2 > P1": int((w.P2 > w.P1).sum())})
+    t = pd.DataFrame(rows)
+    text = ("Depolarising runs on the full set (DepolarizingErrorModel, p_1q = 7.3e-5, "
+            "p_2q = 1.29e-3, p_meas = 1.35e-3, p_init = 4e-5, 2000 shots). F_H is the Hellinger "
+            "fidelity of the Selene samples to the ideal distribution. P0 > P1 and P2 > P1 count "
+            "circuits with a strictly higher F_H.\n\n"
+            + md_table(t, "{:.4f}", fmt={"P0 > P1": "{:d}", "P2 > P1": "{:d}"}))
+    write("S2_selene_depol", text)
+    both = int(((w.P0 > w.P1) & (w.P2 > w.P1)).sum())
+    return {"t": t, "runs": int(len(d)), "circuits": int(len(w)), "both": both,
+            "mean_p2_minus_p0": float((w.P2 - w.P0).mean())}
+
+
 # --------------------------------------------------------------- injection
 
 def inject(report_path: str):
@@ -684,6 +716,7 @@ def main():
     fpb = family_b1_proxy()
     fc = certificates()
     fs = selene()
+    fsd = selene_depol_full()
     print("family A: circuits", fa["n_circuits"], "| P0 at ZZ term count:",
           fa["p0_at_floor"], "| circuits with any pipeline below it:", fa["any_below_floor"],
           "| P2 ties P0:", fa["p2_ties"], "worse:", fa["p2_worse"])
@@ -704,8 +737,11 @@ def main():
     if fs is not None:
         print("selene: noiseless runs", fs["runs"], "| flagged", fs["flagged"], "| shots outside support",
               fs["outside"], "| max TVD/scale", round(fs["max_over_scale"], 3), "| depolarising runs", fs["depol_runs"])
+    if fsd is not None:
+        print("selene depol full: runs", fsd["runs"], "| circuits", fsd["circuits"], "| P0>P1 and P2>P1",
+              fsd["both"], "| mean P2-P0 %.5f" % fsd["mean_p2_minus_p0"])
     for name in ["A1_zz_by_n", "A2_vs_P0", "A3_floor", "A4_proxy", "B1_per_circuit", "B1x_per_circuit", "B2_summary",
-                 "M1_cost_metrics", "M2_cost_coefficients", "A5_proxy_b1", "C1_certificates", "S1_selene"]:
+                 "M1_cost_metrics", "M2_cost_coefficients", "A5_proxy_b1", "C1_certificates", "S1_selene", "S2_selene_depol"]:
         if os.path.exists(os.path.join(TABLES, name + ".md")):
             print(f"\n### {name}\n" + open(os.path.join(TABLES, name + ".md")).read())
     if not args.no_inject:
