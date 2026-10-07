@@ -1,0 +1,8 @@
+shots per probe: 20000
+Rz x20, p_1q=0.3: P(1)                     0.0000 +/- 0.0000   predictions: 0 if Rz noiseless; (1-(1-2f)^20)/2 = 0.5000 (f=2p/3) / 0.4996 (f=p/2) if noisy
+PhasedX(0,0) x20, p_1q=0.3: P(1)           0.5006 +/- 0.0035   predictions: 0 if zero-angle gates are free; (1-(1-2f)^20)/2 = 0.5000 (f=2p/3) / 0.4996 (f=p/2) if noisy
+X, p_1q=0.3: P(flip)                       0.2051 +/- 0.0029   predictions: 2p/3=0.200 (non-identity Pauli) / p/2=0.150 (any Pauli)
+ZZPhase, p_2q=0.3: P(not 00)               0.2442 +/- 0.0030   predictions: 12p/15=0.240 (non-identity Pauli) / 12p/16=0.225 (any Pauli)
+measure |0>, p_meas=0.3: P(1)              0.3061 +/- 0.0033   predictions: p=0.300 if symmetric flip
+measure |1>, p_meas=0.3: P(0)              0.3038 +/- 0.0033   predictions: p=0.300 if symmetric flip
+init, p_init=0.3: P(1)                     0.2979 +/- 0.0032   predictions: p=0.300 if init flip; 2p/3=0.200 if depolarising

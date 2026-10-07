@@ -1,0 +1,13 @@
+recheck of 4 runs with pooled chi2 p < 0.01: 20000 shots, seeds (777, 778)
+P0/tfim_n4_r1_disorder_s2.qasm: original 2000 shots TVD 0.0131 (expected 0.0058), pooled p 0.0008
+    seed 777: TVD 0.0031 (expected 0.0018), TVD/expected 1.67, pooled p 0.033, raw p 0.606, cells<5 11, outside support 0
+    seed 778: TVD 0.0015 (expected 0.0018), TVD/expected 0.84, pooled p 0.563, raw p 0.785, cells<5 11, outside support 0
+P1/tfim_n4_r4_disorder_s3.qasm: original 2000 shots TVD 0.0320 (expected 0.0224), pooled p 0.0096
+    seed 777: TVD 0.0076 (expected 0.0071), TVD/expected 1.08, pooled p 0.156, raw p 0.156, cells<5 0, outside support 0
+    seed 778: TVD 0.0045 (expected 0.0071), TVD/expected 0.64, pooled p 0.679, raw p 0.679, cells<5 0, outside support 0
+P1/xxz_n8_r1_disorder_s1.qasm: original 2000 shots TVD 0.0334 (expected 0.0215), pooled p 0.0078
+    seed 777: TVD 0.0072 (expected 0.0068), TVD/expected 1.06, pooled p 0.085, raw p 0.871, cells<5 30, outside support 0
+    seed 778: TVD 0.0068 (expected 0.0068), TVD/expected 0.99, pooled p 0.500, raw p 0.999, cells<5 30, outside support 0
+P2/ladder_n6_r2_disorder_s1.qasm: original 2000 shots TVD 0.0246 (expected 0.0188), pooled p 0.0031
+    seed 777: TVD 0.0076 (expected 0.0060), TVD/expected 1.27, pooled p 0.236, raw p 0.288, cells<5 42, outside support 0
+    seed 778: TVD 0.0084 (expected 0.0060), TVD/expected 1.42, pooled p 0.229, raw p 0.895, cells<5 42, outside support 0
