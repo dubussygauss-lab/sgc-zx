@@ -139,7 +139,7 @@ Figure 1. Family A. ZZPhase count of each pipeline divided by the P0 count on th
 `[F]` Table A4. Provisional noise proxy.
 
 <!-- TABLE:A4_proxy -->
-Provisional local proxy. Density-matrix simulation with the published H2-2E emulator parameters (p1 = 7.3e-5, p2 = 1.29e-3, readout 9e-4 and 1.8e-3, p_init = 4e-5; no leakage, crosstalk or dephasing), to be replaced by emulator runs. Mean Hellinger fidelity F_H of the noisy output distribution against the ideal one.
+Provisional local proxy. Density-matrix simulation with the published H2-2E emulator parameters (p1 = 7.3e-5, p2 = 1.29e-3, readout 9e-4 and 1.8e-3, p_init = 4e-5) and no leakage, crosstalk or dephasing, to be replaced by emulator runs. Mean Hellinger fidelity F_H of the noisy output distribution against the ideal one.
 
 | n | circuits per pipeline | F_H P0ref | F_H P0 | F_H P1 | F_H P2 | F_H P3 |
 |---|---|---|---|---|---|---|
@@ -179,7 +179,7 @@ Provisional local proxy. Density-matrix simulation with the published H2-2E emul
 | vbe_adder_3 | 10 | 70 | 66 | 56 | 66 | 55 | 41 | 61 | 67 | 26.8 | 24 |  |
 | mod_red_21 | 11 | 119 | 105 | 88 | 105 | 107 | 83 | 140 | 132 | 5.7 | 73 |  |
 | gf2_pow_4_mult | 12 | 112 | 99 | 83 | 99 | 260 | 83 | 277 | 290 | 0.0 | 68 |  |
-| hwb8 | 12 | 5887 | 7118 | 5912 | 7118 |  |  | 11537 | 8461 |  | 3517 | timeout: P1, P2 |
+| hwb8 | 12 | 5887 | 7118 | 5912 | 7118 | 8305 | 5587 | 11537 | 8461 | 5.5 | 3517 |  |
 <!-- /TABLE:B1_per_circuit -->
 
 ![Family B1 ZZPhase count](figures/fig_B1_zz.png)

@@ -77,9 +77,18 @@ def _(RESULTS, os, pd):
     family_A = pd.read_csv(os.path.join(RESULTS, "family_A_counts.csv"))
     family_B1 = pd.read_csv(os.path.join(RESULTS, "family_B1_counts.csv"))
     family_B2 = pd.read_csv(os.path.join(RESULTS, "family_B2_counts.csv"))
-    proxy_path = os.path.join(RESULTS, "family_A_proxy.csv")
+    proxy_path = os.path.join(RESULTS, "family_A_proxy_h22e.csv")
     family_A_proxy = pd.read_csv(proxy_path) if os.path.exists(proxy_path) else None
-    return family_A, family_A_proxy, family_B1, family_B2
+
+    def _load(name):
+        _p = os.path.join(RESULTS, name)
+        return pd.read_csv(_p) if os.path.exists(_p) else None
+
+    certificates = _load("certificates.csv")
+    selene_noiseless = _load("selene_noiseless.csv")
+    cost_model_metrics = _load("cost_model_metrics.csv")
+    return (certificates, cost_model_metrics, family_A, family_A_proxy,
+            family_B1, family_B2, selene_noiseless)
 
 
 @app.cell
@@ -142,23 +151,93 @@ def _(family_A_proxy, mo):
     else:
         _tab = family_A_proxy.pivot_table(index="n", columns="pipeline", values="F_H", aggfunc="mean").round(4)
         _out = mo.vstack([
-            mo.md("**Table A4.** Provisional local noise proxy, mean Hellinger fidelity. "
-                  "To be replaced by H2-2E emulator results. `[PENDING: emulator]`"),
+            mo.md("**Table A4.** Local density-matrix noise proxy with the published H2-2E "
+                  "default parameters (`results/family_A_proxy_h22e.csv`), mean Hellinger "
+                  "fidelity by n and pipeline. To be replaced by H2-2E emulator results. "
+                  "`[PENDING: emulator]`"),
             mo.ui.table(_tab.reset_index(), selection=None)])
     _out
     return
 
 
 @app.cell
-def _(FIGURES, mo, os):
-    _figs = ["fig_A_zz_ratio.png", "fig_B1_zz.png", "fig_B2_t.png"]
+def _(certificates, mo):
+    # Table C: exactness-barrier certificates (results/certificates.csv).
+    if certificates is None:
+        _out = mo.callout(mo.md("`results/certificates.csv` not found. Run `python barrier/run_certificates.py`."), kind="warn")
+    else:
+        _cols = ["family", "file", "n", "t_written", "lde_floor", "t_zx_P2",
+                 "floor_over_t_zx_P2", "collapse_count", "invariant_ok", "wall_s"]
+        _tab = certificates[_cols].copy()
+        _tab["floor_over_t_zx_P2"] = (100 * _tab["floor_over_t_zx_P2"]).round(2)
+        _tab = _tab.rename(columns={"floor_over_t_zx_P2": "floor / T_zx (P2) %"})
+        _n_viol = int((~certificates["invariant_ok"].astype(bool)).sum())
+        _out = mo.vstack([
+            mo.md(f"**Table C.** Certified T-count floor (lde of the exact Pauli channel) against the "
+                  f"T-count after the ZX stage of P2, {len(certificates)} rows. "
+                  f"Invariant floor <= T_zx violated on {_n_viol} rows."),
+            mo.ui.table(_tab, selection=None)])
+    _out
+    return
+
+
+@app.cell
+def _(mo, selene_noiseless):
+    # Table S: local Selene (selene-sim) noiseless runs, summary per pipeline.
+    if selene_noiseless is None:
+        _out = mo.callout(mo.md("`results/selene_noiseless.csv` not found. Run `selene/run_selene.py`."), kind="warn")
+    else:
+        _g = selene_noiseless.groupby("pipeline")
+        _tab = _g.agg(runs=("file", "size"),
+                      max_TVD=("TVD", "max"),
+                      max_TVD_over_scale=("TVD_over_scale", "max"),
+                      median_TVD_over_expected=("TVD_over_expected", "median"),
+                      flagged=("flag", "sum"),
+                      shots_outside_support=("shots_outside_support", "sum"),
+                      t_total_s=("t_total", "sum")).round(3).reset_index()
+        _out = mo.vstack([
+            mo.md(f"**Table S.** Selene noiseless runs of the compiled circuits, "
+                  f"{len(selene_noiseless)} runs of {int(selene_noiseless['shots'].iloc[0])} shots, "
+                  f"sampled distribution against the exact one (`results/selene_noiseless.csv`). "
+                  f"`flagged` counts runs with TVD above 4 times the sampling scale."),
+            mo.ui.table(_tab, selection=None)])
+    _out
+    return
+
+
+@app.cell
+def _(cost_model_metrics, mo):
+    # Table M: cost-model generalisation metrics (results/cost_model_metrics.csv).
+    if cost_model_metrics is None:
+        _out = mo.callout(mo.md("`results/cost_model_metrics.csv` not found. Run `python model/cost_model.py`."), kind="warn")
+    else:
+        _tab = cost_model_metrics[cost_model_metrics["split"].isin(["lofo", "cv5g"])].copy()
+        _tab[["rmse_y", "r2_y", "mae_F"]] = _tab[["rmse_y", "r2_y", "mae_F"]].round(4)
+        _out = mo.vstack([
+            mo.md("**Table M.** Learned cost model, y = -ln F_H from compile-time features, "
+                  "fitted on the proxy CSVs. `lofo` trains on one family and tests on the other, "
+                  "`cv5g` holds out whole circuit classes. Emulator rows replace the proxy rows "
+                  "once they exist. `[PENDING: emulator]`"),
+            mo.ui.table(_tab, selection=None)])
+    _out
+    return
+
+
+@app.cell
+def _(FIGURES, RESULTS, mo, os):
+    _figs = [os.path.join(FIGURES, "fig_A_zz_ratio.png"),
+             os.path.join(FIGURES, "fig_B1_zz.png"),
+             os.path.join(FIGURES, "fig_B2_t.png"),
+             os.path.join(RESULTS, "fig_proxy_h22e.png"),
+             os.path.join(RESULTS, "fig_cost_model.png")]
     _items = []
-    for _f in _figs:
-        _path = os.path.join(FIGURES, _f)
+    for _path in _figs:
         if os.path.exists(_path):
             _items.append(mo.image(src=_path, width=640))
         else:
-            _items.append(mo.md(f"`{_f}` not found. Run `python report/make_tables.py`."))
+            _items.append(mo.md(f"`{os.path.relpath(_path, os.path.dirname(RESULTS))}` not found. "
+                                "Run `python report/make_tables.py`, `python noise/run_proxy.py --figure-h22e` "
+                                "or `python model/cost_model.py`."))
     mo.vstack(_items)
     return
 
@@ -282,9 +361,10 @@ def _(mo):
 
     - `[PENDING: emulator]` Hellinger fidelity and TVD of the emulator counts
       against the ideal distribution, for every (circuit, pipeline) in the budget.
-    - `[PENDING: certificates]` Certified T-count floors for family B1 at n = 5
-      and family B2, from `barrier/certificate.py`.
-    - The learned cost model is trained only after the emulator rows exist.
+    - The learned cost model (Table M) is fitted on proxy rows until the
+      emulator rows exist.
+    - hwb8 under P1 and P2 is in `results/family_B1_hwb8_long_counts.csv` and
+      not yet merged into `results/family_B1_counts.csv` (Table B1).
 
     ### Picking a job back up
 
