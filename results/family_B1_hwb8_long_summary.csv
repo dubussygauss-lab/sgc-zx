@@ -1,0 +1,2 @@
+file,n,n_gates,t_count_as_written,n_cx_as_written,n_2q_P1,n_2q_P2,depth_2q_P1,depth_2q_P2,hqc_P1,hqc_P2,t_count_zx_P1,t_count_zx_P2,t_total_P1,t_total_P2,status_P1,status_P2,max_check_dev
+hwb8.qasm,12,18220,5887,7129,8305,5587,6255,3906,18327.8,12652.4,3517,3517,864.950720888,815.7282617599999,ok,ok,1.6187051699034782e-13

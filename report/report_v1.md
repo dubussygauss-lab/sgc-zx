@@ -2,7 +2,7 @@
 
 Team Learned ZX Rewriting. Quantinuum Singapore Grand Challenge, submission 1, draft v1 (7 October 2026).
 
-Tags: `[F]` marks a statement verifiable from an artifact in the repository or from the cited source. `[O]` marks a judgement. Every number in a table is produced by `report/make_tables.py` from `results/*.csv`. Items marked `[PENDING: emulator]` or `[PENDING: certificates]` are not yet measured.
+Tags: `[F]` marks a statement verifiable from an artifact in the repository or from the cited source. `[O]` marks a judgement. Every number in a results table of Section 3 is produced by `report/make_tables.py` from `results/*.csv`. Items marked `[PENDING: emulator]` or `[PENDING: certificates]` are not yet measured.
 
 ## Scoring map
 
@@ -11,21 +11,21 @@ Tags: `[F]` marks a statement verifiable from an artifact in the repository or f
 | Problem and value | 30 % | Section 1, Section 6 |
 | Technical performance and hardware use | 30 % | Section 3 (tables A1 to B2, emulator rows pending), Section 5, notebook `report/notebook_skeleton.py` |
 | Scientific merit | 20 % | Section 2.5 (certificate), Section 3.3, the two manuscripts in `papers/` |
-| Remaining criteria | 20 % | Not published by the organisers at the time of writing. Section 4 and Section 7 are the candidates. |
+| Remaining criteria | 20 % | Not published by the organisers at the time of writing `[NEEDS SOURCE]`. Section 4 and Section 7 are the candidates. |
 
 ## 1. Problem and value
 
-`[F]` On Quantinuum H2 the price of a program is set by the HQC formula HQC = 5 + C (N_1q + 10 N_2q + 5 N_M) / 5000. Here C is the shot count and N_1q the PhasedX count. N_2q counts ZZPhase and ZZMax gates and N_M counts measurements, resets and initialisations. Source: the docs.quantinuum.com costing page quoted in `docs/platform_notes.md`, section 3.4. Rz gates are free. A two-qubit gate costs ten single-qubit gates.
+`[F]` On Quantinuum H2 the price of a program is set by the HQC formula HQC = 5 + C (N_1q + 10 N_2q + 5 N_M) / 5000. Here C is the shot count and N_1q the PhasedX count. N_2q counts ZZPhase and ZZMax gates and N_M counts measurements, resets and initialisations. Source: the docs.quantinuum.com costing page quoted in `docs/platform_notes.md`, section 3.4 `[NEEDS SOURCE]`. Rz gates are free. A two-qubit gate costs ten single-qubit gates.
 
 `[F]` Two-qubit gates also carry the dominant error. The published H2-2E emulator parameters are p2 = 1.29e-3 per two-qubit gate and p1 = 7.3e-5 per single-qubit gate (`docs/platform_notes.md`, section 3.3).
 
 `[O]` A compiler for H2 therefore has one number to minimise today, the ZZPhase count, and the HQC and the emulated fidelity both follow from it. ZX-calculus rewriting is advertised as a general circuit optimiser. The question a team using H2 needs answered before spending HQCs is whether it lowers the ZZPhase count below what pytket already achieves, on which circuits and by how much. We know of no published comparison with pytket's own Quantinuum pass as the baseline and the native gate set as the target.
 
-`[O]` The second cost layer is not visible on H2 at all. In a fault-tolerant machine a Clifford gate is cheap and a T gate is paid for with a distilled magic state, so the T-count becomes the resource. On H2 a single-qubit T gate compiles to an Rz, which is free in HQC and has no error entry in the noise model. A benchmark that scores only ZZPhase count will reward a rewrite that trades T gates for two-qubit gates and will punish the opposite trade. The ledger needs both columns. The T column needs a floor as well, because a T-count reduction of a few percent is only meaningful once the maximum possible reduction is known.
+`[O]` The second cost layer is invisible on H2. In a fault-tolerant machine a Clifford gate is cheap and a T gate is paid for with a distilled magic state, so the T-count becomes the resource. On H2 a single-qubit T gate compiles to an Rz, which is free in HQC and has no error entry in the noise model. A benchmark that scores only ZZPhase count will reward a rewrite that trades T gates for two-qubit gates and will punish the opposite trade, so the ledger needs both columns. The T column needs a floor as well, because a T-count reduction of a few percent is only meaningful once the maximum possible reduction is known.
 
 `[F]` The team's manuscript on the exactness barrier (Kam, arXiv:2608.22801) gives that floor per instance. For any Clifford+T circuit the least denominator exponent of its exact Pauli-channel representation over Z[sqrt 2] is a lower bound on the T-count of every semantics-exact rewrite of it. The bound is computed by one exact channel multiplication per gate.
 
-`[O]` This submission delivers a resource-certification benchmark with two layers. The NISQ layer measures ZZPhase count, two-qubit depth, HQC and emulated fidelity on H2-2E for three circuit families and five compilation pipelines. The fault-tolerant layer measures the T-count after ZX rewriting against the certified floor. The learned component is a cost model that predicts emulated fidelity from compile-time features, trained on emulator data. Learned rewriting itself is future work and is not claimed here.
+`[O]` This submission delivers a resource-certification benchmark with two layers. The NISQ layer measures ZZPhase count, two-qubit depth, HQC and emulated fidelity on H2-2E for three circuit families and five compilation pipelines `[NEEDS SOURCE]`. The fault-tolerant layer measures the T-count after ZX rewriting against the certified floor. The learned component is a cost model that predicts emulated fidelity from compile-time features, trained on emulator data. Learned rewriting itself is future work and is not claimed here.
 
 `[O]` Value for Quantinuum users now: a reproducible answer to "should I run PyZX before pytket on H2", split by circuit family, with the HQC consequence stated. Value for the fault-tolerant programme later: a per-instance certificate that separates the T-count a rewrite removed from the T-count no exact rewrite can remove, so that resource estimates carry a provable lower bound instead of a best-effort number.
 
@@ -46,14 +46,14 @@ Tags: `[F]` marks a statement verifiable from an artifact in the repository or f
 | Name | Stages |
 |---|---|
 | P0ref | DecomposeBoxes, AutoRebase to the native set, SquashRzPhasedX, RemoveRedundancies. The circuit as written, in native gates, with no optimisation. |
-| P0 | pytket-quantinuum 0.59.3 `default_compilation_pass(optimisation_level=2)`, reproduced pass by pass from the installed source without a backend object (FullPeepholeOptimise to TK2, NormaliseTK2, DecomposeTK2 to ZZPhase, AutoRebase, squash, RemoveRedundancies). This is the baseline. |
+| P0 | pytket-quantinuum 0.59.3 `default_compilation_pass(optimisation_level=2)`, reproduced pass by pass from the installed source without a backend object (FullPeepholeOptimise to TK2, NormaliseTK2, DecomposeTK2 to ZZPhase, AutoRebase, squash, RemoveRedundancies). P0 is the baseline. |
 | P0L1 | The same at optimisation level 1. |
 | P1 | PyZX `full_reduce`, `extract_circuit`, `basic_optimization`, then P0. |
 | P2 | PyZX `teleport_reduce`, `Circuit.from_graph`, `basic_optimization`, then P0. |
 | P3 | pytket `ZXGraphlikeOptimisation`, then P0. |
 | P4 | The ZX stage of P1, then P0 without FullPeepholeOptimise. |
 
-`[F]` The ZX stages run on the circuit as written, in the gate set the ZX tools accept, and the pytket pass runs afterwards on the result. Angles are passed to PyZX through QASM, and the rounding introduced by PyZX's float-to-fraction conversion is recorded per circuit (`pyzx_angle_err` column, at most 2.2e-16 x pi on family A).
+`[F]` The ZX stages run on the circuit as written, in the gate set the ZX tools accept, and the pytket pass runs afterwards on the result. Angles are passed to PyZX through QASM, and the rounding introduced by PyZX's float-to-fraction conversion is recorded per circuit (`pyzx_angle_err` column, at most 2.2e-16 x pi on family A `[NEEDS SOURCE]`).
 
 ### 2.3 Metrics
 
@@ -63,7 +63,7 @@ Tags: `[F]` marks a statement verifiable from an artifact in the repository or f
 
 ### 2.4 Exactness checks
 
-`[F]` Every compiled circuit is checked against the P0ref compilation of the same input: the unitary deviation 1 - |tr(U^dagger V)| / 2^n for n <= 8 and the statevector infidelity on |0...0> beyond, with tolerance 1e-8, plus the maximum difference between the compiled output distribution and the `.npy` reference where one exists. The measured QASM written for submission is re-simulated independently (`qasm_dist_maxdiff`). All 1260 family A rows and all 100 family B2 rows pass. In family B1, 103 of 105 rows pass. The remaining two are the hwb8 timeouts under P1 and P2 at 900 s, not failures.
+`[F]` Every compiled circuit is checked against the P0ref compilation of the same input. The check is the unitary deviation 1 - |tr(U^dagger V)| / 2^n for n <= 8 and the statevector infidelity on |0...0> beyond, with tolerance 1e-8. Where a `.npy` reference exists, the maximum difference between the compiled output distribution and that reference is recorded as well. The measured QASM written for submission is re-simulated independently (`qasm_dist_maxdiff`). All 1260 family A rows and all 100 family B2 rows pass. In family B1, 103 of 105 rows pass. The remaining two are the hwb8 timeouts under P1 and P2 at 900 s, not failures.
 
 `[F]` Family B2 is additionally checked against the Haar target it approximates. The largest deviation 1 - |tr(U_target^dagger U_compiled)| / 2^n over all 100 rows is 7.1e-6, within the gridsynth bound.
 
@@ -75,7 +75,7 @@ Tags: `[F]` marks a statement verifiable from an artifact in the repository or f
 
 `[O]` The certificate is applied to family B1 at n = 5 and to family B2, where the 4^n x 4^n channel is small. The output per circuit is the floor, the T-count after P2 and the certified incompressible fraction lde / T_after. `[PENDING: certificates]`
 
-`[F]` The manuscript is not re-derived here. One point needs stating. While implementing the per-step bookkeeping of Lemma mqval(b), the "reduction fires exactly once" half of that lemma was found to fail on the word T T (`barrier/NOTES.md`, section 8). The floor of Corollary cert does not use that half, and the manuscript's own text says nothing downstream depends on it. The correction is being made in the manuscript.
+`[F]` The manuscript is not re-derived here, with one exception that needs stating. While implementing the per-step bookkeeping of Lemma mqval(b), the implementation found that the "reduction fires exactly once" half of that lemma fails on the word T T (`barrier/NOTES.md`, section 8). The floor of Corollary cert does not use that half, and the manuscript's own text says nothing downstream depends on it. The correction is being made in the manuscript.
 
 ### 2.6 Hardware use
 
@@ -130,31 +130,33 @@ Tags: `[F]` marks a statement verifiable from an artifact in the repository or f
 
 ![Family A ZZPhase ratio](figures/fig_A_zz_ratio.png)
 
-`[F]` P0 compiles every one of the 180 circuits to exactly one ZZPhase per two-body term. No pipeline goes below that count on any circuit. P2 equals P0 on 120 circuits and is worse on 60, by at most a factor 1.19. P1, P3 and P4 are worse than P0 on all 180 circuits by factors between 1.19 and 10.36. The factor grows with n.
+Figure 1. Family A. ZZPhase count of each pipeline divided by the P0 count on the same circuit, mean over the 36 circuits at each n with the min-max band shaded. The dashed line is P0 itself. Data: Table A2 and `results/family_A_counts.csv`.
+
+`[F]` P0 compiles every one of the 180 circuits to exactly one ZZPhase per two-body term. No pipeline goes below that count on any circuit. P2 equals P0 on 120 circuits and is worse on 60, by at most a factor 1.19. P1, P3 and P4 are worse than P0 on all 180 circuits by factors between 1.19 and 10.36 `[NEEDS SOURCE]`, and the factor grows with n.
 
 `[O]` One ZZPhase per two-body exponential is the natural count for this family and P0 reaches it. A rewrite that preserves the unitary has no room to remove entangling gates here. The ZX extraction pipelines add them because `extract_circuit` resynthesises the graph with CNOTs that no longer follow the Trotter term structure.
 
 `[F]` Table A4. Provisional noise proxy.
 
 <!-- TABLE:A4_proxy -->
-Provisional local proxy. Density-matrix simulation with the data-sheet H2 typical parameters, to be replaced by the H2-2E parameter rerun. Mean Hellinger fidelity F_H of the noisy output distribution against the ideal one.
+Provisional local proxy. Density-matrix simulation with the published H2-2E emulator parameters (p1 = 7.3e-5, p2 = 1.29e-3, readout 9e-4 and 1.8e-3, p_init = 4e-5; no leakage, crosstalk or dephasing), to be replaced by emulator runs. Mean Hellinger fidelity F_H of the noisy output distribution against the ideal one.
 
 | n | circuits per pipeline | F_H P0ref | F_H P0 | F_H P1 | F_H P2 | F_H P3 |
 |---|---|---|---|---|---|---|
-| 4 | 36 | 0.9805 | 0.9891 | 0.9826 | 0.9886 | 0.9821 |
-| 6 | 36 | 0.9683 | 0.9823 | 0.9586 | 0.9804 | 0.9577 |
-| 8 | 36 | 0.9567 | 0.9757 | 0.9238 | 0.9728 | 0.9185 |
+| 4 | 36 | 0.9867 | 0.9922 | 0.9893 | 0.9919 | 0.9893 |
+| 6 | 36 | 0.9785 | 0.9874 | 0.9735 | 0.9862 | 0.9743 |
+| 8 | 36 | 0.9704 | 0.9826 | 0.9504 | 0.9807 | 0.9514 |
 
 | pipeline | mean F_H | mean TVD | mean n_2q | mean n_1q |
 |---|---|---|---|---|
-| P0ref | 0.9685 | 0.0474 | 42.0 | 58.7 |
-| P0 | 0.9824 | 0.0279 | 21.0 | 40.5 |
-| P1 | 0.9550 | 0.0657 | 64.2 | 61.3 |
-| P2 | 0.9806 | 0.0297 | 22.6 | 41.7 |
-| P3 | 0.9527 | 0.0671 | 64.0 | 72.0 |
+| P0ref | 0.9785 | 0.0352 | 42.0 | 57.7 |
+| P0 | 0.9874 | 0.0210 | 21.0 | 40.1 |
+| P1 | 0.9710 | 0.0494 | 65.1 | 62.8 |
+| P2 | 0.9863 | 0.0221 | 22.6 | 42.0 |
+| P3 | 0.9717 | 0.0482 | 64.4 | 72.9 |
 <!-- /TABLE:A4_proxy -->
 
-`[F]` Table A4 comes from a local density-matrix simulation (`noise/dm_sim.py`) with the H2 data-sheet typical parameters in `noise/h2_params.py`, not from the H2-2E emulator. It is being rerun with the published H2-2E parameters and will be replaced. `[PENDING: emulator]` Emulated fidelity on H2-2E.
+`[F]` Table A4 comes from a local density-matrix simulation (`noise/dm_sim.py`) with the H2 data-sheet typical parameters in `noise/h2_params.py`, not from the H2-2E emulator. The proxy is being rerun with the published H2-2E parameters and Table A4 will be replaced. `[PENDING: emulator]` Emulated fidelity on H2-2E.
 
 ### 3.2 Family B1, Clifford+T benchmarks
 
@@ -182,9 +184,11 @@ Provisional local proxy. Density-matrix simulation with the data-sheet H2 typica
 
 ![Family B1 ZZPhase count](figures/fig_B1_zz.png)
 
+Figure 2. Family B1. ZZPhase count per circuit for P0ref, P0 and P2, log scale, circuits ordered by qubit number then T-count. hwb8 (5912 under P0) is omitted. Data: Table B1.
+
 `[F]` On the 14 circuits where P2 completed, P2 is below P0 on 12, equal on 2 (qft_4 and gf2_pow_4_mult) and above on none. The mean reduction against P0 is 7.0 %. The largest is vbe_adder_3, 56 to 41 ZZPhase gates, 26.8 %. P1 is above P0 on 13 of 14 completed circuits and below on one (vbe_adder_3). P3 is above P0 on 14 of 15 and below on one (mod5_4).
 
-`[F]` The T-counts after the ZX stage reproduce the published PyZX values.
+`[F]` The T-counts after the ZX stage reproduce the published PyZX values `[NEEDS SOURCE]`.
 
 - tof_3: 21 to 15
 - mod5_4: 28 to 8
@@ -212,17 +216,19 @@ Provisional local proxy. Density-matrix simulation with the data-sheet H2 typica
 
 ![Family B2 T-count reduction](figures/fig_B2_t.png)
 
+Figure 3. Family B2. Percentage of the written T-count removed by the ZX stage of P1, P2 and P3, mean over the 5 circuits in each (n, eps) group. P1 and P2 give the same T-count on every circuit. Data: Table B2.
+
 `[F]` The mean raw T-counts match the barrier manuscript's Table E6 for the two rows it reports: n = 2 at eps = 1e-3 gives 638.4 here against 644 there, and n = 3 at eps = 1e-3 gives 2571.6 against 2570. The manuscript rows are means over 50 and 8 instances, this table over 5.
 
 `[F]` The ZX stage removes between 1.3 % and 3.1 % of the T-count under P1 and P2, and between 0.7 % and 1.9 % under P3. The ZZPhase count after P0 is 3 at n = 2 and 19 at n = 3 for every circuit, and P2 leaves it unchanged.
 
-`[O]` Synthesised circuits are the case where the fault-tolerant layer matters and the NISQ layer does not. The two-qubit count is fixed by the KAK or QSD skeleton. The whole cost is in the gridsynth words, which are near their floors by construction, and the certificate quantifies "near".
+`[O]` Synthesised circuits are the case where the fault-tolerant layer matters and the NISQ layer does not. The two-qubit count is fixed by the KAK or QSD skeleton. The whole cost is in the gridsynth words, which are near their floors by construction, and the certificate measures how near.
 
 `[PENDING: certificates]` Certified floors and incompressible fractions for all 20 circuits.
 
 ## 4. Learned cost model
 
-`[O]` This section is a protocol. No model has been trained because no emulator data exist yet.
+`[O]` Section 4 is a protocol. No model has been trained because no emulator data exist yet.
 
 Target. The Hellinger fidelity F_H between the H2-2E output distribution at 1000 shots and the ideal distribution, for every submitted (circuit, pipeline).
 
@@ -239,7 +245,7 @@ Models. (a) The baseline F_H = exp(-(p2 n_2q + p1 n_1q + p_meas n)), with no fit
 
 Protocol. Training and validation are split by circuit and never by pipeline, so that a held-out circuit is unseen under every pipeline. Two held-out sets: a random 20 % of circuits, and all circuits with n = 8 trained on n <= 6, to measure extrapolation in size. Reported metrics: root-mean-square error of F_H and the rank correlation between predicted and measured F_H across pipelines on the same circuit, since the model's use is to choose a pipeline. The proxy in Table A4 serves as a synthetic pretraining set only and is never mixed into validation.
 
-What the model is for. Predicting which pipeline to run before spending HQCs, and giving the rewriting search a cost signal once learned rewriting is attempted. The second use is future work.
+Use. The model predicts which pipeline to run before HQCs are spent, and later gives the rewriting search a cost signal once learned rewriting is attempted. The second use is future work.
 
 ## 5. Reproducibility
 
@@ -285,7 +291,9 @@ What the model is for. Predicting which pipeline to run before spending HQCs, an
 - `python bench/test_gen_trotter.py`
 - `python pipelines/test_compile.py`
 - `python noise/test_dm_sim.py`
-- `python barrier/test_certificate.py` The compile tests check every pipeline against the unitary of the input and check that the measured QASM encodes the implicit qubit permutation left by `allow_swaps=True`. The certificate tests reproduce the manuscript's finite verifications.
+- `python barrier/test_certificate.py`
+
+The compile tests check every pipeline against the unitary of the input and check that the measured QASM encodes the implicit qubit permutation left by `allow_swaps=True`. The certificate tests reproduce the manuscript's finite verifications.
 
 `[F]` Checks recorded per row in every counts CSV:
 
@@ -299,9 +307,9 @@ What the model is for. Predicting which pipeline to run before spending HQCs, an
 
 ## 6. Limitations
 
-`[F]` ZX extraction worsens the ZZPhase count. P1, P3 and P4 are above P0 on every family A circuit and on 13 or 14 of the 15 family B1 circuits. Only teleport reduction, which does not extract, helps on H2.
+`[F]` ZX extraction worsens the ZZPhase count. P1, P3 and P4 are above P0 on every family A circuit and on 13 or 14 of the 15 family B1 circuits `[NEEDS SOURCE]`. Only teleport reduction, which does not extract, helps on H2.
 
-`[F]` The Trotter family sits at one ZZPhase per two-body term under P0 alone. No optimiser in this study improves it, and the family measures the cost of a rewrite instead of its benefit. `[O]` This is the right control, because a Trotter circuit is what an H2 user runs most, and a method that damages it has to be caught.
+`[F]` The Trotter family sits at one ZZPhase per two-body term under P0 alone. No optimiser in this study improves it, and the family measures the cost of a rewrite instead of its benefit. `[O]` The Trotter family is the right control, because a Trotter circuit is what an H2 user runs most, and a method that damages it has to be caught.
 
 `[F]` A single-qubit T gate is an Rz on H2, which is free in HQC and absent from the noise model. The T-count layer of the ledger has no effect on any H2 number in this report. Its value is for a fault-tolerant target.
 
@@ -309,9 +317,9 @@ What the model is for. Predicting which pipeline to run before spending HQCs, an
 
 `[F]` Table A4 is a local proxy with data-sheet parameters and a simplified noise model. Its gates are depolarising and it has no transport dephasing and no angle dependence of the two-qubit error. The H2-2E emulator model has both, and the hardware differs from its emulator. Nothing in this draft has run on an emulator or on hardware. `[PENDING: emulator]`
 
-`[F]` hwb8 did not complete under P1 or P2 within 900 s. It is reported for the other five pipelines only.
+`[F]` hwb8 did not complete under P1 or P2 within 900 s. hwb8 is reported for the other five pipelines only.
 
-`[F]` Five circuits per row in Table B2 against 50 and 8 in the manuscript. The agreement of the means is a consistency check, not a statistical result.
+`[F]` Table B2 has five circuits per row against 50 and 8 in the manuscript. The agreement of the means is a consistency check, not a statistical result.
 
 `[O]` The learned component is a protocol without data. Any claim about learned rewriting is deferred to submission 2.
 

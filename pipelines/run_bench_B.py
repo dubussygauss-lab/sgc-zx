@@ -180,9 +180,17 @@ def main():
     man = pd.read_csv(a.manifest)
     bench = os.path.dirname(os.path.abspath(a.manifest))
     if a.files:
-        man = man[man["file"].isin(a.files.split(","))]
+        # accept "hwb8" as well as "hwb8.qasm"
+        wanted = {f if f.endswith(".qasm") else f + ".qasm"
+                  for f in a.files.split(",") if f}
+        man = man[man["file"].isin(wanted)]
+        missing = sorted(wanted - set(man["file"]))
+        if missing:
+            print(f"warning: not in manifest: {missing}", file=sys.stderr)
     if a.limit:
         man = man.head(a.limit)
+    if man.empty:
+        sys.exit("error: no circuits selected (check --files / --limit)")
     os.makedirs(RESULTS, exist_ok=True)
 
     # biggest circuits first so the long jobs do not trail at the end
@@ -197,9 +205,14 @@ def main():
                   f"{row['status']} n_2q={row.get('n_2q')} "
                   f"{row['t_wall']:.1f}s  [{time.perf_counter() - t0:.0f}s]", flush=True)
     counts = pd.DataFrame(rows)
+    if counts.empty or "file" not in counts.columns:
+        sys.exit("error: no results produced")
     meta = man[["file", "n", "n_gates", "t_count_as_written", "n_cx_as_written"]]
     counts = meta.merge(counts, on="file", how="right")
-    counts["pipeline"] = pd.Categorical(counts["pipeline"], C.PIPELINES)
+    # keep only the pipelines actually run so the summary never indexes a
+    # missing pivot column on a --pipelines subset
+    counts["pipeline"] = pd.Categorical(
+        counts["pipeline"], [p for p in C.PIPELINES if p in pipelines])
     counts = counts.sort_values(["n", "file", "pipeline"])
     counts.to_csv(os.path.join(RESULTS, f"{a.prefix}_counts.csv"), index=False)
 

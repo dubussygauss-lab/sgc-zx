@@ -18,7 +18,7 @@ and the block between a pair is replaced by report/tables/<name>.md.
 
 Inputs (all under results/)
   family_A_counts.csv   180 Trotter circuits x 7 pipelines
-  family_A_proxy.csv    local density-matrix noise proxy, family A, n <= 8
+  family_A_proxy_h22e.csv  local density-matrix noise proxy (H2-2E parameters), family A, n <= 8
   family_B1_counts.csv  15 Clifford+T benchmark circuits x 7 pipelines
   family_B2_counts.csv  20 QSD + gridsynth Haar circuits x 5 pipelines
 
@@ -178,14 +178,13 @@ def family_a(fig=True):
             means = [ratio[meta.n == n].mean() for n in ns]
             lo = [ratio[meta.n == n].min() for n in ns]
             hi = [ratio[meta.n == n].max() for n in ns]
-            ax.plot(ns, means, color=COLOR[p], lw=2, marker="o", ms=5, label=p)
+            ax.plot(ns, means, color=COLOR[p], lw=2, marker="o", ms=5, label=LABEL[p])
             ax.fill_between(ns, lo, hi, color=COLOR[p], alpha=0.12, lw=0)
-            ax.annotate(p, (ns[-1], means[-1]), xytext=(4, 0),
-                        textcoords="offset points", va="center", fontsize=8)
-        ax.axhline(1.0, color="#888888", lw=1, ls="--")
+        ax.axhline(1.0, color="#888888", lw=1, ls="--", label=LABEL["P0"] + ", ratio 1")
         ax.set_xlabel("qubits n")
-        ax.set_ylabel("ZZPhase count relative to P0 (pytket L2)")
-        ax.set_title("Family A: ZZPhase count ratio to P0 (mean, min-max band)", fontsize=10)
+        ax.set_ylabel("ZZPhase count / ZZPhase count of P0")
+        ax.set_title("Family A ZZPhase count relative to P0, mean with min-max band",
+                     fontsize=10)
         ax.set_xticks(ns)
         ax.spines[["top", "right"]].set_visible(False)
         ax.grid(axis="y", color="#e5e5e5", lw=0.8)
@@ -204,9 +203,9 @@ def family_a(fig=True):
 # ------------------------------------------------------------ family A proxy
 
 def family_a_proxy():
-    path = os.path.join(RESULTS, "family_A_proxy.csv")
+    path = os.path.join(RESULTS, "family_A_proxy_h22e.csv")
     if not os.path.exists(path):
-        write("A4_proxy", "[PENDING: proxy rerun] results/family_A_proxy.csv not found.\n")
+        write("A4_proxy", "[PENDING: proxy rerun] results/family_A_proxy_h22e.csv not found.\n")
         return None
     pr = pd.read_csv(path)
     pipes = [p for p in ["P0ref", "P0", "P1", "P2", "P3"] if p in set(pr.pipeline)]
@@ -226,8 +225,9 @@ def family_a_proxy():
                       "mean n_2q": round(float(g.n_2q.mean()), 1),
                       "mean n_1q": round(float(g.n_1q.mean()), 1)})
     t2 = pd.DataFrame(rows2)
-    text = ("Provisional local proxy. Density-matrix simulation with the data-sheet "
-            "H2 typical parameters, to be replaced by the H2-2E parameter rerun. "
+    text = ("Provisional local proxy. Density-matrix simulation with the published "
+            "H2-2E emulator parameters (p1 = 7.3e-5, p2 = 1.29e-3, readout 9e-4 and 1.8e-3, "
+            "p_init = 4e-5; no leakage, crosstalk or dephasing), to be replaced by emulator runs. "
             "Mean Hellinger fidelity F_H of the noisy output distribution against "
             "the ideal one.\n\n"
             + md_table(t, "{:.4f}") + "\n"
@@ -290,8 +290,11 @@ def family_b1(fig=True):
             ax.bar(x + (i - 1) * w, vals, width=w - 0.03, color=COLOR[p], label=LABEL[p])
         ax.set_xticks(x)
         ax.set_xticklabels(sub.circuit, rotation=40, ha="right", fontsize=8)
-        ax.set_ylabel("ZZPhase count")
-        ax.set_title("Family B1: ZZPhase count per circuit (hwb8 omitted)", fontsize=10)
+        ax.set_yscale("log")
+        ax.set_yticks([10, 20, 50, 100, 200, 300])
+        ax.set_yticklabels(["10", "20", "50", "100", "200", "300"])
+        ax.set_ylabel("ZZPhase count (log scale)")
+        ax.set_title("Family B1 ZZPhase count per circuit, hwb8 omitted", fontsize=10)
         ax.spines[["top", "right"]].set_visible(False)
         ax.grid(axis="y", color="#e5e5e5", lw=0.8)
         ax.set_axisbelow(True)
@@ -344,9 +347,10 @@ def family_b2(fig=True):
                 vals.append((100 * (1 - g.t_count_after_zx / g.t_count_written)).mean())
             ax.bar(x + (i - 1) * w, vals, width=w - 0.03, color=COLOR[p], label=LABEL[p])
         ax.set_xticks(x)
-        ax.set_xticklabels([f"n={n}, eps={eps:g}" for n, eps in groups], fontsize=8)
-        ax.set_ylabel("T-count reduction by the ZX stage (%)")
-        ax.set_title("Family B2: mean T-count reduction by the ZX stage", fontsize=10)
+        ax.set_xticklabels([f"n = {n}, eps = {eps:g}" for n, eps in groups], fontsize=8)
+        ax.set_ylabel("T-count removed by the ZX stage (%)")
+        ax.set_title("Family B2 mean T-count reduction by the ZX stage, 5 circuits per group",
+                     fontsize=10)
         ax.spines[["top", "right"]].set_visible(False)
         ax.grid(axis="y", color="#e5e5e5", lw=0.8)
         ax.set_axisbelow(True)
