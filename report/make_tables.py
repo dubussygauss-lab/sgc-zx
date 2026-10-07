@@ -20,6 +20,9 @@ Inputs (all under results/)
   family_A_counts.csv   180 Trotter circuits x 7 pipelines
   family_A_proxy_h22e.csv  local density-matrix noise proxy (H2-2E parameters), family A, n <= 8
   family_B1_counts.csv  15 Clifford+T benchmark circuits x 7 pipelines
+  family_B1x_counts.csv 8 Clifford+T benchmark circuits with 14 <= n <= 19 x
+                        3 pipelines (P0ref, P0, P2), compiled with --no-check,
+                        status ok-unchecked (table B1x of Section 3.2.1)
   family_B2_counts.csv  20 QSD + gridsynth Haar circuits x 5 pipelines
   family_B1_proxy_h22e.csv  local density-matrix noise proxy (H2-2E parameters), family B1, n <= 7
   certificates.csv      exactness-barrier certificate, 20 family B2 + 4 family B1 circuits
@@ -28,8 +31,8 @@ Inputs (all under results/)
                         written by model/cost_model.py (tables M1, M2 and the
                         cost-model figure of Section 4)
 
-The marker injection runs on report/report_v1.md, report/report_v2.md and
-every report/v2/part*.md that exists.
+The marker injection runs on report/report_v1.md, report/report_v2.md,
+report/report_v3.md and every report/v2/part*.md that exists.
 
 Definitions used below
   n_2q           ZZPhase + ZZMax count of the compiled native circuit
@@ -60,6 +63,7 @@ TABLES = os.path.join(ROOT, "report", "tables")
 FIGURES = os.path.join(ROOT, "report", "figures")
 REPORT = os.path.join(ROOT, "report", "report_v1.md")
 REPORT_V2 = os.path.join(ROOT, "report", "report_v2.md")
+REPORT_V3 = os.path.join(ROOT, "report", "report_v3.md")
 
 PIPELINES_A = ["P0ref", "P0", "P0L1", "P1", "P2", "P3", "P4"]
 PIPELINES_B2 = ["P0ref", "P0", "P1", "P2", "P3"]
@@ -88,7 +92,8 @@ INT_COLUMNS = {"n", "r", "circuits", "circuits per pipeline", "T written",
                "circuits with n_2q = ZZ terms", "T after ZX",
                "ZZ P0ref", "ZZ P0", "ZZ P0L1", "ZZ P1", "ZZ P2", "ZZ P3", "ZZ P4",
                "support", "floor", "runs", "shots per run", "flagged (TVD > 4 TVD_scale)",
-               "shots outside support", "abs z <= 2"}
+               "shots outside support", "abs z <= 2",
+               "depth_2q P0", "depth_2q P2"}
 
 
 def md_table(df: pd.DataFrame, floatfmt="{:.1f}", fmt: dict = None) -> str:
@@ -316,6 +321,54 @@ def family_b1(fig=True):
         fig_.savefig(os.path.join(FIGURES, "fig_B1_zz.png"), dpi=160)
         plt.close(fig_)
     return {"t_b1": t_b1, **stats}
+
+
+# ---------------------------------------------------------------- family B1x
+
+def family_b1x():
+    """Table B1x: the count-only family B1x (results/family_B1x_counts.csv),
+    8 benchmark circuits with 14 <= n <= 19 under P0ref, P0 and P2, compiled
+    with --no-check.  No unitary, statevector or distribution check exists for
+    these rows (status ok-unchecked), only the gate-set check.  One row per
+    circuit, ordered by n and then by T-count as written."""
+    path = os.path.join(RESULTS, "family_B1x_counts.csv")
+    if not os.path.exists(path):
+        write("B1x_per_circuit", "[PENDING: B1x] results/family_B1x_counts.csv not found.\n")
+        return None
+    b = pd.read_csv(path)
+    assert b.native.all(), "family B1x has non-native rows"
+    assert (b.status == "ok-unchecked").all(), "family B1x status is not ok-unchecked on every row"
+    piv = b.pivot_table(index="file", columns="pipeline", values="n_2q")
+    dep = b.pivot_table(index="file", columns="pipeline", values="depth_2q")
+    tz = b.pivot_table(index="file", columns="pipeline", values="t_count_zx")
+    meta = b[b.pipeline == "P0ref"].set_index("file")[["n", "t_count_written"]]
+    order = meta.sort_values(["n", "t_count_written"]).index
+    rows = []
+    for f in order:
+        rows.append({
+            "file": f.replace(".qasm", ""), "n": int(meta.loc[f, "n"]),
+            "ZZ P0ref": int(piv.loc[f, "P0ref"]), "ZZ P0": int(piv.loc[f, "P0"]),
+            "ZZ P2": int(piv.loc[f, "P2"]),
+            "P2 vs P0 %": float(100 * (1 - piv.loc[f, "P2"] / piv.loc[f, "P0"])),
+            "depth_2q P0": int(dep.loc[f, "P0"]), "depth_2q P2": int(dep.loc[f, "P2"]),
+            "T written": int(meta.loc[f, "t_count_written"]),
+            "T after ZX P2": int(tz.loc[f, "P2"]),
+        })
+    t = pd.DataFrame(rows)
+    text = ("Count-only rows, status ok-unchecked on every row: no unitary, statevector or "
+            "distribution check was run at this size, only the gate-set check. "
+            "P2 vs P0 % = 100 (1 - ZZ P2 / ZZ P0).\n\n"
+            + md_table(t, fmt={"T after ZX P2": "{:.0f}"}))
+    write("B1x_per_circuit", text)
+    red = 100 * (1 - piv["P2"] / piv["P0"])
+    return {"t": t, "n_circuits": int(piv.shape[0]),
+            "p2_better": int((piv["P2"] < piv["P0"]).sum()),
+            "p2_equal": int((piv["P2"] == piv["P0"]).sum()),
+            "p2_worse": int((piv["P2"] > piv["P0"]).sum()),
+            "zz_P0": int(piv["P0"].sum()), "zz_P2": int(piv["P2"].sum()),
+            "zz_P0ref": int(piv["P0ref"].sum()),
+            "agg_red_pct": float(100 * (1 - piv["P2"].sum() / piv["P0"].sum())),
+            "max_red": (red.idxmax().replace(".qasm", ""), float(red.max()))}
 
 
 # ----------------------------------------------------------------- family B2
@@ -624,6 +677,7 @@ def main():
     fa = family_a(fig=not args.no_fig)
     fp = family_a_proxy()
     fb1 = family_b1(fig=not args.no_fig)
+    fb1x = family_b1x()
     fb2 = family_b2(fig=not args.no_fig)
     fm1 = cost_model_metrics()
     fm2 = cost_model_coefficients()
@@ -634,6 +688,8 @@ def main():
           fa["p0_at_floor"], "| circuits with any pipeline below it:", fa["any_below_floor"],
           "| P2 ties P0:", fa["p2_ties"], "worse:", fa["p2_worse"])
     print("family B1:", {k: v for k, v in fb1.items() if k != "t_b1"})
+    if fb1x is not None:
+        print("family B1x (count-only, ok-unchecked):", {k: v for k, v in fb1x.items() if k != "t"})
     print("family B2: mean T reduction by pipeline (%):",
           {p: round(float(v.mean()), 2) for p, v in fb2["red"].items()},
           "| max target deviation:", float(fb2["max_target_dev"].max()))
@@ -648,12 +704,12 @@ def main():
     if fs is not None:
         print("selene: noiseless runs", fs["runs"], "| flagged", fs["flagged"], "| shots outside support",
               fs["outside"], "| max TVD/scale", round(fs["max_over_scale"], 3), "| depolarising runs", fs["depol_runs"])
-    for name in ["A1_zz_by_n", "A2_vs_P0", "A3_floor", "A4_proxy", "B1_per_circuit", "B2_summary",
+    for name in ["A1_zz_by_n", "A2_vs_P0", "A3_floor", "A4_proxy", "B1_per_circuit", "B1x_per_circuit", "B2_summary",
                  "M1_cost_metrics", "M2_cost_coefficients", "A5_proxy_b1", "C1_certificates", "S1_selene"]:
         if os.path.exists(os.path.join(TABLES, name + ".md")):
             print(f"\n### {name}\n" + open(os.path.join(TABLES, name + ".md")).read())
     if not args.no_inject:
-        for path in ([REPORT, REPORT_V2]
+        for path in ([REPORT, REPORT_V2, REPORT_V3]
                      + sorted(glob.glob(os.path.join(ROOT, "report", "v2", "part*.md")))):
             if os.path.exists(path):
                 k = inject(path)
