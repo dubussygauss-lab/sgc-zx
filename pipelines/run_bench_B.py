@@ -9,6 +9,9 @@ Outputs (for --prefix family_B1)
   results/compiled/<pipeline>/<file>.qasm   compiled circuit + measure-all
 
 Extra columns relative to run_bench.py
+  --no-check         skip the unitary / statevector / distribution checks
+                     (needed above ~20 qubits); check columns are NaN and the
+                     status is "ok-unchecked" (gate-set check still applied)
   t_count_written    T-count of the input as written: T, Tdg and Rz with
                      angle an odd multiple of pi/4
   t_count_zx         T-count of the pyzx circuit after the ZX stage of P1,
@@ -68,21 +71,25 @@ def t_count_written(circ) -> int:
     return n
 
 
-def run_one(bench: str, file: str, pipeline: str) -> dict:
-    """Compile one circuit with one pipeline, check it, save its QASM."""
+def run_one(bench: str, file: str, pipeline: str, check: bool = True) -> dict:
+    """Compile one circuit with one pipeline, check it, save its QASM.
+    With check=False (--no-check) no unitary / statevector / distribution
+    check is run: the check columns stay NaN, the gate-set check is kept and
+    the status is "ok-unchecked" (or "FLAGGED-unchecked" if non-native)."""
     row = {"file": file, "pipeline": pipeline}
     circ = circuit_from_qasm(os.path.join(bench, file))
     npy = os.path.join(bench, file.replace(".qasm", ".npy"))
     ref_probs = np.load(npy) if os.path.exists(npy) else None
     row["t_count_written"] = t_count_written(circ)
-
-    ref, _ = C.compile_pipeline("P0ref", circ)
-    ref_ck = C.check(ref, circ, None)
-    row["ref_dev"] = ref_ck["check_dev"]
     row["pyzx_angle_err"] = C.pyzx_angle_rounding(circ)
-    if ref_probs is None:
-        # no stored reference distribution: use P0ref's
-        ref_probs = C.probs(ref)
+
+    if check:
+        ref, _ = C.compile_pipeline("P0ref", circ)
+        ref_ck = C.check(ref, circ, None)
+        row["ref_dev"] = ref_ck["check_dev"]
+        if ref_probs is None:
+            # no stored reference distribution: use P0ref's
+            ref_probs = C.probs(ref)
 
     zx_out = {} if pipeline in ZX_PIPELINES else None
     comp, times = C.compile_pipeline(pipeline, circ, zx_out)
@@ -94,13 +101,17 @@ def run_one(bench: str, file: str, pipeline: str) -> dict:
         row["n_2q_zx"] = pz.twoqubitcount()
         row["n_gates_zx"] = len(pz.gates)
     row.update(C.metrics(comp, n_measure=comp.n_qubits))
-    row.update(C.check(comp, ref, ref_probs))
-
     qasm = C.to_qasm(C.add_measure_all(comp))
     outdir = os.path.join(RESULTS, "compiled", pipeline)
     os.makedirs(outdir, exist_ok=True)
     with open(os.path.join(outdir, file), "w") as f:
         f.write(qasm)
+    if not check:
+        row["check_kind"] = "none"
+        row["check_ok"] = float("nan")
+        row["status"] = "ok-unchecked" if row["native"] else "FLAGGED-unchecked"
+        return row
+    row.update(C.check(comp, ref, ref_probs))
     row["qasm_dist_maxdiff"] = float(np.max(np.abs(
         C.probs_from_measured_qasm(qasm) - ref_probs)))
     qasm_ok = row["qasm_dist_maxdiff"] <= C.CHECK_TOL
@@ -108,19 +119,19 @@ def run_one(bench: str, file: str, pipeline: str) -> dict:
     return row
 
 
-def _child(bench, file, pipeline, conn):
+def _child(bench, file, pipeline, check, conn):
     try:
-        conn.send(run_one(bench, file, pipeline))
+        conn.send(run_one(bench, file, pipeline, check))
     except Exception as e:  # noqa: BLE001
         conn.send({"file": file, "pipeline": pipeline, "status": "error",
                    "error": repr(e)[:300]})
 
 
 def run_with_timeout(args):
-    bench, file, pipeline, timeout = args
+    bench, file, pipeline, timeout, check = args
     ctx = mp.get_context("fork")
     parent, child = ctx.Pipe(duplex=False)
-    p = ctx.Process(target=_child, args=(bench, file, pipeline, child))
+    p = ctx.Process(target=_child, args=(bench, file, pipeline, check, child))
     t0 = time.perf_counter()
     p.start()
     child.close()
@@ -133,7 +144,7 @@ def run_with_timeout(args):
     row.setdefault("t_wall", time.perf_counter() - t0)
     for k in NAN_METRICS:
         row.setdefault(k, float("nan"))
-    row.setdefault("check_ok", False)
+    row.setdefault("check_ok", float("nan") if not check else False)
     row.setdefault("native", False)
     return row
 
@@ -174,6 +185,9 @@ def main():
     ap.add_argument("--pipelines", default=",".join(C.PIPELINES))
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--files", default="", help="comma-separated subset of files")
+    ap.add_argument("--no-check", action="store_true",
+                    help="skip unitary/statevector/distribution checks (check "
+                         "columns NaN, status ok-unchecked); gate-set check kept")
     a = ap.parse_args()
     pipelines = a.pipelines.split(",")
 
@@ -195,7 +209,7 @@ def main():
 
     # biggest circuits first so the long jobs do not trail at the end
     order = man.sort_values("n_gates", ascending=False)["file"]
-    jobs = [(bench, f, p, a.timeout) for f in order for p in pipelines]
+    jobs = [(bench, f, p, a.timeout, not a.no_check) for f in order for p in pipelines]
     t0 = time.perf_counter()
     rows = []
     with ProcessPoolExecutor(max_workers=a.workers) as ex:
