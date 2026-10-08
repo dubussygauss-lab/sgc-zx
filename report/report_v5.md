@@ -848,7 +848,7 @@ Figure 4. Learned cost model on the proxy data. Left, predicted F_H = exp(-y_hat
 | `model/test_cost_model.py` | `python model/test_cost_model.py` | 7 of 7 passed, rerun 8 October after the `--prefix` change | under 1 s |
 | `submit/test_submit.py` | `python -m pytest submit/test_submit.py -q` | 11 of 11 passed, 8 October, offline with no credentials | 4 s |
 | `submit/test_h22e_stats.py` | `python -m pytest submit/test_h22e_stats.py -q` | 7 of 7 passed, 8 October | 4.2 s |
-| `submit/test_h22e_pooled.py` | `python -m pytest submit/test_h22e_pooled.py -q` | 9 of 9 passed, 8 October | 6.2 s |
+| `submit/test_h22e_pooled.py` | `python -m pytest submit/test_h22e_pooled.py -q` | 10 of 10 passed, 9 October | 6.2 s |
 | `value/test_value_ledger.py` | `python -m pytest value/test_value_ledger.py -q` | 5 of 5 passed, 8 October | 2.9 s |
 | `value/test_value_by_application.py` | `python -m pytest value/test_value_by_application.py -q` | 5 of 5 passed, 8 October | 1.1 s |
 | `value/test_selector_ledger.py` | `python -m pytest value/test_selector_ledger.py -q` | 4 of 4 passed, 9 October | 1.6 s |
@@ -1038,3 +1038,4 @@ Changelog, part 2 (Section 3), 7 October 2026.
 - [F] Section 2.2 states seven compile pipelines and defines PSEL as a selector over P0 and P2 from `report/sec22_selector_v5.md`. It is not an eighth compile pipeline.
 - [F] Section 6 states that PSEL keeps P0 on all 60 XXZ circuits and on 123 of 180 family A circuits. It states that PSEL compiles twice and that its family totals come from the stored rows.
 - [F] Scoring map rows Technical and Engineering name PSEL, `value/selector_ledger.py` and their tests. Section 5 lists `pipelines/pass_select.py` and `value/selector_ledger.py` in the script table and `pipelines/test_pass_select.py` with 3 of 3 passed and `value/test_selector_ledger.py` with 4 of 4 passed in the test table, each run once on 9 October 2026.
+- [F] Section 5 test table: `submit/test_h22e_pooled.py` now passes 10 of 10 after the three-circuit Holm test was added on 9 October.
