@@ -19,7 +19,7 @@ app = marimo.App(width="full", auto_download=["html", "markdown", "ipynb"])
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    # A certified resource ledger shows where ZX rewriting pays on Quantinuum H2
+    # A pass selector keeps ZX rewriting only where it lowers the cost of a circuit on Quantinuum H2
 
     Team **Learned ZX Rewriting**, Quantinuum Singapore Grand Challenge, submission 1.
 

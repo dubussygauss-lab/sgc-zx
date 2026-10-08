@@ -1,6 +1,6 @@
 # Summary for the judges
 
-Team Learned ZX Rewriting. Quantinuum Singapore Grand Challenge, submission 1. Built on 9 October 2026 from `report/report_v5.md` and aligned with its Section 1.
+Team Learned ZX Rewriting. Report title: "A pass selector keeps ZX rewriting only where it lowers the cost of a circuit on Quantinuum H2". Quantinuum Singapore Grand Challenge, submission 1. Built on 9 October 2026 from `report/report_v5.md` and aligned with its Section 1.
 
 `[F]` marks a statement copied from the report or from the `value/` outputs. `[O]` marks a judgement. The script `check_summary_numbers.py` finds every number of this page in `report/report_v5.md` or in `value/`.
 

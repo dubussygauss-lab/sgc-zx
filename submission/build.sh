@@ -25,7 +25,7 @@ log "pandoc $(pandoc --version | head -1 | cut -d' ' -f2), wkhtmltopdf $(wkhtmlt
 HTML="$LOG/report_v5.html"
 pandoc "$OUT/report.md" -f gfm -t html5 --standalone --embed-resources \
   --resource-path="$OUT" --css="$OUT/report.css" \
-  --metadata title="A certified resource ledger shows where ZX rewriting pays on Quantinuum H2" \
+  --metadata title="A pass selector keeps ZX rewriting only where it lowers the cost of a circuit on Quantinuum H2" \
   --metadata pagetitle="report_v5" \
   -o "$HTML" 2>>"$LOG/build.log"
 # drop the duplicated H1 that --metadata title adds
