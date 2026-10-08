@@ -174,6 +174,17 @@ def selected_rows(led):
               "extra_shots_capped_pct"]].set_index("file").loc[list(SELECTED)].reset_index()
 
 
+def b1_extra_shots_spread(led):
+    """Per-circuit extra-shot percentage at the fixed budget over the checked B1 circuits:
+    100 (shots_at_budget_P2 - shots_at_budget_P0) / shots_at_budget_P0, one job, one fee."""
+    b = led[(led.layer == "NISQ") & (led.family == "B1") & (led.row_kind == "circuit")]
+    pct = 100 * (b.shots_at_budget_P2 - b.shots_at_budget_P0) / b.shots_at_budget_P0
+    i = pct.idxmax()
+    return dict(n_circuits=len(b), median_pct=float(pct.median()), max_pct=float(pct.max()),
+                max_file=b.loc[i, "file"].replace(".qasm", ""),
+                max_is_largest_hqc_saved_pct=bool(b.hqc_saved_pct.idxmax() == i))
+
+
 def family_a(led):
     a = led[(led.layer == "NISQ") & (led.family == "A") & (led.row_kind == "circuit")].copy()
     a["model"] = a.file.str.split("_").str[0]
@@ -248,6 +259,7 @@ def main():
     amap = assign_areas(files, table)
     areas = area_rows(led, amap, table)
     sel = selected_rows(led)
+    spread = b1_extra_shots_spread(led)
     fa = family_a(led)
     b2 = family_b2(led)
     b1c = b1_certified(led)
@@ -310,6 +322,14 @@ def main():
           md_table(sel, cap_cols, cap_nd), "",
           f"`[F]` Jobs of {JOB_SHOT_CAP:,} shots are filled first and the remainder goes in one last job. "
           f"Every job pays the {JOB_FEE} HQC fee. extra_shots_capped_pct = 100 extra_shots_capped / shots_capped_P0.", ""]
+    L += [f"## Extra shots at a fixed {BUDGET:,} HQC budget over the checked B1 circuits", "",
+          "| quantity | value |", "|---|---|",
+          f"| B1 circuits | {spread['n_circuits']} |",
+          f"| median per-circuit extra_shots_pct | {spread['median_pct']:.1f} |",
+          f"| largest per-circuit extra_shots_pct | {spread['max_pct']:.1f} ({spread['max_file']}) |",
+          f"| largest extra_shots_pct is also the largest hqc_saved_pct | {spread['max_is_largest_hqc_saved_pct']} |", "",
+          "`[F]` One job and one 5 HQC fee per circuit, as in the first shots table. "
+          "extra_shots_pct = 100 (shots_at_budget_P2 - shots_at_budget_P0) / shots_at_budget_P0.", ""]
     fa_cols = ["model", "n_circuits", "hqc_P0", "hqc_P2", "hqc_saved", "hqc_increase_P2_vs_P0_pct",
                "hqc_saved_pct_median", "n_P2_dearer", "n_P2_cheaper"]
     L += ["## Family A control (Trotter circuits)", "",

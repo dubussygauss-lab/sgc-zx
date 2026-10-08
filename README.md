@@ -1,6 +1,6 @@
 # sgc-zx
 
-Team Learned ZX Rewriting, Quantinuum Singapore Grand Challenge. A resource-certification benchmark for Quantinuum H2 with two cost layers: the NISQ layer (ZZPhase count, two-qubit depth, HQC, emulated fidelity) and the fault-tolerant layer (T-count against a per-instance certified floor). The current submission report is `report/report_v4.md`. The executable companion is `report/notebook_skeleton.py`.
+Team Learned ZX Rewriting, Quantinuum Singapore Grand Challenge. A resource-certification benchmark for Quantinuum H2 with two cost layers: the NISQ layer (ZZPhase count, two-qubit depth, HQC, emulated fidelity) and the fault-tolerant layer of T-counts. A per-instance certified T-count floor exists for the 24 circuits of `results/certificates.csv`. The current submission report is `report/report_v5.md`. The executable companion is `report/notebook_skeleton.py`.
 
 ## Layout
 
@@ -14,10 +14,14 @@ Team Learned ZX Rewriting, Quantinuum Singapore Grand Challenge. A resource-cert
 | `pipelines/run_bench.py` | Family A: every pipeline on every circuit. Writes `results/family_A_counts.csv`, `results/family_A_summary.csv`, `results/compiled/<pipeline>/`. |
 | `pipelines/run_bench_B.py` | Manifest-driven runner (family B1). Writes `results/family_B1_counts.csv`, `results/family_B1_summary.csv`. |
 | `pipelines/run_b2.py` | Family B2 runner. Writes `results/family_B2_counts.csv`. |
-| `noise/dm_sim.py`, `noise/h2_params.py`, `noise/run_proxy.py` | Local density-matrix noise proxy for family A (n <= 8). Writes `results/family_A_proxy.csv` and `results/fig_proxy_fidelity_vs_n2q.{pdf,png}`. Provisional until emulator runs exist. |
+| `noise/dm_sim.py`, `noise/h2_params.py`, `noise/run_proxy.py` | Local density-matrix noise proxy for family A (n <= 8). Writes `results/family_A_proxy.csv` and `results/fig_proxy_fidelity_vs_n2q.{pdf,png}`. Compared with the emulator runs in Sections 3.7 and 3.7.1 of the report. |
 | `barrier/certificate.py`, `barrier/NOTES.md` | Exact-arithmetic implementation of the T-count floor of the exactness-barrier manuscript (arXiv:2608.22801), with a line-by-line map to the manuscript. |
-| `report/make_tables.py` | Generates every table and figure of the report from `results/*.csv` and injects the tables into `report/report_v1.md` to `report/report_v4.md` at their `<!-- TABLE:name -->` markers. |
-| `report/report_v4.md` | Submission report, draft v4 (current). Drafts v1 to v3 are kept unchanged. |
+| `report/make_tables.py` | Generates every table and figure of the report from `results/*.csv` and injects the tables into `report/report_v1.md` to `report/report_v5.md` at their `<!-- TABLE:name -->` markers. |
+| `report/report_v5.md` | Submission report, draft v5 (current). Section 1 is kept identical to `report/sec1_v5.md`. Drafts v1 to v4 are kept. |
+| `value/value_ledger.py` | HQC and magic-state ledger, P2 against P0 at 1000 shots. Writes `value/value_ledger.csv` and `value/value_ledger.md`. |
+| `value/value_by_application.py` | Regroups the ledger by application area from `docs/applications.md`. Writes `value/value_by_application.csv` and `value/value_by_application.md`, the sources of Section 1. |
+| `submit/syntax_check.py`, `submit/run_emulator.py`, `submit/fetch_job.py` | Platform jobs through `aqora`. Every job is recorded in `results/emulator_jobs.csv`. |
+| `submit/h22e_stats.py` | Recomputes the H2-2E statistics of Table E2 from the stored counts. |
 | `report/notebook_skeleton.py` | Marimo notebook: tables, figures, live compilation of one circuit through P0 and P2, gated submission to `nexus:H2-2E` through `aqora.QPU`. |
 | `report/tables/`, `report/figures/` | Outputs of `make_tables.py`. |
 | `results/` | All CSVs, logs and compiled QASM (hqslib1 header, measure-all appended). |
@@ -43,14 +47,27 @@ python pipelines/run_b2.py --workers 2
 # 7    noise proxy (provisional, family A n <= 8)
 python noise/run_proxy.py --workers 2
 
-# 8    tables and figures, injected into report/report_v1.md to report/report_v4.md
+# 8    tables and figures, injected into report/report_v1.md to report/report_v5.md
 #      (--no-fig skips the figures, --no-inject writes report/tables/ only)
 python report/make_tables.py
 ```
 
-Table A1 to A3 and the family A figure come from `results/family_A_counts.csv`. Table A4 comes from `results/family_A_proxy.csv`. Table B1 and its figure come from `results/family_B1_counts.csv`. Table B2 and its figure come from `results/family_B2_counts.csv`.
+Table A1 to A3 and the family A figure come from `results/family_A_counts.csv`. Table A4 comes from `results/family_A_proxy_h22e.csv`. Table B1 and its figure come from `results/family_B1_counts.csv`. Table B2 and its figure come from `results/family_B2_counts.csv`.
 
-Pending steps: certificates (`barrier/certificate.py` on family B1 n = 5 and family B2) and emulator jobs (notebook section 3). Both are marked `[PENDING: ...]` in the report.
+Status on 8 October 2026:
+
+- Certificates done. `python barrier/run_certificates.py` writes `results/certificates.csv` with 24 rows (20 family B2 circuits at n = 2 and 3, four family B1 circuits at n = 5). Report Table C1.
+- Selene done. 468 noiseless and 468 full depolarising runs plus a 68-run comparison. Report Tables S1 and S2 and `results/selene.md`.
+- H2-Emulator done. Three jobs with 22 circuit rows. Report Table E1, `results/emulator_nexus_H2-Emulator.csv`.
+- H2-2E done. Six jobs with an HQC estimate of 1840.0 in total. Report Table E2, `results/emulator_nexus_H2-2E.csv`.
+- The submission cell of `report/notebook_skeleton.py` has not been executed. The platform jobs were submitted by the `submit/` scripts.
+
+Value ledger, run after the compilation steps:
+
+```
+python value/value_ledger.py
+python value/value_by_application.py
+```
 
 Tests. Five run as scripts:
 
@@ -62,11 +79,14 @@ python barrier/test_certificate.py
 python model/test_cost_model.py
 ```
 
-Two run under pytest. The Selene tests need the proxy variables cleared (see the proxy note below):
+Five run under pytest. The Selene tests need the proxy variables cleared (see the proxy note below):
 
 ```
 HTTPS_PROXY= https_proxy= HTTP_PROXY= http_proxy= NO_PROXY= no_proxy= python -m pytest selene/test_selene.py -q
 python -m pytest submit/test_submit.py -q
+python -m pytest submit/test_h22e_stats.py -q
+python -m pytest value/test_value_ledger.py -q
+python -m pytest value/test_value_by_application.py -q
 ```
 
 ## Notebook
@@ -80,7 +100,7 @@ Before submitting, set `TEAM_ORG` in the second cell to the team's aqora organiz
 
 ## Environment
 
-Python 3.13, pytket 2.18.4, pytket-quantinuum 0.59.3, pyzx 0.10.7, qiskit 2.5.2, pygridsynth 2.0.0, numpy 2.5.3, pandas 2.3.3, scipy 1.18.1, matplotlib 3.11.2, aqora 0.35.1, qnexus 0.51.1, selene-sim 0.3.4, marimo 0.25.1. Full list in `report/report_v4.md`, section 5.
+Python 3.13, pytket 2.18.4, pytket-quantinuum 0.59.3, pyzx 0.10.7, qiskit 2.5.2, pygridsynth 2.0.0, numpy 2.5.3, pandas 2.3.3, scipy 1.18.1, matplotlib 3.11.2, aqora 0.35.1, qnexus 0.51.1, selene-sim 0.3.4, marimo 0.25.1. Full list in `report/report_v5.md`, section 5.
 
 ```
 pip install pytket==2.18.4 pytket-quantinuum==0.59.3 pyzx==0.10.7 qiskit==2.5.2 pygridsynth==2.0.0 aqora==0.35.1 marimo==0.25.1 numpy pandas scipy matplotlib

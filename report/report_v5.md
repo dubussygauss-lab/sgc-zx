@@ -2,7 +2,7 @@
 
 Team Learned ZX Rewriting. Quantinuum Singapore Grand Challenge, submission 1, draft v5 (8 October 2026).
 
-Tags: `[F]` marks a statement verifiable from an artifact in the repository or from the cited source. `[O]` marks a judgement or a plan. Every number in a results table of Section 3 is produced by `report/make_tables.py` from `results/*.csv`. Items marked `[PENDING: emulator]` wait for emulator data that is not yet measured.
+Tags: `[F]` marks a statement verifiable from an artifact in the repository or from the cited source. `[O]` marks a judgement or a plan. Every number in a results table of Section 3 is produced by `report/make_tables.py` from `results/*.csv`. The emulator runs are reported in Sections 3.7 and 3.7.1.
 
 ## Scoring map
 
@@ -22,7 +22,7 @@ Tags: `[F]` marks a statement verifiable from an artifact in the repository or f
 - `[O]` User. A team that runs Clifford+T subroutines on Quantinuum H2 under a fixed HQC budget and will later price them on a fault-tolerant Helios.
 - `[O]` Decision. Should this circuit go through ZX rewriting before pytket's Quantinuum pass?
 - `[F]` H2 cost. On the 15 checked B1 circuits P2 costs 14,772.8 HQC against 15,516.0 for P0. The saving is 743.2 HQC or 4.8 %. The median per-circuit saving is 3.9 %.
-- `[F]` Fault-tolerant cost. ZX removes 2,862 of 7,048 T gates on B1. Each T gate is one magic state, so the saving is 40.6 %. On the 20 synthesised B2 circuits 0.997 of the remaining T-count is certified incompressible.
+- `[F]` Fault-tolerant cost. ZX removes 2,862 of 7,048 T gates on B1. Each T gate is one magic state, so the saving is 40.6 %. On the four B1 circuits with a certificate the certified fraction of the remaining T-count is 0.443. The fraction 0.997 holds for the 20 synthesised B2 Haar circuits at n = 2 and 3 and not for the B1 circuits.
 - `[F]` Algorithms. Every circuit except hwb6, hwb8 and the two ham15 circuits is an adder, multiplier, Fourier transform, oracle, search instance or multi-controlled Toffoli. The adders, multipliers and the Fourier transform come from factoring and discrete-log circuits. grover_5 and mod5_4 come from search (Section 1.4). `[O]` The Toffoli circuits are placed in search as oracle and diffusion parts.
 
 ### 1.1 The user and the decision
@@ -56,7 +56,7 @@ Tags: `[F]` marks a statement verifiable from an artifact in the repository or f
 
 `[F]` P2 is cheaper than P0 in HQC on 14 of the 15 B1 circuits. hwb8 alone accounts for 84.6 % of the B1 saving but serves no sourced quantum algorithm. Without hwb8 the B1 saving is 114.6 HQC. `[O]` The median of 3.9 % is the better guide for a single circuit.
 
-`[F]` Saved HQC buys shots. The following figures assume one job that pays the 5 HQC job fee once. At the 10,000 HQC team budget P0 affords 68,178 shots of vbe_adder_3 and P2 affords 87,675. That is 19,497 extra shots or 28.6 % more. On the Grover oracle mod5_4 the gain is 11,757 shots or 7.5 %.
+`[F]` Saved HQC buys shots. The following figures assume one job that pays the 5 HQC job fee once. At the 10,000 HQC team budget P0 affords 68,178 shots of vbe_adder_3 and P2 affords 87,675. That is 19,497 extra shots or 28.6 % more. vbe_adder_3 is the largest per-circuit saving of the 15 B1 circuits. The median extra-shot gain over the 15 circuits is 4.3 % (`value/value_by_application.md`). On the Grover oracle mod5_4 the gain is 11,757 shots or 7.5 %.
 
 `[F]` The H2 hardware guide limits a job to 10,000 shots (`docs/platform_notes.md` section 3.4). With that limit and one fee per job P0 affords 67,974 shots of vbe_adder_3 and P2 affords 87,324. That is 19,350 extra shots or 28.5 % more. On mod5_4 the gain is 11,584 shots or 7.4 % (`value/value_by_application.md`). Whether the per-job limit applies on H2-2E is Unverifiable from the repository.
 
@@ -107,15 +107,15 @@ Tags: `[F]` marks a statement verifiable from an artifact in the repository or f
 
 ### 1.5 Value statement and scope of claims
 
-`[O]` For an H2 user the ledger is a reproducible answer to "should I run ZX before pytket" in HQC per area. `[F]` P2 saves 7.9 % on the checked factoring circuits and 4.8 % on the checked search circuits. `[O]` On Trotter circuits the answer is no. For the fault-tolerant programme the ledger gives certified magic-state counts per subroutine.
+`[O]` For an H2 user the ledger is a reproducible answer to "should I run ZX before pytket" in HQC per area. `[F]` P2 saves 7.9 % on the checked factoring circuits and 4.8 % on the checked search circuits. `[O]` On Trotter circuits the answer is no. `[F]` The ledger gives magic-state counts for every B1, B1x and B2 circuit. The certificate covers only the 24 circuits of `results/certificates.csv`, all with n at most 5. Four of them are B1 subroutines with a pooled certified fraction of 0.443. The other 20 are the synthesised B2 Haar circuits at n = 2 and 3 with a pooled fraction of 0.997.
 
-`[F]` The winner of the finals receives credits on the on-premise Helios machine in Singapore (organisers' timeline email, 25 Aug 2026). `[O]` Quantinuum's Helios roadmap targets fault tolerance. The certified T column prices the layer those credits will be spent on.
+`[F]` The winner of the finals receives credits on the on-premise Helios machine in Singapore (organisers' timeline email, 25 Aug 2026). `[O]` Quantinuum's Helios roadmap targets fault tolerance. The T-count column prices the layer those credits will be spent on.
 
 `[F]` Model prediction. A proxy fit of 1.18e-3 per ZZ gate predicts a relative fidelity gain of 1.79 % for P2 on vbe_adder_3 and a median relative gain of 0.24 % over B1. `[O]` These are model predictions and not measurements.
 
 `[F]` The six H2-2E jobs of vbe_adder_3, hwb6 and grover_5 under P0 and P2 carry HQC estimates that sum to 1,840 HQC. At 1000 shots the emulator does not resolve P2 against P0 on any of the three. On vbe_adder_3 the measured F_H was 0.954 under P0 and 0.959 under P2 (Section 3.7.1).
 
-`[F]` The ledger states value in HQC, shots and magic states and makes no claim in currency. The learned component of this submission is a cost model that predicts fidelity from compile-time features (Section 4). Learned rewriting is future work and is not claimed here.
+`[F]` The ledger states value in HQC, shots and magic states and makes no claim in currency. The team name Learned ZX Rewriting names the research programme. The learned component of this submission is the cost model of Section 4, which predicts fidelity from compile-time features. This submission contains no learned rewriting.
 
 ## 2. Method
 
@@ -589,7 +589,7 @@ Nexus H2-Emulator, noisy_simulation = True, 1000 shots per row. F_H is the Helli
 
 `[F]` Version 1 of this section was a protocol with no trained model. Version 2 trains the model on the local proxy fidelities of Section 3 and reports its validation. Every number in Tables M1 and M2 is produced by `report/make_tables.py` from `results/cost_model_metrics.csv` and `results/cost_model_coefficients.csv`, which are written by `model/cost_model.py`.
 
-`[F]` Data. The training set is the proxy output of `noise/run_proxy.py` with the published H2-2E emulator defaults p1 = 7.3e-5, p2 = 1.29e-3, readout flip rates 9e-4 and 1.8e-3 and p_init = 4e-5. Family A contributes 540 rows, the 108 Trotter circuits with n in {4, 6, 8} under the five pipelines P0ref, P0, P1, P2 and P3. Family B1 contributes 35 rows, the 7 benchmark circuits with n in {5, 7} under the same five pipelines. F_H is the Hellinger fidelity of the exact noisy output distribution against the ideal one, with no shot sampling. `[O]` These are proxy numbers from a density-matrix model that omits leakage, crosstalk and duration-based dephasing. The script reruns unchanged on emulator CSVs with the same columns, and every table of this section will be refit on emulator data `[PENDING: emulator]`.
+`[F]` Data. The training set is the proxy output of `noise/run_proxy.py` with the published H2-2E emulator defaults p1 = 7.3e-5, p2 = 1.29e-3, readout flip rates 9e-4 and 1.8e-3 and p_init = 4e-5. Family A contributes 540 rows, the 108 Trotter circuits with n in {4, 6, 8} under the five pipelines P0ref, P0, P1, P2 and P3. Family B1 contributes 35 rows, the 7 benchmark circuits with n in {5, 7} under the same five pipelines. F_H is the Hellinger fidelity of the exact noisy output distribution against the ideal one, with no shot sampling. `[O]` These are proxy numbers from a density-matrix model that omits leakage, crosstalk and duration-based dephasing. The script reruns unchanged on emulator CSVs with the same columns. `[F]` The model was not refit on the 22 H2-Emulator rows or the six H2-2E rows of Sections 3.7 and 3.7.1.
 
 ### 4.1 Target and features
 
@@ -657,9 +657,9 @@ Figure 4. Learned cost model on the proxy data. Left, predicted F_H = exp(-y_hat
 
 ### 4.6 Status and use
 
-`[F]` All numbers in this section come from the local proxy with the published H2-2E parameters. The proxy has no shot noise, no leakage, no crosstalk and no duration-based dephasing. The emulator F_H will be measured at 1000 shots. `[O]` Shot noise adds a floor to y that none of the seven features carries, so the refit on emulator data will need either an intercept or a shot-count term, and the coefficients of Table M2 will change.
+`[F]` All numbers in this section come from the local proxy with the published H2-2E parameters. The proxy has no shot noise, no leakage, no crosstalk and no duration-based dephasing. The emulator F_H of Sections 3.7 and 3.7.1 was measured at 1000 shots and does not enter this section. `[O]` Shot noise adds a floor to y that none of the seven features carries, so the refit on emulator data will need either an intercept or a shot-count term, and the coefficients of Table M2 will change.
 
-`[O]` The model has two uses in this submission. Before HQCs are spent it ranks the five pipelines of a circuit by predicted F_H from their compiled counts, so that only the pipeline the model prefers is run. The rank correlation between predicted and measured F_H across the pipelines of a circuit is the metric that matters for that use and will be reported once emulator rows exist `[PENDING: emulator]`. After the run it predicts the fidelity of any further circuit from its compiled counts and support size, which is what a user who has not yet run the circuit can supply. The support size is computed from the ideal distribution and is available for every circuit in this benchmark because the ideal outputs are stored, and it is not available for a circuit too large to simulate. A cost signal for a rewriting search is future work and is not claimed here.
+`[O]` The model has two uses in this submission. Before HQCs are spent it ranks the five pipelines of a circuit by predicted F_H from their compiled counts, so that only the pipeline the model prefers is run. The rank correlation between predicted and measured F_H across the pipelines of a circuit is the metric that matters for that use. `[F]` That rank correlation was not computed on the emulator rows of Sections 3.7 and 3.7.1. `[O]` After the run it predicts the fidelity of any further circuit from its compiled counts and support size, which is what a user who has not yet run the circuit can supply. The support size is computed from the ideal distribution and is available for every circuit in this benchmark because the ideal outputs are stored, and it is not available for a circuit too large to simulate. A cost signal for a rewriting search is future work and is not claimed here.
 
 ### 4.7 Refit on Selene depolarising data
 
@@ -741,7 +741,7 @@ Figure 4. Learned cost model on the proxy data. Left, predicted F_H = exp(-y_hat
 
 `[F]` The Selene command clears every proxy variable because Selene streams its results over a local TCP socket that the container proxy intercepts (`results/selene.md`, section 1).
 
-`[F]` Tests. Each file was run once with the versions above, on 7 October 2026 unless the table gives 8 October. Five files run as scripts. `selene/test_selene.py` and `submit/test_submit.py` run under pytest.
+`[F]` Tests. Each file was run once with the versions above, on 7 October 2026 unless the table gives 8 October. Five files run as scripts. Five files run under pytest. These are `selene/test_selene.py`, `submit/test_submit.py`, `submit/test_h22e_stats.py`, `value/test_value_ledger.py` and `value/test_value_by_application.py`.
 
 | File | Command | Result | Wall time |
 |---|---|---|---|
@@ -752,6 +752,9 @@ Figure 4. Learned cost model on the proxy data. Left, predicted F_H = exp(-y_hat
 | `selene/test_selene.py` | proxy variables cleared, `python -m pytest selene/test_selene.py -q` | 6 of 6 passed (5 functions, one parametrised twice) | 7 s |
 | `model/test_cost_model.py` | `python model/test_cost_model.py` | 7 of 7 passed, rerun 8 October after the `--prefix` change | under 1 s |
 | `submit/test_submit.py` | `python -m pytest submit/test_submit.py -q` | 11 of 11 passed, 8 October, offline with no credentials | 4 s |
+| `submit/test_h22e_stats.py` | `python -m pytest submit/test_h22e_stats.py -q` | 7 of 7 passed, 8 October | 4.2 s |
+| `value/test_value_ledger.py` | `python -m pytest value/test_value_ledger.py -q` | 5 of 5 passed, 8 October | 2.9 s |
+| `value/test_value_by_application.py` | `python -m pytest value/test_value_by_application.py -q` | 5 of 5 passed, 8 October | 1.1 s |
 
 `[F]` The compile tests check every pipeline against the unitary of the input and check that the measured QASM encodes the implicit qubit permutation left by `allow_swaps=True`. The certificate tests reproduce the finite verifications of the barrier manuscript (the counts 24, 1536 and 18384). The Selene tests check the bit order of the returned array with a permuted measure map and check that a seed reproduces the counts. The cost-model tests check that OLS recovers a known law without noise and that the physics baseline is exact on its own law. The submit tests run offline. They check the native gate set, the HQC formula, the bit order of returned counts, F_H and TVD, the job ledger, the job plans, the credential detection and the rubric rendering.
 
@@ -771,7 +774,7 @@ Figure 4. Learned cost model on the proxy data. Left, predicted F_H = exp(-y_hat
 
 `[F]` The noise proxy is a density-matrix simulation with the published H2-2E default parameters (p1 = 7.3e-5, p2 = 1.29e-3, p_meas = (9e-4, 1.8e-3), p_init = 4e-5) and depolarising gate channels only. The published H2-2E model has in addition a spontaneous-emission branch that applies leakage half of the time, measurement and initialisation crosstalk, quadratic and linear dephasing during transport and idling, and a two-qubit fault probability that scales with the RZZ angle (`docs/platform_notes.md`, section 3.2). The proxy has none of these. The Selene cross-check in `results/selene.md` compares two depolarising models that share the same per-gate convention, so the agreement of 32 of 34 runs within two standard deviations for the like-for-like variant confirms the implementation of the proxy and its measure-map handling, not its fidelity to H2-2E. `[O]` On the family B1 circuits, whose ZZPhase angles are multiples of pi/2, the angle scaling changes little. The angles of family A are small, so the published scaling lowers the two-qubit fault probability below p2 and the proxy is pessimistic there.
 
-`[F]` Nothing in this report has run on hardware. The 22 H2-Emulator rows of Section 3.7 and the six H2-2E rows of Section 3.7.1 are emulator runs. The 468 noiseless, the 68 depolarising and the 468 full depolarising Selene runs are local. They use the Quest statevector backend and do not contain the H2-2E noise model. The emulator cell of the notebook has not been executed. `[PENDING: emulator]`
+`[F]` Nothing in this report has run on hardware. The 22 H2-Emulator rows of Section 3.7 and the six H2-2E rows of Section 3.7.1 are emulator runs. The 468 noiseless, the 68 depolarising and the 468 full depolarising Selene runs are local. They use the Quest statevector backend and do not contain the H2-2E noise model. The submission cell of `report/notebook_skeleton.py` has not been executed. Its stored marimo session `report/__marimo__/session/notebook_skeleton.py.json` stops at the Submit to QPU gate. The platform jobs were submitted by `submit/syntax_check.py` and `submit/run_emulator.py`.
 
 `[F]` The cost model is fitted on proxy fidelities, not on emulator output. Held-out whole circuit classes within the pooled data give R^2 = 0.990 on family A rows and 0.830 on family B1 rows (gradient boosting, `cv5g`), which measures interpolation within the families. Across families the evidence is one direction: trained on family A the best model predicts the 7 family B1 circuits with R^2 = 0.805 against 0.785 for the unfitted physics baseline, and trained on the 35 family B1 rows no model predicts family A (best R^2 = 0.326). `[O]` Seven B1 circuits do not establish generalisation, and learned rewriting itself is not attempted in this submission.
 
@@ -785,15 +788,11 @@ Figure 4. Learned cost model on the proxy data. Left, predicted F_H = exp(-y_hat
 
 ## 7. Team and roles
 
-| Name | Role |
-|---|---|
-| C.-F. Kam | `[TBD]` |
-| A. Mahasinghe | `[TBD]` |
-| D. De Silva | `[TBD]` |
-| Karunarathne | `[TBD]` |
-| F. Cadet | `[TBD]` |
-| Bessafi | `[TBD]` |
-| K. De Silva | `[TBD]` |
+`[F]` The team members are C.-F. Kam, A. Mahasinghe, D. De Silva, Karunarathne, F. Cadet, Bessafi and K. De Silva.
+
+`[F]` C.-F. Kam is the first author of the exactness-barrier manuscript arXiv:2608.22801 (Reference 1). `[O]` Kam is the team owner on Aqora as stated by the team. No artifact in the repository records it.
+
+`[O]` Roles of the other members to be confirmed by Kam before submission.
 
 ## References
 
@@ -906,3 +905,12 @@ Changelog, part 2 (Section 3), 7 October 2026.
 - [F] `value/value_by_application.py` gains `shots_affordable_capped()` and a second shots table with at most 10,000 shots per job. Section 1.2 quotes both tables. `value/test_value_by_application.py` gains a brute-force test of the capped count.
 - [F] `submit/h22e_stats.py` gains `h2emulator_sd()`, which reproduces the bootstrap stream of Table E1. The grover_5 cross-emulator z now uses the Table E1 sd and reads 4.33 in place of 4.29. `report/make_tables.py` asserts that this sd equals the Table E1 value and prefixes the Table E2 caption with `[F]`. `submit/test_h22e_stats.py` gains a test of the cross-emulator sd.
 - [F] Reference 1 no longer carries the audit item A10 marker.
+- [F] Overclaim removed from Section 1.5. "certified magic-state counts per subroutine" is replaced by the certificate scope from `results/certificates.csv`: 24 circuits with n at most 5, four of them B1 subroutines with pooled fraction 0.443 and 20 synthesised B2 Haar circuits at n = 2 and 3 with pooled fraction 0.997. "The certified T column" in Section 1.5 now reads "The T-count column".
+- [F] Section 1 summary bullet "Fault-tolerant cost" puts the B1 certified fraction 0.443 next to the B1 saving and attributes 0.997 to the synthesised B2 Haar circuits only.
+- [F] Section 1.2 states that vbe_adder_3 is the largest per-circuit saving of the 15 B1 circuits and gives the median per-circuit extra-shot gain of 4.3 %. `value/value_by_application.py` gains `b1_extra_shots_spread()` and prints both numbers in a new table of `value/value_by_application.md`. `value/value_by_application.csv` is byte-identical after the rerun.
+- [F] Section 1.5 states that the team name names the research programme and that the learned component is the cost model of Section 4. The former sentence on learned rewriting is merged into it.
+- [F] Every `[PENDING: emulator]` marker outside the changelogs is removed. The Tags paragraph points to Sections 3.7 and 3.7.1. Section 4 states that the model was not refit on the emulator rows. Section 4.6 states that the rank correlation was not computed. Section 6 states that the notebook submission cell was not executed, from its stored marimo session.
+- [F] Section 7 lists the seven members without a role column. Kam's first authorship of arXiv:2608.22801 is tagged [F] and the Aqora team owner role is tagged [O] because no repository artifact records it. The open item on the other roles is stated.
+- [F] Section 5 test table gains `submit/test_h22e_stats.py` with 7 of 7 passed, `value/test_value_ledger.py` with 5 of 5 and `value/test_value_by_application.py` with 5 of 5, each run once under pytest on 8 October 2026.
+- [F] `README.md` points to `report/report_v5.md` and lists the `value/` scripts, the `submit/` scripts and the five pytest files. It gives the status of the certificates, the Selene runs, the H2-Emulator runs of Table E1 and the H2-2E runs of Table E2. It names `results/family_A_proxy_h22e.csv` as the source of Table A4.
+- [O] The title "A certified resource ledger" is unchanged. The certificate covers 24 circuits and the title wording is left to Kam.
