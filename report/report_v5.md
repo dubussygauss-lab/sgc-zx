@@ -900,11 +900,19 @@ Figure 4. Learned cost model on the proxy data. Left, predicted F_H = exp(-y_hat
 
 ## 7. Team and roles
 
-`[F]` The team members are C.-F. Kam, A. Mahasinghe, D. De Silva, Karunarathne, F. Cadet, Bessafi and K. De Silva.
+`[F]` Members and affiliations as registered for the challenge in the team's email of 31 August 2026. No copy of that email is in the repository.
 
-`[F]` C.-F. Kam is the first author of the exactness-barrier manuscript arXiv:2608.22801 (Reference 1). `[O]` Kam is the team owner on Aqora as stated by the team. No artifact in the repository records it.
+| Member | Affiliation | Recorded academic status | Contribution recorded in this submission |
+|---|---|---|---|
+| Chon-Fai Kam | Università degli Studi di Palermo and Université Paris Cité | | Team lead and owner of the Aqora organisation `learned_zx_rewriting`. First author of the exactness-barrier manuscript arXiv:2608.22801 (Reference 1). |
+| Anuradha Mahasinghe | University of Colombo | | |
+| Dulari De Silva | University of Colombo | BSc (Hons) in Computational Mathematics | First author of the Solovay-Kitaev and ZX manuscript arXiv:2608.22810 (Reference 2). |
+| Nethmini Karunarathne | University of Colombo | BSc student in Computer Engineering | |
+| Frédéric Cadet | PEACCEL, Paris | | |
+| Miloud Bessafi | PEACCEL, Paris | | |
+| Kaushika De Silva | QUISA, The University of Western Australia | | |
 
-`[O]` Roles of the other members to be confirmed by Kam before submission.
+`[F]` An empty cell means that no source available to the authors of this report records the entry.
 
 ## References
 
@@ -1049,3 +1057,4 @@ Changelog, part 2 (Section 3), 7 October 2026.
 - [F] Title changed on Kam's instruction on 9 October 2026 from "A certified resource ledger shows where ZX rewriting pays on Quantinuum H2" to "A pass selector keeps ZX rewriting only where it lowers the cost of a circuit on Quantinuum H2". The old title overclaimed per verification 2026-10-08d F1.
 - [F] Header line: "draft v5" replaced by "report version 5" for the submitted PDF.
 - [F] Judge round 3, 9 October 2026. Section 1 summary bullet, Section 1.5 and `submission/SUMMARY.md` state that PSEL costing no more HQC than P0 holds by construction because P0 is always a candidate. They keep the measured P2 picks and savings. Section 1 summary bullet, Section 1.3 and `submission/SUMMARY.md` state that the 40.6 % magic-state saving is measured against the written input circuits and add the Table C2 count of 14 of 22 circuits equal to the best ancilla-free value and 8 above it, recomputed from `results/literature_tcounts.csv`. Section 2.2 states that the P0 reproduction has not been compared against `QuantinuumBackend.default_compilation_pass` on a live backend object. `report/sec1_v5.md` updated identically.
+- [F] Section 7 rewritten from the team registration email of 31 August 2026: names, affiliations, recorded academic status and the contributions that a source records. The placeholder on member roles is removed.
