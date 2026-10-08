@@ -1,0 +1,7 @@
+ok test_features_support_extremes
+ok test_ols_exact_without_noise
+ok test_ols_recovers_known_law
+ok test_physics_baseline_exact_on_its_own_law
+ok test_physics_baseline_matches_b1_fit_slope
+ok test_ridge_close_to_ols_for_small_lambda
+ok test_score_identity

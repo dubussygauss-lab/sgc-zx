@@ -1,0 +1,13 @@
+PASS test_primitives_are_exact_exponentials
+PASS test_single_term_step_is_exact
+PASS test_commuting_terms_are_exact
+PASS test_hamiltonian_signs_match_spec
+PASS test_trotter_error_scales_as_one_over_r
+PASS test_sv_matches_dense_simulator
+PASS test_sv_extra_gates
+PASS test_qasm_roundtrip_and_depth
+PASS test_written_files
+PASS test_xxz_neel_distribution_is_nondeterministic
+PASS test_xxz_circuit_matches_expm_on_neel_input
+PASS test_draws_are_reproducible
+12/12 passed

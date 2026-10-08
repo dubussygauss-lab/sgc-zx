@@ -1,0 +1,28 @@
+noise set h22e: {'p1': 7.3e-05, 'p2': 0.00129, 'p_meas_0': 0.0009, 'p_meas_1': 0.0018, 'p_init': 4e-05, 'p_idle': 0.0, 'rz_virtual': True}
+family B1 circuits with n <= 8: 7 ; pipelines: ['P0ref', 'P0', 'P1', 'P2', 'P3']
+verify (10 circuits x 5 pipelines): max |dm_sim - probs_from_measured_qasm| = 7.33e-15, max |dm_sim - reference (P0ref noise-free)| = 3.89e-16
+runs: 35 in 3.9 s wall (2 workers); noise-free-vs-npy failures: 0
+wrote /tmp/claude-0/-home-claude/339fffb6-0a3b-567c-954d-81548aaad86f/scratchpad/repro/results/family_B1_proxy_h22e.csv
+
+mean over circuits of F_H / TVD / n_2q / n_1q / depth_2q / support_size (p_idle = 0):
+   n   pipe       F_H       TVD     n_2q     n_1q  depth_2q  support
+   5  P0ref   0.96859   0.03154    29.00    37.00     27.25      4.8
+   5     P0   0.97309   0.02703    23.75    31.50     22.75      4.8
+   5     P1   0.96667   0.03347    28.25    41.25     24.25      4.8
+   5     P2   0.97405   0.02607    22.75    33.75     22.00      4.8
+   5     P3   0.96327   0.03690    34.00    47.25     31.00      4.8
+   7  P0ref   0.92650   0.07350    64.67    82.67     54.00      1.0
+   7     P0   0.93651   0.06349    54.67    68.67     46.67      1.0
+   7     P1   0.91795   0.08205    67.33    93.33     54.33      1.0
+   7     P2   0.93912   0.06088    51.67    73.67     42.67      1.0
+   7     P3   0.89187   0.10813    94.33   119.33     82.33      1.0
+
+Fits of -ln F_H (least squares, OLS standard errors):
+  a n_2q + b n_1q                                    a = 1.2643e-03 +/- 2.5e-04, b = -6.5485e-05 +/- 1.9e-04 ; resid sd 8.08e-03 ; R^2 0.9676
+  a n_2q + b n_1q + c depth_2q                       a = 1.4158e-03 +/- 3.5e-04, b = -2.8819e-05 +/- 2.0e-04, c = -2.3801e-04 +/- 3.8e-04 ; resid sd 8.15e-03 ; R^2 0.9680
+  a n_2q + b n_1q + s n  (s: SPAM per measured qubit) a = 1.5128e-03 +/- 2.6e-04, b = -3.2295e-04 +/- 2.1e-04, s = 9.9836e-04 +/- 4.4e-04 ; resid sd 7.60e-03 ; R^2 0.9722
+  a n_2q only                                        a = 1.1801e-03 +/- 2.3e-05 ; resid sd 7.97e-03 ; R^2 0.9675
+  a n_2q + b n_1q + u support_size                   a = 7.3581e-04 +/- 1.5e-04, b = 3.8782e-04 +/- 1.2e-04, u = -1.3087e-03 +/- 1.5e-04 ; resid sd 4.46e-03 ; R^2 0.9904
+  a n_2q + b n_1q + s n + u support_size             a = 9.8969e-04 +/- 1.1e-04, b = 1.2398e-04 +/- 9.5e-05, s = 1.0372e-03 +/- 1.8e-04, u = -1.3192e-03 +/- 1.1e-04 ; resid sd 3.16e-03 ; R^2 0.9954
+  a n_2q + b n_1q + v log2(support_size)             a = 7.6700e-04 +/- 1.3e-04, b = 3.5190e-04 +/- 1.0e-04, v = -5.1987e-03 +/- 5.0e-04 ; resid sd 3.93e-03 ; R^2 0.9926
+total time 7.7 s

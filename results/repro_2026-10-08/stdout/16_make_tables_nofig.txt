@@ -1,0 +1,317 @@
+family A: circuits 180 | P0 at ZZ term count: 180 | circuits with any pipeline below it: 0 | P2 ties P0: 120 worse: 60
+family B1: {'n_circuits': 15, 'p2_done': 15, 'p2_better': 13, 'p2_equal': 2, 'p2_worse': 0, 'p1_worse': 14, 'p1_done': 15, 'p3_worse': 14, 'p3_done': 15, 'p2_mean_red_pct': 6.908765011778313, 't_zx_agree': True}
+family B1x (count-only, ok-unchecked): {'n_circuits': 8, 'p2_better': 5, 'p2_equal': 3, 'p2_worse': 0, 'zz_P0': 1329, 'zz_P2': 1256, 'zz_P0ref': 1603, 'agg_red_pct': 5.492851768246798, 'max_red': ('ham15-med', 11.24121779859485)}
+family B2: mean T reduction by pipeline (%): {'P1': 2.22, 'P2': 2.22, 'P3': 1.31} | max target deviation: 7.101929895836356e-06
+cost model: OLS residual sd of y by training set: {'A': 0.0063483047165721, 'B1': 0.0025452830365025, 'A+B1': 0.0072399790975013}
+family B1 proxy: slope a = 1.1801e-03 +/- 2.33e-05, centred R^2 0.9675, P2 above P0 on 7 of 7
+certificates: rows 24 | floor <= T_zx on 24 | B2 min floor/T_zx % 99.28 | B2 config means {'n=2 eps=1e-03': 99.84, 'n=2 eps=1e-05': 99.79, 'n=3 eps=1e-03': 99.57, 'n=3 eps=1e-05': 99.76}
+selene: noiseless runs 468 | flagged 0 | shots outside support 0 | max TVD/scale 1.121 | depolarising runs 68
+selene depol full: runs 468 | circuits 156 | P0>P1 and P2>P1 140 | mean P2-P0 -0.00131
+H2-Emulator: {'rows': 22, 'sd_min': 0.000874524912622477, 'sd_max': 0.013099650477868334, 'sd_b1_min': 0.0037056459562387106, 'sd_b1_max': 0.00883566642932563, 'sd_b1_mean': 0.0062627420946626995, 'sd_A_min': 0.000874524912622477, 'sd_A_max': 0.003279587409289056, 'max_rel_delta_vs_boot': 0.5933973400822595, 'n_proxy': 18, 'mean_d_proxy': -0.0007476583478177898, 'within2_proxy': 15, 'n_selene': 22, 'mean_d_selene': -0.0011179264311678048, 'within2_selene': 20, 'slope_b1': 0.0011800512665484275, 'fb_mean': 0.9546363636363637, 'dF_1gate': 0.0011271847871178208, 'shots_1gate_2sd': 272675.1641667595, 'off_proxy': [('barenco_tof_4.qasm', 'P2'), ('ladder_n4_r2_uniform_s1.qasm', 'P2'), ('ladder_n4_r4_uniform_s1.qasm', 'P2')], 'off_selene': [('barenco_tof_4.qasm', 'P2'), ('grover_5.qasm', 'P0')], 'mean_abs_d_proxy': 0.004200239309120692, 'mean_abs_d_selene': 0.0055163275272349654, 'mean_d_proxy_A': -0.003137471821158977, 'mean_d_proxy_B1': 0.002239608493858694}
+                        file  dzz        dF  sd_diff  dF_expected  z_observed  expected_over_sd
+          barenco_tof_3.qasm    1 -0.011000 0.007455     0.001154   -1.475495          0.154738
+          barenco_tof_4.qasm    2  0.016000 0.008858     0.002245    1.806184          0.253401
+          barenco_tof_5.qasm    3 -0.015000 0.011916     0.003291   -1.258816          0.276191
+ladder_n4_r1_uniform_s1.qasm    0 -0.001145 0.001677     0.000000   -0.682848          0.000000
+ladder_n4_r2_uniform_s1.qasm    0 -0.004630 0.002469     0.000000   -1.875084          0.000000
+ladder_n4_r4_uniform_s1.qasm    0 -0.003236 0.003904     0.000000   -0.828838          0.000000
+                  tof_3.qasm    1 -0.005000 0.005717     0.001164   -0.874537          0.203630
+H2-2E: HQC estimate total 1840.0 (18.40 % of quota), slope a 1.1801e-03
+            file  dN_2q  ratio_pred        dF  sd_diff         z  dF_pred  pred_over_sd  z_vs_pred  shots_2sd  dF_proxy
+vbe_adder_3.qasm     15    1.017858  0.005000 0.009122  0.548151 0.017037      1.867757  -1.319606       1147       NaN
+       hwb6.qasm      5    1.005918 -0.015000 0.012367 -1.212904 0.005468      0.442140  -1.655044      20462  0.004662
+   grover_5.qasm     22    1.026301  0.007603 0.015985  0.475613 0.022755      1.423517  -0.947904       1974       NaN
+H2-2E vs H2-Emulator, grover_5.qasm P0: sd 0.0131 (E1) and 0.0114 (E2), z 4.33
+C2 literature: totals on certified circuits {'T after ZX': 106, 'best': 105, 'floor': 47, 'headroom': 1, 'open': 58, 'gap': 59} | best with ancillas 95
+
+### A1_zz_by_n
+| n | circuits | ZZ terms | P0ref | P0 | P0L1 | P1 | P2 | P3 | P4 |
+|---|---|---|---|---|---|---|---|---|---|
+| 4 | 36 | 12.4 | 24.9 | 12.4 | 24.9 | 25.9 | 12.9 | 26.1 | 31.4 |
+| 6 | 36 | 21.0 | 42.0 | 21.0 | 42.0 | 62.0 | 22.7 | 58.9 | 71.0 |
+| 8 | 36 | 29.6 | 59.1 | 29.6 | 59.1 | 107.6 | 32.2 | 108.2 | 119.9 |
+| 10 | 36 | 38.1 | 76.2 | 38.1 | 76.2 | 173.7 | 41.7 | 157.2 | 189.8 |
+| 12 | 36 | 46.7 | 93.3 | 46.7 | 93.3 | 246.1 | 50.7 | 233.4 | 262.6 |
+
+
+### A2_vs_P0
+| pipeline | better than P0 | equal to P0 | worse than P0 | mean ZZ ratio | min ZZ ratio | max ZZ ratio | mean 2q-depth ratio | mean HQC ratio |
+|---|---|---|---|---|---|---|---|---|
+| P0ref | 0 | 0 | 180 | 2.00 | 2.00 | 2.00 | 2.00 | 1.63 |
+| P0L1 | 0 | 0 | 180 | 2.00 | 2.00 | 2.00 | 2.00 | 1.63 |
+| P1 | 0 | 0 | 180 | 4.43 | 1.28 | 10.32 | 10.92 | 3.03 |
+| P2 | 0 | 120 | 60 | 1.04 | 1.00 | 1.19 | 1.25 | 1.03 |
+| P3 | 0 | 0 | 180 | 3.79 | 1.31 | 7.91 | 10.29 | 2.76 |
+| P4 | 0 | 0 | 180 | 4.90 | 1.44 | 10.36 | 11.88 | 3.33 |
+
+
+### A3_floor
+| model | r | circuits | mean ZZ terms | mean n_2q P0 | circuits with n_2q = ZZ terms |
+|---|---|---|---|---|---|
+| ladder | 1 | 20 | 10.0 | 10.0 | 20 |
+| ladder | 2 | 20 | 20.0 | 20.0 | 20 |
+| ladder | 4 | 20 | 40.0 | 40.0 | 20 |
+| tfim | 1 | 20 | 7.0 | 7.0 | 20 |
+| tfim | 2 | 20 | 14.0 | 14.0 | 20 |
+| tfim | 4 | 20 | 28.0 | 28.0 | 20 |
+| xxz | 1 | 20 | 21.0 | 21.0 | 20 |
+| xxz | 2 | 20 | 42.0 | 42.0 | 20 |
+| xxz | 4 | 20 | 84.0 | 84.0 | 20 |
+
+
+### A4_proxy
+Provisional local proxy. Density-matrix simulation with the published H2-2E emulator parameters (p1 = 7.3e-5, p2 = 1.29e-3, readout 9e-4 and 1.8e-3, p_init = 4e-5) and no leakage, crosstalk or dephasing, to be replaced by emulator runs. Mean Hellinger fidelity F_H of the noisy output distribution against the ideal one.
+
+| n | circuits per pipeline | F_H P0ref | F_H P0 | F_H P1 | F_H P2 | F_H P3 |
+|---|---|---|---|---|---|---|
+| 4 | 36 | 0.9867 | 0.9922 | 0.9893 | 0.9919 | 0.9893 |
+| 6 | 36 | 0.9785 | 0.9874 | 0.9735 | 0.9862 | 0.9743 |
+| 8 | 36 | 0.9704 | 0.9826 | 0.9504 | 0.9807 | 0.9514 |
+
+| pipeline | mean F_H | mean TVD | mean n_2q | mean n_1q |
+|---|---|---|---|---|
+| P0ref | 0.9785 | 0.0352 | 42.0 | 57.7 |
+| P0 | 0.9874 | 0.0210 | 21.0 | 40.1 |
+| P1 | 0.9710 | 0.0494 | 65.1 | 62.8 |
+| P2 | 0.9863 | 0.0221 | 22.6 | 42.0 |
+| P3 | 0.9717 | 0.0482 | 64.4 | 72.9 |
+
+
+### B1_per_circuit
+| circuit | n | T written | ZZ P0ref | ZZ P0 | ZZ P0L1 | ZZ P1 | ZZ P2 | ZZ P3 | ZZ P4 | P2 vs P0 % | T after ZX | note |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| tof_3 | 5 | 21 | 18 | 15 | 18 | 22 | 14 | 25 | 25 | 6.7 | 15 |  |
+| barenco_tof_3 | 5 | 28 | 24 | 20 | 24 | 23 | 19 | 27 | 27 | 5.0 | 16 |  |
+| mod5_4 | 5 | 28 | 28 | 24 | 28 | 25 | 22 | 20 | 29 | 8.3 | 8 |  |
+| qft_4 | 5 | 69 | 46 | 36 | 46 | 43 | 36 | 64 | 57 | 0.0 | 67 |  |
+| tof_4 | 7 | 35 | 30 | 25 | 30 | 31 | 23 | 40 | 38 | 8.0 | 23 |  |
+| barenco_tof_4 | 7 | 56 | 48 | 40 | 48 | 41 | 38 | 54 | 54 | 5.0 | 28 |  |
+| hwb6 | 7 | 105 | 116 | 99 | 116 | 130 | 94 | 189 | 144 | 5.1 | 75 |  |
+| mod_mult_55 | 9 | 49 | 48 | 41 | 48 | 71 | 39 | 85 | 90 | 4.9 | 35 |  |
+| tof_5 | 9 | 49 | 42 | 35 | 42 | 48 | 32 | 56 | 66 | 8.6 | 31 |  |
+| barenco_tof_5 | 9 | 84 | 72 | 60 | 72 | 70 | 57 | 90 | 87 | 5.0 | 40 |  |
+| grover_5 | 9 | 336 | 288 | 240 | 288 | 256 | 218 | 322 | 278 | 9.2 | 166 |  |
+| vbe_adder_3 | 10 | 70 | 66 | 56 | 66 | 55 | 41 | 61 | 67 | 26.8 | 24 |  |
+| mod_red_21 | 11 | 119 | 105 | 88 | 105 | 107 | 83 | 140 | 132 | 5.7 | 73 |  |
+| gf2_pow_4_mult | 12 | 112 | 99 | 83 | 99 | 260 | 83 | 277 | 290 | 0.0 | 68 |  |
+| hwb8 | 12 | 5887 | 7118 | 5912 | 7118 | 8305 | 5587 | 11537 | 8461 | 5.5 | 3517 |  |
+
+
+### B1x_per_circuit
+Count-only rows, status ok-unchecked on every row: no unitary, statevector or distribution check was run at this size, only the gate-set check. P2 vs P0 % = 100 (1 - ZZ P2 / ZZ P0).
+
+| file | n | ZZ P0ref | ZZ P0 | ZZ P2 | P2 vs P0 % | depth_2q P0 | depth_2q P2 | T written | T after ZX P2 |
+|---|---|---|---|---|---|---|---|---|---|
+| rc_adder_6 | 14 | 88 | 76 | 73 | 3.9 | 48 | 43 | 77 | 47 |
+| csla_mux_3 | 15 | 76 | 63 | 63 | 0.0 | 31 | 32 | 70 | 62 |
+| gf2_pow_5_mult | 15 | 154 | 129 | 129 | 0.0 | 68 | 84 | 175 | 115 |
+| ham15-low | 17 | 236 | 204 | 198 | 2.9 | 145 | 124 | 161 | 97 |
+| ham15-med | 17 | 534 | 427 | 379 | 11.2 | 344 | 266 | 574 | 212 |
+| gf2_pow_6_mult | 18 | 221 | 185 | 185 | 0.0 | 86 | 90 | 252 | 150 |
+| tof_10 | 19 | 102 | 85 | 77 | 9.4 | 77 | 68 | 119 | 71 |
+| barenco_tof_10 | 19 | 192 | 160 | 152 | 5.0 | 145 | 130 | 224 | 100 |
+
+
+### B2_summary
+| n | eps | circuits | mean T written | T after ZX P1 | T red. % P1 | T after ZX P2 | T red. % P2 | T after ZX P3 | T red. % P3 | ZZ P0 | ZZ P2 | HQC P0 | max target dev. |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 2 | 1e-05 | 5 | 1048.4 | 1024.4 | 2.3 | 1024.4 | 2.3 | 1037.6 | 1.0 | 3 | 3 | 16.6 | 3.2e-10 |
+| 2 | 0.001 | 5 | 638.4 | 624.4 | 2.2 | 624.4 | 2.2 | 628.4 | 1.6 | 3 | 3 | 16.6 | 1.9e-06 |
+| 3 | 1e-05 | 5 | 4220.8 | 4167.2 | 1.3 | 4167.2 | 1.3 | 4189.6 | 0.7 | 19 | 19 | 56.4 | 9.4e-10 |
+| 3 | 0.001 | 5 | 2571.6 | 2490.8 | 3.1 | 2490.8 | 3.1 | 2522.8 | 1.9 | 19 | 19 | 56.4 | 7.1e-06 |
+
+
+### M1_cost_metrics
+| split | train | test | n | physics | ols | ridge | gbr |
+|---|---|---|---|---|---|---|---|
+| lofo | A | B1 | 35 | 0.785 / 0.0151 | 0.560 / 0.0252 | 0.840 / 0.0150 | 0.805 / 0.0083 |
+| lofo | B1 | A | 540 | -3.513 / 0.0430 | -261.894 / 0.1971 | -0.605 / 0.0259 | 0.326 / 0.0184 |
+| lomo | A minus ladder | A ladder | 180 | -34.797 / 0.0489 | 0.399 / 0.0058 | 0.410 / 0.0060 | 0.751 / 0.0030 |
+| lomo | A minus tfim | A tfim | 180 | -33.455 / 0.0424 | 0.637 / 0.0044 | 0.522 / 0.0047 | 0.843 / 0.0023 |
+| lomo | A minus xxz | A xxz | 180 | -2.061 / 0.0376 | -1.272 / 0.0350 | 0.541 / 0.0159 | -1.035 / 0.0353 |
+| cv5 | A+B1 (4/5) | A+B1 (1/5) | 575 | -2.739 / 0.0413 | 0.944 / 0.0050 | 0.944 / 0.0050 | 0.990 / 0.0009 |
+| cv5g | A+B1 (4/5) | A+B1 (1/5) | 575 | -2.739 / 0.0413 | 0.938 / 0.0051 | 0.938 / 0.0052 | 0.971 / 0.0017 |
+| cv5g | A+B1 (4/5) | A rows of fold | 540 | -3.513 / 0.0430 | 0.937 / 0.0049 | 0.935 / 0.0050 | 0.990 / 0.0014 |
+| cv5g | A+B1 (4/5) | B1 rows of fold | 35 | 0.785 / 0.0151 | 0.918 / 0.0090 | 0.926 / 0.0079 | 0.830 / 0.0074 |
+
+
+### M2_cost_coefficients
+| feature | physics | OLS A (t) | OLS B1 (t) | OLS A+B1 (t) | ridge A+B1 | GBR importance (sd) |
+|---|---|---|---|---|---|---|
+| n_2q | 1.29e-03 | 3.73e-04 (11.8) | -4.77e-05 (-0.2) | 2.89e-04 (8.2) | 2.56e-04 | 5.95e-05 (1.2e-05) |
+| n_1q | 7.30e-05 | 7.38e-06 (0.4) | 8.08e-05 (0.9) | 4.65e-05 (2.2) | 5.86e-05 | 2.91e-05 (4.0e-05) |
+| n_qubits | 1.39e-03 | 8.69e-03 (17.0) | -5.57e-05 (-0.1) | 3.81e-03 (15.0) | 3.49e-03 | 2.89e-06 (1.6e-06) |
+| depth_2q |  | -1.90e-04 (-6.2) | 1.68e-04 (1.0) | -1.40e-04 (-4.2) | -1.10e-04 | 4.13e-05 (2.2e-05) |
+| support_size |  | 2.85e-06 (0.6) | 4.57e-03 (1.4) | -5.03e-06 (-0.9) | -4.99e-06 | 2.70e-06 (2.3e-06) |
+| log2_support |  | -9.12e-03 (-16.2) | -1.71e-02 (-1.4) | -3.91e-03 (-13.6) | -3.57e-03 | 1.91e-06 (2.1e-06) |
+| n_2q_offsupport |  | 4.97e-04 (24.7) | 9.81e-04 (4.1) | 6.19e-04 (30.3) | 6.27e-04 | 1.47e-03 (7.0e-04) |
+
+
+### A5_proxy_b1
+| circuit | n | support | F_H P0ref | F_H P0 | F_H P1 | F_H P2 | F_H P3 | ZZ P0 | ZZ P2 |
+|---|---|---|---|---|---|---|---|---|---|
+| barenco_tof_3 | 5 | 1 | 0.9696 | 0.9739 | 0.9692 | 0.9747 | 0.9644 | 20 | 19 |
+| mod5_4 | 5 | 1 | 0.9647 | 0.9689 | 0.9661 | 0.9710 | 0.9705 | 24 | 22 |
+| qft_4 | 5 | 16 | 0.9641 | 0.9704 | 0.9623 | 0.9706 | 0.9527 | 36 | 36 |
+| tof_3 | 5 | 1 | 0.9759 | 0.9791 | 0.9691 | 0.9800 | 0.9655 | 15 | 14 |
+| barenco_tof_4 | 7 | 1 | 0.9430 | 0.9513 | 0.9451 | 0.9528 | 0.9316 | 40 | 38 |
+| hwb6 | 7 | 1 | 0.8751 | 0.8915 | 0.8521 | 0.8962 | 0.7977 | 99 | 94 |
+| tof_4 | 7 | 1 | 0.9614 | 0.9667 | 0.9567 | 0.9684 | 0.9464 | 25 | 23 |
+
+
+### C1_certificates
+Per circuit. floor = lde of the exact Pauli channel (Corollary cert, Theorem C(c)), T after ZX = T-count after PyZX teleport_reduce (P2, equal to the full_reduce value on every row), achieved % = 100 (1 - T after ZX / T written).
+
+| family | file | n | T written | floor | T after ZX | floor / T after ZX % | achieved % |
+|---|---|---|---|---|---|---|---|
+| B2 | haar_n2_eps1e-03_s1 | 2 | 662 | 651 | 652 | 99.85 | 1.51 |
+| B2 | haar_n2_eps1e-03_s2 | 2 | 628 | 611 | 612 | 99.84 | 2.55 |
+| B2 | haar_n2_eps1e-03_s3 | 2 | 638 | 630 | 630 | 100.00 | 1.25 |
+| B2 | haar_n2_eps1e-03_s4 | 2 | 622 | 613 | 614 | 99.84 | 1.29 |
+| B2 | haar_n2_eps1e-03_s5 | 2 | 642 | 612 | 614 | 99.67 | 4.36 |
+| B2 | haar_n2_eps1e-05_s1 | 2 | 1046 | 1021 | 1022 | 99.90 | 2.29 |
+| B2 | haar_n2_eps1e-05_s2 | 2 | 1046 | 1025 | 1026 | 99.90 | 1.91 |
+| B2 | haar_n2_eps1e-05_s3 | 2 | 1038 | 1002 | 1004 | 99.80 | 3.28 |
+| B2 | haar_n2_eps1e-05_s4 | 2 | 1052 | 1030 | 1036 | 99.42 | 1.52 |
+| B2 | haar_n2_eps1e-05_s5 | 2 | 1060 | 1033 | 1034 | 99.90 | 2.45 |
+| B2 | haar_n3_eps1e-03_s1 | 3 | 2566 | 2483 | 2496 | 99.48 | 2.73 |
+| B2 | haar_n3_eps1e-03_s2 | 3 | 2544 | 2442 | 2452 | 99.59 | 3.62 |
+| B2 | haar_n3_eps1e-03_s3 | 3 | 2570 | 2486 | 2490 | 99.84 | 3.11 |
+| B2 | haar_n3_eps1e-03_s4 | 3 | 2588 | 2511 | 2520 | 99.64 | 2.63 |
+| B2 | haar_n3_eps1e-03_s5 | 3 | 2590 | 2478 | 2496 | 99.28 | 3.63 |
+| B2 | haar_n3_eps1e-05_s1 | 3 | 4208 | 4132 | 4144 | 99.71 | 1.52 |
+| B2 | haar_n3_eps1e-05_s2 | 3 | 4218 | 4158 | 4162 | 99.90 | 1.33 |
+| B2 | haar_n3_eps1e-05_s3 | 3 | 4224 | 4179 | 4188 | 99.79 | 0.85 |
+| B2 | haar_n3_eps1e-05_s4 | 3 | 4248 | 4184 | 4192 | 99.81 | 1.32 |
+| B2 | haar_n3_eps1e-05_s5 | 3 | 4206 | 4133 | 4150 | 99.59 | 1.33 |
+| B1 | barenco_tof_3 | 5 | 28 | 4 | 16 | 25.00 | 42.86 |
+| B1 | mod5_4 | 5 | 28 | 2 | 8 | 25.00 | 71.43 |
+| B1 | qft_4 | 5 | 69 | 37 | 67 | 55.22 | 2.90 |
+| B1 | tof_3 | 5 | 21 | 4 | 15 | 26.67 | 28.57 |
+
+Family B2 by configuration, 5 circuits each.
+
+| n | eps | circuits | mean T written | mean floor / T after ZX % | min floor / T after ZX % | mean achieved % | mean collapse rate % |
+|---|---|---|---|---|---|---|---|
+| 2 | 1e-03 | 5 | 638.4 | 99.84 | 99.67 | 2.19 | 1.25 |
+| 2 | 1e-05 | 5 | 1048.4 | 99.79 | 99.42 | 2.29 | 1.34 |
+| 3 | 1e-03 | 5 | 2571.6 | 99.57 | 99.28 | 3.14 | 1.86 |
+| 3 | 1e-05 | 5 | 4220.8 | 99.76 | 99.59 | 1.27 | 0.80 |
+
+
+### S1_selene
+Noiseless runs (IdealErrorModel, Quest backend). TVD is against the exact output distribution of the compiled QASM, TVD_scale = sqrt(support / (2 pi shots)).
+
+| family | circuits | pipelines | runs | shots per run | max TVD | max TVD / TVD_scale | flagged (TVD > 4 TVD_scale) | shots outside support |
+|---|---|---|---|---|---|---|---|---|
+| A | 144 | P0, P1, P2 | 432 | 2000 | 0.117 | 1.111 | 0 | 0 |
+| B1 | 12 | P0, P1, P2 | 36 | 2000 | 0.080 | 1.121 | 0 | 0 |
+
+Depolarising runs (DepolarizingErrorModel, p_1q = 7.3e-5, p_2q = 1.29e-3) against the density-matrix proxy, pipelines P0 and P2. z = (F_H Selene - mean F_H of 400 2000-shot samples of the proxy distribution) / their sd. gates_meas_init adds p_meas = 1.35e-3 and p_init = 4e-5, gates_only sets both to 0.
+
+| family | variant | runs | abs z <= 2 | mean z | sd z | max abs z | mean F_H Selene - proxy exact | mean F_H Selene - proxy sampled |
+|---|---|---|---|---|---|---|---|---|
+| A | gates_meas_init | 20 | 20 | -0.13 | 0.82 | 1.73 | -0.0075 | -0.0007 |
+| A | gates_only | 20 | 17 | 0.83 | 1.17 | 3.52 | -0.0035 | 0.0033 |
+| B1 | gates_meas_init | 14 | 12 | -0.50 | 1.18 | 2.81 | -0.0029 | -0.0027 |
+| B1 | gates_only | 14 | 10 | 1.24 | 1.11 | 2.43 | 0.0045 | 0.0046 |
+
+
+### S2_selene_depol
+Depolarising runs on the full set (DepolarizingErrorModel, p_1q = 7.3e-5, p_2q = 1.29e-3, p_meas = 1.35e-3, p_init = 4e-5, 2000 shots). F_H is the Hellinger fidelity of the Selene samples to the ideal distribution. P0 > P1 and P2 > P1 count circuits with a strictly higher F_H.
+
+| family | n | circuits | mean F_H P0 | mean F_H P1 | mean F_H P2 | P0 > P1 | P2 > P1 |
+|---|---|---|---|---|---|---|---|
+| A | 4 | 36 | 0.9914 | 0.9880 | 0.9902 | 33 | 29 |
+| A | 6 | 36 | 0.9832 | 0.9706 | 0.9820 | 35 | 32 |
+| A | 8 | 36 | 0.9705 | 0.9410 | 0.9691 | 36 | 34 |
+| A | 10 | 36 | 0.9517 | 0.8918 | 0.9501 | 36 | 36 |
+| B1 | 5 | 4 | 0.9722 | 0.9638 | 0.9739 | 4 | 3 |
+| B1 | 7 | 3 | 0.9328 | 0.9210 | 0.9308 | 2 | 2 |
+| B1 | 9 | 4 | 0.9121 | 0.8816 | 0.9109 | 4 | 4 |
+| B1 | 10 | 1 | 0.9410 | 0.9260 | 0.9350 | 1 | 1 |
+| all |  | 156 | 0.9716 | 0.9459 | 0.9702 | 151 | 141 |
+
+
+### E1_h2emulator
+Nexus H2-Emulator, noisy_simulation = True, 1000 shots per row. F_H is the Hellinger fidelity of the returned counts to the ideal distribution. sd F_H emulator is the sd of F_H over 4000 multinomial bootstrap resamples of the counts (seed 20261008). F_H proxy is the exact density-matrix proxy value of Section 3.5 and is empty where the proxy has no row. F_H Selene depol is the 2000-shot Selene DepolarizingErrorModel value of Section 3.6.
+
+| file | n | pipeline | n_2q | F_H emulator | sd F_H emulator | F_H proxy | F_H Selene depol |
+|---|---|---|---|---|---|---|---|
+| tof_3 | 5 | P0 | 15 | 0.9860 | 0.0037 | 0.9791 | 0.9785 |
+| tof_3 | 5 | P2 | 14 | 0.9810 | 0.0044 | 0.9800 | 0.9810 |
+| barenco_tof_3 | 5 | P0 | 20 | 0.9770 | 0.0048 | 0.9739 | 0.9740 |
+| barenco_tof_3 | 5 | P1 | 23 | 0.9760 | 0.0049 | 0.9692 | 0.9700 |
+| barenco_tof_3 | 5 | P2 | 19 | 0.9660 | 0.0057 | 0.9747 | 0.9655 |
+| barenco_tof_4 | 7 | P0 | 40 | 0.9500 | 0.0068 | 0.9513 | 0.9470 |
+| barenco_tof_4 | 7 | P1 | 41 | 0.9420 | 0.0073 | 0.9451 | 0.9490 |
+| barenco_tof_4 | 7 | P2 | 38 | 0.9660 | 0.0057 | 0.9528 | 0.9450 |
+| barenco_tof_5 | 9 | P0 | 60 | 0.9280 | 0.0080 |  | 0.9305 |
+| barenco_tof_5 | 9 | P1 | 70 | 0.9160 | 0.0088 |  | 0.9120 |
+| barenco_tof_5 | 9 | P2 | 57 | 0.9130 | 0.0088 |  | 0.9255 |
+| grover_5 | 9 | P0 | 240 | 0.7898 | 0.0131 |  | 0.8245 |
+| ladder_n4_r1_uniform_s1 | 4 | P0 | 4 | 0.9993 | 0.0009 | 0.9992 | 0.9984 |
+| ladder_n4_r1_uniform_s1 | 4 | P1 | 11 | 0.9927 | 0.0027 | 0.9954 | 0.9948 |
+| ladder_n4_r1_uniform_s1 | 4 | P2 | 4 | 0.9981 | 0.0014 | 0.9992 | 0.9978 |
+| ladder_n4_r2_uniform_s1 | 4 | P0 | 8 | 0.9993 | 0.0017 | 0.9995 | 0.9975 |
+| ladder_n4_r2_uniform_s1 | 4 | P1 | 25 | 0.9901 | 0.0033 | 0.9933 | 0.9899 |
+| ladder_n4_r2_uniform_s1 | 4 | P2 | 8 | 0.9947 | 0.0018 | 0.9995 | 0.9970 |
+| ladder_n4_r4_uniform_s1 | 4 | P0 | 16 | 0.9957 | 0.0026 | 0.9998 | 0.9987 |
+| ladder_n4_r4_uniform_s1 | 4 | P1 | 42 | 0.9912 | 0.0032 | 0.9970 | 0.9950 |
+| ladder_n4_r4_uniform_s1 | 4 | P2 | 16 | 0.9924 | 0.0029 | 0.9998 | 0.9975 |
+| ladder_n6_r1_uniform_s1 | 6 | P0 | 7 | 0.9963 | 0.0018 | 0.9986 | 0.9962 |
+
+
+### E2_h22e
+`[F]` Nexus H2-2E, noisy_simulation = True, 1000 shots per row, one job per row. F_H is the Hellinger fidelity of the returned counts to the ideal distribution. sd F_H is the binomial value sqrt(F_H (1 - F_H) / 1000) on vbe_adder_3 and hwb6, whose ideal output is a single bit string. On grover_5 it is the sd over 4000 multinomial bootstrap resamples of the counts (seed 20261008). HQC estimate is the formula value stored with each job. F_H proxy is the exact density-matrix proxy value of Section 3.5 and is empty where the proxy has no row (n > 7). F_H Selene depol is the 2000-shot Selene DepolarizingErrorModel value of Section 3.6.
+
+| file | n | pipeline | n_2q | HQC estimate | F_H | sd F_H | F_H proxy | F_H Selene depol |
+|---|---|---|---|---|---|---|---|---|
+| vbe_adder_3 | 10 | P0 | 56 | 151.6 | 0.9540 | 0.0066 |  | 0.9410 |
+| vbe_adder_3 | 10 | P2 | 41 | 119.0 | 0.9590 | 0.0063 |  | 0.9350 |
+| hwb6 | 7 | P0 | 99 | 243.0 | 0.9240 | 0.0084 | 0.8915 | 0.8845 |
+| hwb6 | 7 | P2 | 94 | 232.6 | 0.9090 | 0.0091 | 0.8962 | 0.8805 |
+| grover_5 | 9 | P0 | 240 | 565.6 | 0.8652 | 0.0114 |  | 0.8245 |
+| grover_5 | 9 | P2 | 218 | 528.2 | 0.8728 | 0.0112 |  | 0.8315 |
+
+
+### C2_literature
+`[F]` Per circuit of families B1 and B1x. T after ZX is the P2 T-count. best ancilla-free is the smallest T-count reported in the six papers on the same n qubits, taken over the columns of `results/literature_tcounts.csv` with ancilla_free = yes, same_circuit = yes and reported_error = no. best with ancillas is the smallest published T-count of a method that adds Hadamard ancillas (TODD, or AlphaTensor-Quantum where its compiled qubit count exceeds n). The floor is the certified lde floor of Table C1 and exists for the four n = 5 circuits only. T after ZX - best is the part of the ZX output that a published ancilla-free method is known to remove. best - floor is the part that neither a published method nor the certificate has closed. Source keys: AMM2014 arXiv:1303.2042 Table 1, AM2016 arXiv:1601.07363 Table II, Nam2018 arXiv:1710.07345 Table 4, TODD2018 and TODDpart2018 arXiv:1712.01557 Tables I and II, KvdW2020 arXiv:1903.10477 Table 1, AQ2024 arXiv:2402.14396 Table 2. grover_5 has no same-circuit published value.
+
+| family | circuit | n | T written | T after ZX | best ancilla-free | source | best with ancillas | source (ancillas) | floor | T after ZX - best | best - floor |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| B1 | barenco_tof_3 | 5 | 28 | 16 | 16 | AM2016_RMmaj, AM2016_RMrec, AM2016_Tpar, AMM2014_Tpar, KvdW2020_PyZX, KvdW2020_PyZXTODD, Nam2018_H, Nam2018_L | 13 | AQ2024 | 4 | 0 | 12 |
+| B1 | mod5_4 | 5 | 28 | 8 | 7 | AQ2024, KvdW2020_PyZXTODD | 16 | TODD2018 | 2 | 1 | 5 |
+| B1 | qft_4 | 5 | 69 | 67 | 67 | AM2016_RMmaj, AM2016_RMrec, AM2016_Tpar, TODDpart2018 | 53 | AQ2024 | 37 | 0 | 30 |
+| B1 | tof_3 | 5 | 21 | 15 | 15 | AM2016_RMmaj, AM2016_RMrec, AM2016_Tpar, AMM2014_Tpar, KvdW2020_PyZX, KvdW2020_PyZXTODD, Nam2018_L, TODDpart2018 | 13 | AQ2024, TODD2018 | 4 | 0 | 11 |
+| B1 | barenco_tof_4 | 7 | 56 | 28 | 28 | AM2016_RMmaj, AM2016_RMrec, AM2016_Tpar, AMM2014_Tpar, KvdW2020_PyZX, KvdW2020_PyZXTODD, Nam2018_H, Nam2018_L | 23 | AQ2024 |  | 0 |  |
+| B1 | hwb6 | 7 | 105 | 75 | 71 | AM2016_Tpar | 51 | AQ2024, TODD2018 |  | 4 |  |
+| B1 | tof_4 | 7 | 35 | 23 | 23 | AM2016_RMmaj, AM2016_RMrec, AM2016_Tpar, AMM2014_Tpar, KvdW2020_PyZX, KvdW2020_PyZXTODD, Nam2018_L, TODDpart2018 | 19 | AQ2024, TODD2018 |  | 0 |  |
+| B1 | barenco_tof_5 | 9 | 84 | 40 | 40 | AM2016_RMmaj, AM2016_RMrec, AM2016_Tpar, AMM2014_Tpar, KvdW2020_PyZX, KvdW2020_PyZXTODD, Nam2018_H, Nam2018_L | 33 | AQ2024 |  | 0 |  |
+| B1 | grover_5 | 9 | 336 | 166 |  |  |  |  |  |  |  |
+| B1 | mod_mult_55 | 9 | 49 | 35 | 20 | KvdW2020_PyZXTODD | 17 | AQ2024, TODD2018 |  | 15 |  |
+| B1 | tof_5 | 9 | 49 | 31 | 31 | AM2016_RMmaj, AM2016_RMrec, AM2016_Tpar, AMM2014_Tpar, KvdW2020_PyZX, KvdW2020_PyZXTODD, Nam2018_L, TODDpart2018 | 25 | AQ2024, TODD2018 |  | 0 |  |
+| B1 | vbe_adder_3 | 10 | 70 | 24 | 24 | AM2016_RMmaj, AM2016_RMrec, AM2016_Tpar, AMM2014_Tpar, KvdW2020_PyZX, KvdW2020_PyZXTODD, Nam2018_L | 19 | AQ2024 |  | 0 |  |
+| B1 | mod_red_21 | 11 | 119 | 73 | 73 | AM2016_RMmaj, AM2016_RMrec, AM2016_Tpar, AMM2014_Tpar, KvdW2020_PyZX, KvdW2020_PyZXTODD, Nam2018_H, Nam2018_L | 51 | AQ2024 |  | 0 |  |
+| B1 | gf2_pow_4_mult | 12 | 112 | 68 | 39 | AQ2024 | 54 | TODD2018 |  | 29 |  |
+| B1 | hwb8 | 12 | 5887 | 3517 | 3501 | KvdW2020_PyZXTODD |  |  |  | 16 |  |
+| B1x | rc_adder_6 | 14 | 77 | 47 | 47 | AM2016_RMmaj, AM2016_RMrec, KvdW2020_PyZX, KvdW2020_PyZXTODD, Nam2018_H, Nam2018_L | 37 | AQ2024, TODD2018 |  | 0 |  |
+| B1x | csla_mux_3 | 15 | 70 | 62 | 45 | KvdW2020_PyZXTODD | 39 | AQ2024 |  | 17 |  |
+| B1x | gf2_pow_5_mult | 15 | 175 | 115 | 59 | AQ2024 | 87 | TODD2018 |  | 56 |  |
+| B1x | ham15-low | 17 | 161 | 97 | 97 | AM2016_RMmaj, AM2016_RMrec, AM2016_Tpar, KvdW2020_PyZX, KvdW2020_PyZXTODD | 73 | AQ2024 |  | 0 |  |
+| B1x | ham15-med | 17 | 574 | 212 | 212 | KvdW2020_PyZX, KvdW2020_PyZXTODD | 162 | TODD2018 |  | 0 |  |
+| B1x | gf2_pow_6_mult | 18 | 252 | 150 | 77 | AQ2024 | 126 | TODD2018 |  | 73 |  |
+| B1x | barenco_tof_10 | 19 | 224 | 100 | 100 | AM2016_RMmaj, AM2016_RMrec, AM2016_Tpar, AMM2014_Tpar, KvdW2020_PyZX, KvdW2020_PyZXTODD, Nam2018_H, Nam2018_L | 83 | AQ2024 |  | 0 |  |
+| B1x | tof_10 | 19 | 119 | 71 | 71 | AM2016_RMmaj, AM2016_RMrec, AM2016_Tpar, AMM2014_Tpar, KvdW2020_PyZX, KvdW2020_PyZXTODD, Nam2018_L, TODDpart2018 | 55 | AQ2024, TODD2018 |  | 0 |  |
+
+`[F]` On the 4 circuits with a floor: T after ZX 106, best ancilla-free 105, floor 47. T after ZX - best = 1, best - floor = 58, sum 59. Best with ancillas on the same circuits: 95.
+
+injected 6 table blocks into /tmp/claude-0/-home-claude/339fffb6-0a3b-567c-954d-81548aaad86f/scratchpad/repro/report/report_v1.md
+injected 11 table blocks into /tmp/claude-0/-home-claude/339fffb6-0a3b-567c-954d-81548aaad86f/scratchpad/repro/report/report_v2.md
+injected 13 table blocks into /tmp/claude-0/-home-claude/339fffb6-0a3b-567c-954d-81548aaad86f/scratchpad/repro/report/report_v3.md
+injected 14 table blocks into /tmp/claude-0/-home-claude/339fffb6-0a3b-567c-954d-81548aaad86f/scratchpad/repro/report/report_v4.md
+injected 16 table blocks into /tmp/claude-0/-home-claude/339fffb6-0a3b-567c-954d-81548aaad86f/scratchpad/repro/report/report_v5.md
+injected 0 table blocks into /tmp/claude-0/-home-claude/339fffb6-0a3b-567c-954d-81548aaad86f/scratchpad/repro/report/v2/part1.md
+injected 9 table blocks into /tmp/claude-0/-home-claude/339fffb6-0a3b-567c-954d-81548aaad86f/scratchpad/repro/report/v2/part2.md
+injected 2 table blocks into /tmp/claude-0/-home-claude/339fffb6-0a3b-567c-954d-81548aaad86f/scratchpad/repro/report/v2/part3.md
+injected 0 table blocks into /tmp/claude-0/-home-claude/339fffb6-0a3b-567c-954d-81548aaad86f/scratchpad/repro/report/v2/part4.md

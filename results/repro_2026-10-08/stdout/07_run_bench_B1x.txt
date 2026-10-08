@@ -1,0 +1,52 @@
+1/24 ham15-med.qasm P0ref ok-unchecked n_2q=534 2.6s  [3s]
+2/24 ham15-med.qasm P0 ok-unchecked n_2q=427 11.9s  [12s]
+3/24 ham15-med.qasm P2 ok-unchecked n_2q=379 19.9s  [22s]
+4/24 gf2_pow_6_mult.qasm P0ref ok-unchecked n_2q=221 1.1s  [22s]
+5/24 gf2_pow_6_mult.qasm P0 ok-unchecked n_2q=185 4.9s  [22s]
+6/24 gf2_pow_6_mult.qasm P2 ok-unchecked n_2q=185 6.5s  [24s]
+7/24 barenco_tof_10.qasm P0ref ok-unchecked n_2q=192 1.0s  [24s]
+8/24 barenco_tof_10.qasm P0 ok-unchecked n_2q=160 3.9s  [27s]
+9/24 barenco_tof_10.qasm P2 ok-unchecked n_2q=152 5.1s  [30s]
+10/24 ham15-low.qasm P0ref ok-unchecked n_2q=236 1.1s  [30s]
+11/24 ham15-low.qasm P0 ok-unchecked n_2q=204 5.8s  [34s]
+12/24 ham15-low.qasm P2 ok-unchecked n_2q=198 8.2s  [38s]
+13/24 gf2_pow_5_mult.qasm P0ref ok-unchecked n_2q=154 0.8s  [38s]
+14/24 gf2_pow_5_mult.qasm P0 ok-unchecked n_2q=129 3.5s  [39s]
+15/24 gf2_pow_5_mult.qasm P2 ok-unchecked n_2q=129 4.7s  [42s]
+16/24 tof_10.qasm P0ref ok-unchecked n_2q=102 0.7s  [42s]
+17/24 tof_10.qasm P0 ok-unchecked n_2q=85 2.2s  [42s]
+18/24 tof_10.qasm P2 ok-unchecked n_2q=77 2.9s  [44s]
+19/24 rc_adder_6.qasm P0ref ok-unchecked n_2q=88 0.5s  [44s]
+20/24 rc_adder_6.qasm P0 ok-unchecked n_2q=76 2.2s  [45s]
+21/24 rc_adder_6.qasm P2 ok-unchecked n_2q=73 2.8s  [47s]
+22/24 csla_mux_3.qasm P0ref ok-unchecked n_2q=76 0.5s  [47s]
+23/24 csla_mux_3.qasm P0 ok-unchecked n_2q=63 2.0s  [47s]
+24/24 csla_mux_3.qasm P2 ok-unchecked n_2q=63 1.6s  [49s]
+
+status counts:
+status    ok-unchecked
+pipeline              
+P0ref                8
+P0                   8
+P2                   8
+
+max check_dev per pipeline:
+          check_dev  dist_maxdiff  qasm_dist_maxdiff
+pipeline                                            
+P0ref           NaN           NaN                NaN
+P0              NaN           NaN                NaN
+P2              NaN           NaN                NaN
+
+n_2q by circuit and pipeline:
+pipeline             P0ref     P0     P2
+file                                    
+barenco_tof_10.qasm  192.0  160.0  152.0
+csla_mux_3.qasm       76.0   63.0   63.0
+gf2_pow_5_mult.qasm  154.0  129.0  129.0
+gf2_pow_6_mult.qasm  221.0  185.0  185.0
+ham15-low.qasm       236.0  204.0  198.0
+ham15-med.qasm       534.0  427.0  379.0
+rc_adder_6.qasm       88.0   76.0   73.0
+tof_10.qasm          102.0   85.0   77.0
+
+total wall 49s

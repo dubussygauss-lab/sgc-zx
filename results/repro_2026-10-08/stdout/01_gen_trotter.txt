@@ -1,0 +1,10 @@
+180 circuits written
+n   files  cx(min-max)   depth(min-max)
+4   36        6-72           7-105
+6   36       10-120          7-105
+8   36       14-168          7-105
+10  36       18-216          7-105
+12  36       22-264          7-105
+tfim    60 files
+xxz     60 files
+ladder  60 files

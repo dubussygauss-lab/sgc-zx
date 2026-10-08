@@ -1,0 +1,44 @@
+60 circuits x 7 pipelines
+50/420 done, 8s
+100/420 done, 18s
+150/420 done, 37s
+200/420 done, 62s
+250/420 done, 96s
+300/420 done, 126s
+350/420 done, 161s
+400/420 done, 208s
+420/420 done, 227s
+merge: 1260 old rows, 420 replaced, 420 new
+
+status counts:
+status     ok
+pipeline     
+P0        180
+P0L1      180
+P0ref     180
+P1        180
+P2        180
+P3        180
+P4        180
+
+max check_dev per pipeline:
+             check_dev  dist_maxdiff  qasm_dist_maxdiff
+pipeline                                               
+P0        1.731948e-14  5.828671e-15       5.440093e-15
+P0L1      1.687539e-14  6.661338e-15       8.437695e-15
+P0ref     3.042011e-14  7.327472e-15       6.439294e-15
+P1        2.375877e-14  5.688056e-11       5.688294e-11
+P2        1.865175e-14  5.687495e-11       5.687617e-11
+P3        2.353673e-14  2.375877e-14       1.565414e-14
+P4        2.886580e-14  5.687784e-11       5.687378e-11
+
+mean n_2q by n and pipeline:
+pipeline    P0  P0L1  P0ref     P1    P2     P3     P4
+n                                                     
+4         12.4  24.9   24.9   25.9  12.9   26.1   31.4
+6         21.0  42.0   42.0   62.0  22.7   58.9   71.0
+8         29.6  59.1   59.1  107.6  32.2  108.2  119.9
+10        38.1  76.2   76.2  173.7  41.7  157.2  189.8
+12        46.7  93.3   93.3  246.1  50.7  233.4  262.6
+
+total wall 228s

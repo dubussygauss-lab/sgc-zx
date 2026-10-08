@@ -1,0 +1,102 @@
+models: ['physics', 'ols', 'ridge', 'gbr']
+  model split          train            test   rmse_y    r2_y     mae_F  n_test
+physics  lofo              A              B1  0.02022   0.785   0.01508      35
+    ols  lofo              A              B1  0.02893  0.5596   0.02521      35
+  ridge  lofo              A              B1  0.01743  0.8402   0.01504      35
+    gbr  lofo              A              B1  0.01927  0.8046  0.008338      35
+physics  lofo             B1               A  0.06204  -3.513   0.04297     540
+    ols  lofo             B1               A   0.4735  -261.9    0.1971     540
+  ridge  lofo             B1               A    0.037 -0.6046    0.0259     540
+    gbr  lofo             B1               A  0.02398  0.3256   0.01839     540
+physics  lomo A minus ladder        A ladder  0.06751   -34.8    0.0489     180
+    ols  lomo A minus ladder        A ladder 0.008747  0.3991  0.005796     180
+  ridge  lomo A minus ladder        A ladder 0.008669  0.4098  0.005957     180
+    gbr  lomo A minus ladder        A ladder 0.005633  0.7508  0.003018     180
+physics  lomo   A minus tfim          A tfim  0.06159  -33.46   0.04236     180
+    ols  lomo   A minus tfim          A tfim 0.006319  0.6373  0.004405     180
+  ridge  lomo   A minus tfim          A tfim 0.007256  0.5217   0.00472     180
+    gbr  lomo   A minus tfim          A tfim 0.004152  0.8434  0.002343     180
+physics  lomo    A minus xxz           A xxz  0.05655  -2.061   0.03764     180
+    ols  lomo    A minus xxz           A xxz  0.04872  -1.272     0.035     180
+  ridge  lomo    A minus xxz           A xxz  0.02189  0.5414   0.01591     180
+    gbr  lomo    A minus xxz           A xxz   0.0461  -1.035   0.03529     180
+physics   cv5     A+B1 (4/5)      A+B1 (1/5)  0.06033  -2.739   0.04127     575
+physics   cv5     A+B1 (4/5)  A rows of fold  0.06204  -3.513   0.04297     540
+physics   cv5     A+B1 (4/5) B1 rows of fold  0.02022   0.785   0.01508      35
+    ols   cv5     A+B1 (4/5)      A+B1 (1/5) 0.007364  0.9443     0.005     575
+    ols   cv5     A+B1 (4/5)  A rows of fold 0.006985  0.9428  0.004757     540
+    ols   cv5     A+B1 (4/5) B1 rows of fold  0.01175  0.9274  0.008751      35
+  ridge   cv5     A+B1 (4/5)      A+B1 (1/5)  0.00738  0.9441  0.005023     575
+  ridge   cv5     A+B1 (4/5)  A rows of fold 0.007093   0.941  0.004857     540
+  ridge   cv5     A+B1 (4/5) B1 rows of fold  0.01088  0.9377  0.007579      35
+    gbr   cv5     A+B1 (4/5)      A+B1 (1/5) 0.003134  0.9899  0.000924     575
+    gbr   cv5     A+B1 (4/5)  A rows of fold 0.000997  0.9988 0.0006985     540
+    gbr   cv5     A+B1 (4/5) B1 rows of fold  0.01208  0.9232  0.004403      35
+physics  cv5g     A+B1 (4/5)      A+B1 (1/5)  0.06033  -2.739   0.04127     575
+physics  cv5g     A+B1 (4/5)  A rows of fold  0.06204  -3.513   0.04297     540
+physics  cv5g     A+B1 (4/5) B1 rows of fold  0.02022   0.785   0.01508      35
+    ols  cv5g     A+B1 (4/5)      A+B1 (1/5) 0.007769   0.938  0.005136     575
+    ols  cv5g     A+B1 (4/5)  A rows of fold 0.007358  0.9365  0.004886     540
+    ols  cv5g     A+B1 (4/5) B1 rows of fold  0.01249  0.9179     0.009      35
+  ridge  cv5g     A+B1 (4/5)      A+B1 (1/5) 0.007793  0.9376  0.005157     575
+  ridge  cv5g     A+B1 (4/5)  A rows of fold 0.007454  0.9349  0.004979     540
+  ridge  cv5g     A+B1 (4/5) B1 rows of fold  0.01185  0.9261  0.007901      35
+    gbr  cv5g     A+B1 (4/5)      A+B1 (1/5) 0.005268  0.9715  0.001717     575
+    gbr  cv5g     A+B1 (4/5)  A rows of fold 0.002927    0.99  0.001351     540
+    gbr  cv5g     A+B1 (4/5) B1 rows of fold  0.01799  0.8296  0.007356      35
+  model                   train         feature      value        se          t                   kind
+    ols                       A            n_2q  3.730e-04 3.171e-05  1.176e+01            coefficient
+    ols                       A            n_1q  7.382e-06 1.866e-05  3.957e-01            coefficient
+    ols                       A        n_qubits  8.686e-03 5.105e-04  1.701e+01            coefficient
+    ols                       A        depth_2q -1.903e-04 3.056e-05 -6.227e+00            coefficient
+    ols                       A    support_size  2.849e-06 4.982e-06  5.719e-01            coefficient
+    ols                       A    log2_support -9.118e-03 5.641e-04 -1.616e+01            coefficient
+    ols                       A n_2q_offsupport  4.969e-04 2.012e-05  2.469e+01            coefficient
+    ols                       A        resid_sd  6.348e-03       NaN        NaN                    fit
+  ridge                       A            n_2q  3.132e-04       NaN        NaN            coefficient
+  ridge                       A            n_1q  3.693e-05       NaN        NaN            coefficient
+  ridge                       A        n_qubits  5.858e-03       NaN        NaN            coefficient
+  ridge                       A        depth_2q -1.559e-04       NaN        NaN            coefficient
+  ridge                       A    support_size -3.920e-06       NaN        NaN            coefficient
+  ridge                       A    log2_support -6.027e-03       NaN        NaN            coefficient
+  ridge                       A n_2q_offsupport  5.537e-04       NaN        NaN            coefficient
+    ols                      B1            n_2q -4.772e-05 2.836e-04 -1.683e-01            coefficient
+    ols                      B1            n_1q  8.084e-05 8.711e-05  9.280e-01            coefficient
+    ols                      B1        n_qubits -5.575e-05 6.377e-04 -8.741e-02            coefficient
+    ols                      B1        depth_2q  1.676e-04 1.751e-04  9.569e-01            coefficient
+    ols                      B1    support_size  4.572e-03 3.249e-03  1.407e+00            coefficient
+    ols                      B1    log2_support -1.710e-02 1.234e-02 -1.386e+00            coefficient
+    ols                      B1 n_2q_offsupport  9.807e-04 2.368e-04  4.142e+00            coefficient
+    ols                      B1        resid_sd  2.545e-03       NaN        NaN                    fit
+  ridge                      B1            n_2q  2.934e-04       NaN        NaN            coefficient
+  ridge                      B1            n_1q  1.999e-04       NaN        NaN            coefficient
+  ridge                      B1        n_qubits  7.158e-04       NaN        NaN            coefficient
+  ridge                      B1        depth_2q  3.168e-04       NaN        NaN            coefficient
+  ridge                      B1    support_size -3.388e-04       NaN        NaN            coefficient
+  ridge                      B1    log2_support -2.131e-03       NaN        NaN            coefficient
+  ridge                      B1 n_2q_offsupport  3.463e-04       NaN        NaN            coefficient
+    ols                    A+B1            n_2q  2.887e-04 3.510e-05  8.225e+00            coefficient
+    ols                    A+B1            n_1q  4.648e-05 2.090e-05  2.224e+00            coefficient
+    ols                    A+B1        n_qubits  3.808e-03 2.542e-04  1.498e+01            coefficient
+    ols                    A+B1        depth_2q -1.401e-04 3.352e-05 -4.179e+00            coefficient
+    ols                    A+B1    support_size -5.031e-06 5.390e-06 -9.333e-01            coefficient
+    ols                    A+B1    log2_support -3.909e-03 2.883e-04 -1.356e+01            coefficient
+    ols                    A+B1 n_2q_offsupport  6.194e-04 2.041e-05  3.034e+01            coefficient
+    ols                    A+B1        resid_sd  7.240e-03       NaN        NaN                    fit
+  ridge                    A+B1            n_2q  2.556e-04       NaN        NaN            coefficient
+  ridge                    A+B1            n_1q  5.862e-05       NaN        NaN            coefficient
+  ridge                    A+B1        n_qubits  3.485e-03       NaN        NaN            coefficient
+  ridge                    A+B1        depth_2q -1.104e-04       NaN        NaN            coefficient
+  ridge                    A+B1    support_size -4.993e-06       NaN        NaN            coefficient
+  ridge                    A+B1    log2_support -3.568e-03       NaN        NaN            coefficient
+  ridge                    A+B1 n_2q_offsupport  6.267e-04       NaN        NaN            coefficient
+physics                    none            n_2q  1.290e-03 0.000e+00        NaN            coefficient
+physics                    none            n_1q  7.300e-05 0.000e+00        NaN            coefficient
+physics                    none        n_qubits  1.390e-03 0.000e+00        NaN            coefficient
+    gbr A+B1 (cv5g out-of-fold)            n_2q  5.952e-05 1.232e-05        NaN permutation_importance
+    gbr A+B1 (cv5g out-of-fold)            n_1q  2.906e-05 3.993e-05        NaN permutation_importance
+    gbr A+B1 (cv5g out-of-fold)        n_qubits  2.887e-06 1.605e-06        NaN permutation_importance
+    gbr A+B1 (cv5g out-of-fold)        depth_2q  4.129e-05 2.211e-05        NaN permutation_importance
+    gbr A+B1 (cv5g out-of-fold)    support_size  2.698e-06 2.258e-06        NaN permutation_importance
+    gbr A+B1 (cv5g out-of-fold)    log2_support  1.908e-06 2.059e-06        NaN permutation_importance
+    gbr A+B1 (cv5g out-of-fold) n_2q_offsupport  1.466e-03 6.989e-04        NaN permutation_importance

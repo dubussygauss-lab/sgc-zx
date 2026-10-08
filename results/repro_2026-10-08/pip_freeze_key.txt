@@ -1,0 +1,12 @@
+aqora==0.35.1
+guppylang==1.1.2
+numpy==2.5.3
+pandas==2.3.3
+pygridsynth==2.0.0
+pytket==2.18.4
+pytket-quantinuum==0.59.3
+pyzx==0.10.7
+qiskit==2.5.2
+qnexus==0.51.1
+scipy==1.18.1
+selene-sim==0.3.4

@@ -1,0 +1,41 @@
+haar_n2_eps1e-03_s1.qasm: gates=1735 T=662 cx=3 rz_synth=20 err=2.119e-03 bound=2.000e-02 MA=True
+haar_n2_eps1e-05_s1.qasm: gates=2713 T=1046 cx=3 rz_synth=20 err=2.691e-05 bound=2.000e-04 MA=True
+haar_n2_eps1e-03_s2.qasm: gates=1690 T=628 cx=3 rz_synth=20 err=2.193e-03 bound=2.000e-02 MA=True
+haar_n2_eps1e-05_s2.qasm: gates=2740 T=1046 cx=3 rz_synth=20 err=3.500e-05 bound=2.000e-04 MA=True
+haar_n2_eps1e-03_s3.qasm: gates=1673 T=638 cx=3 rz_synth=20 err=1.839e-03 bound=2.000e-02 MA=True
+haar_n2_eps1e-05_s3.qasm: gates=2712 T=1038 cx=3 rz_synth=20 err=2.558e-05 bound=2.000e-04 MA=True
+haar_n2_eps1e-03_s4.qasm: gates=1659 T=622 cx=3 rz_synth=20 err=2.577e-03 bound=2.000e-02 MA=True
+haar_n2_eps1e-05_s4.qasm: gates=2759 T=1052 cx=3 rz_synth=20 err=3.245e-05 bound=2.000e-04 MA=True
+haar_n2_eps1e-03_s5.qasm: gates=1686 T=642 cx=3 rz_synth=20 err=1.767e-03 bound=2.000e-02 MA=True
+haar_n2_eps1e-05_s5.qasm: gates=2777 T=1060 cx=3 rz_synth=20 err=3.573e-05 bound=2.000e-04 MA=True
+haar_n3_eps1e-03_s1.qasm: gates=6813 T=2566 cx=19 rz_synth=80 err=4.769e-03 bound=8.000e-02 MA=True
+haar_n3_eps1e-05_s1.qasm: gates=10968 T=4208 cx=19 rz_synth=80 err=5.056e-05 bound=8.000e-04 MA=True
+haar_n3_eps1e-03_s2.qasm: gates=6760 T=2544 cx=19 rz_synth=80 err=6.268e-03 bound=8.000e-02 MA=True
+haar_n3_eps1e-05_s2.qasm: gates=10940 T=4218 cx=19 rz_synth=80 err=6.908e-05 bound=8.000e-04 MA=True
+haar_n3_eps1e-03_s3.qasm: gates=6855 T=2570 cx=19 rz_synth=80 err=6.430e-03 bound=8.000e-02 MA=True
+haar_n3_eps1e-05_s3.qasm: gates=10971 T=4224 cx=19 rz_synth=80 err=4.619e-05 bound=8.000e-04 MA=True
+haar_n3_eps1e-03_s4.qasm: gates=6864 T=2588 cx=19 rz_synth=80 err=5.080e-03 bound=8.000e-02 MA=True
+haar_n3_eps1e-05_s4.qasm: gates=11007 T=4248 cx=19 rz_synth=80 err=4.980e-05 bound=8.000e-04 MA=True
+haar_n3_eps1e-03_s5.qasm: gates=6873 T=2590 cx=19 rz_synth=80 err=5.406e-03 bound=8.000e-02 MA=True
+haar_n3_eps1e-05_s5.qasm: gates=10916 T=4206 cx=19 rz_synth=80 err=5.429e-05 bound=8.000e-04 MA=True
+                        file  n      eps  instance  n_gates  t_count  n_cx   n_h  n_rz_transpiled  n_rz_synthesised  n_rz_exact  worst_block_error  all_blocks_matsumoto_amano  transpile_dev  operator_norm_error  operator_norm_error_qiskit  sim_vs_qiskit   bound  below_bound
+0   haar_n2_eps1e-03_s1.qasm  2  0.00100         1     1735      662     3   704               23                20           3           0.000497                        True   2.624696e-14             0.002119                    0.002119   3.014101e-14  0.0200         True
+1   haar_n2_eps1e-05_s1.qasm  2  0.00001         1     2713     1046     3  1093               23                20           3           0.000004                        True   2.624696e-14             0.000027                    0.000027   4.755638e-14  0.0002         True
+2   haar_n2_eps1e-03_s2.qasm  2  0.00100         2     1690      628     3   674               23                20           3           0.000495                        True   2.224924e-15             0.002193                    0.002193   2.976916e-14  0.0200         True
+3   haar_n2_eps1e-05_s2.qasm  2  0.00001         2     2740     1046     3  1093               23                20           3           0.000005                        True   2.224924e-15             0.000035                    0.000035   4.368555e-14  0.0002         True
+4   haar_n2_eps1e-03_s3.qasm  2  0.00100         3     1673      638     3   684               23                20           3           0.000496                        True   2.586448e-15             0.001839                    0.001839   2.981866e-14  0.0200         True
+5   haar_n2_eps1e-05_s3.qasm  2  0.00001         3     2712     1038     3  1084               23                20           3           0.000005                        True   2.586448e-15             0.000026                    0.000026   4.568934e-14  0.0002         True
+6   haar_n2_eps1e-03_s4.qasm  2  0.00100         4     1659      622     3   670               23                20           3           0.000477                        True   5.208890e-15             0.002577                    0.002577   2.566718e-14  0.0200         True
+7   haar_n2_eps1e-05_s4.qasm  2  0.00001         4     2759     1052     3  1095               23                20           3           0.000005                        True   5.208890e-15             0.000032                    0.000032   4.579187e-14  0.0002         True
+8   haar_n2_eps1e-03_s5.qasm  2  0.00100         5     1686      642     3   690               23                20           3           0.000452                        True   3.097489e-15             0.001767                    0.001767   2.857504e-14  0.0200         True
+9   haar_n2_eps1e-05_s5.qasm  2  0.00001         5     2777     1060     3  1106               23                20           3           0.000005                        True   3.097489e-15             0.000036                    0.000036   4.729674e-14  0.0002         True
+10  haar_n3_eps1e-03_s1.qasm  3  0.00100         1     6813     2566    19  2723               87                80           7           0.000496                        True   7.357908e-15             0.004769                    0.004769   1.071381e-13  0.0800         True
+11  haar_n3_eps1e-05_s1.qasm  3  0.00001         1    10968     4208    19  4366               87                80           7           0.000005                        True   7.357908e-15             0.000051                    0.000051   1.750236e-13  0.0008         True
+12  haar_n3_eps1e-03_s2.qasm  3  0.00100         2     6760     2544    19  2704               87                80           7           0.000500                        True   4.177883e-15             0.006268                    0.006268   1.094923e-13  0.0800         True
+13  haar_n3_eps1e-05_s2.qasm  3  0.00001         2    10940     4218    19  4380               87                80           7           0.000005                        True   4.177883e-15             0.000069                    0.000069   1.748178e-13  0.0008         True
+14  haar_n3_eps1e-03_s3.qasm  3  0.00100         3     6855     2570    19  2726               87                80           7           0.000497                        True   5.463703e-15             0.006430                    0.006430   1.110854e-13  0.0800         True
+15  haar_n3_eps1e-05_s3.qasm  3  0.00001         3    10971     4224    19  4391               87                80           7           0.000005                        True   5.463703e-15             0.000046                    0.000046   1.772258e-13  0.0008         True
+16  haar_n3_eps1e-03_s4.qasm  3  0.00100         4     6864     2588    19  2748               87                80           7           0.000499                        True   5.161118e-15             0.005080                    0.005080   1.086962e-13  0.0800         True
+17  haar_n3_eps1e-05_s4.qasm  3  0.00001         4    11007     4248    19  4405               87                80           7           0.000005                        True   5.161118e-15             0.000050                    0.000050   1.816907e-13  0.0008         True
+18  haar_n3_eps1e-03_s5.qasm  3  0.00100         5     6873     2590    19  2751               87                80           7           0.000497                        True   6.853194e-15             0.005406                    0.005406   1.099809e-13  0.0800         True
+19  haar_n3_eps1e-05_s5.qasm  3  0.00001         5    10916     4206    19  4366               87                80           7           0.000005                        True   6.853194e-15             0.000054                    0.000054   1.770663e-13  0.0008         True

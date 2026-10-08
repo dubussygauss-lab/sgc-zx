@@ -1,0 +1,13 @@
+barenco_tof_10.qasm          n=19 gates=   578 T=  224 cx=   192 (source: 130 gates, 32 ccx)
+csla_mux_3.qasm              n=15 gates=   210 T=   70 cx=    80 (source: 70 gates, 10 ccx)
+gf2_pow_5_mult.qasm          n=15 gates=   447 T=  175 cx=   154 (source: 97 gates, 25 ccx)
+gf2_pow_6_mult.qasm          n=18 gates=   639 T=  252 cx=   221 (source: 135 gates, 36 ccx)
+skip ham15-high.qasm: ~6712 gates after expansion
+ham15-low.qasm               n=17 gates=   535 T=  161 cx=   236 (source: 213 gates, 23 ccx)
+ham15-med.qasm               n=17 gates=  1600 T=  574 cx=   534 (source: 452 gates, 82 ccx)
+skip hwb10.qasm: ~91642 gates after expansion
+skip hwb11.qasm: ~256181 gates after expansion
+skip hwb12.qasm: ~514412 gates after expansion
+rc_adder_6.qasm              n=14 gates=   244 T=   77 cx=    93 (source: 90 gates, 11 ccx)
+tof_10.qasm                  n=19 gates=   323 T=  119 cx=   102 (source: 85 gates, 17 ccx)
+8 circuits, commit e695d6d711e67b2b7223417c4714b6b1fcc09191

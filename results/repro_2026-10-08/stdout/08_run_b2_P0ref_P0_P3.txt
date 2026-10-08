@@ -1,0 +1,72 @@
+1/60 haar_n2_eps1e-03_s1.qasm P0ref ok 1s
+2/60 haar_n2_eps1e-03_s1.qasm P0 ok 1s
+3/60 haar_n2_eps1e-03_s1.qasm P3 ok 2s
+4/60 haar_n2_eps1e-05_s1.qasm P0ref ok 3s
+5/60 haar_n2_eps1e-05_s1.qasm P0 ok 4s
+6/60 haar_n2_eps1e-05_s1.qasm P3 ok 5s
+7/60 haar_n2_eps1e-03_s2.qasm P0ref ok 5s
+8/60 haar_n2_eps1e-03_s2.qasm P0 ok 6s
+9/60 haar_n2_eps1e-03_s2.qasm P3 ok 7s
+10/60 haar_n2_eps1e-05_s2.qasm P0ref ok 8s
+11/60 haar_n2_eps1e-05_s2.qasm P0 ok 8s
+12/60 haar_n2_eps1e-05_s2.qasm P3 ok 10s
+13/60 haar_n2_eps1e-03_s3.qasm P0ref ok 10s
+14/60 haar_n2_eps1e-03_s3.qasm P0 ok 10s
+15/60 haar_n2_eps1e-03_s3.qasm P3 ok 11s
+16/60 haar_n2_eps1e-05_s3.qasm P0ref ok 12s
+17/60 haar_n2_eps1e-05_s3.qasm P0 ok 13s
+18/60 haar_n2_eps1e-05_s3.qasm P3 ok 14s
+19/60 haar_n2_eps1e-03_s4.qasm P0ref ok 14s
+20/60 haar_n2_eps1e-03_s4.qasm P0 ok 15s
+21/60 haar_n2_eps1e-03_s4.qasm P3 ok 15s
+22/60 haar_n2_eps1e-05_s4.qasm P0ref ok 17s
+23/60 haar_n2_eps1e-05_s4.qasm P0 ok 17s
+24/60 haar_n2_eps1e-05_s4.qasm P3 ok 19s
+25/60 haar_n2_eps1e-03_s5.qasm P0ref ok 19s
+26/60 haar_n2_eps1e-03_s5.qasm P0 ok 19s
+27/60 haar_n2_eps1e-03_s5.qasm P3 ok 20s
+28/60 haar_n2_eps1e-05_s5.qasm P0ref ok 21s
+29/60 haar_n2_eps1e-05_s5.qasm P0 ok 22s
+30/60 haar_n2_eps1e-05_s5.qasm P3 ok 24s
+31/60 haar_n3_eps1e-03_s1.qasm P0ref ok 27s
+32/60 haar_n3_eps1e-03_s1.qasm P0 ok 28s
+33/60 haar_n3_eps1e-03_s1.qasm P3 ok 33s
+34/60 haar_n3_eps1e-05_s1.qasm P0ref ok 35s
+35/60 haar_n3_eps1e-05_s1.qasm P0 ok 40s
+36/60 haar_n3_eps1e-05_s1.qasm P3 ok 45s
+37/60 haar_n3_eps1e-03_s2.qasm P0ref ok 45s
+38/60 haar_n3_eps1e-03_s2.qasm P0 ok 50s
+39/60 haar_n3_eps1e-03_s2.qasm P3 ok 52s
+40/60 haar_n3_eps1e-05_s2.qasm P0ref ok 57s
+41/60 haar_n3_eps1e-05_s2.qasm P0 ok 59s
+42/60 haar_n3_eps1e-05_s2.qasm P3 ok 67s
+43/60 haar_n3_eps1e-03_s3.qasm P0ref ok 67s
+44/60 haar_n3_eps1e-03_s3.qasm P0 ok 68s
+45/60 haar_n3_eps1e-03_s3.qasm P3 ok 72s
+46/60 haar_n3_eps1e-05_s3.qasm P0ref ok 75s
+47/60 haar_n3_eps1e-05_s3.qasm P0 ok 79s
+48/60 haar_n3_eps1e-05_s3.qasm P3 ok 85s
+49/60 haar_n3_eps1e-03_s4.qasm P0ref ok 85s
+50/60 haar_n3_eps1e-03_s4.qasm P0 ok 88s
+51/60 haar_n3_eps1e-03_s4.qasm P3 ok 90s
+52/60 haar_n3_eps1e-05_s4.qasm P0ref ok 96s
+53/60 haar_n3_eps1e-05_s4.qasm P0 ok 97s
+54/60 haar_n3_eps1e-05_s4.qasm P3 ok 105s
+55/60 haar_n3_eps1e-03_s5.qasm P0ref ok 105s
+56/60 haar_n3_eps1e-03_s5.qasm P0 ok 106s
+57/60 haar_n3_eps1e-03_s5.qasm P3 ok 110s
+58/60 haar_n3_eps1e-05_s5.qasm P0ref ok 113s
+59/60 haar_n3_eps1e-05_s5.qasm P0 ok 118s
+60/60 haar_n3_eps1e-05_s5.qasm P3 ok 121s
+           n_2q             t_count_after_zx                
+pipeline     P0 P0ref    P3               P0   P0ref      P3
+n eps                                                       
+2 0.00001   3.0   3.0   3.0           1048.4  1048.4  1037.6
+  0.00100   3.0   3.0   3.0            638.4   638.4   628.4
+3 0.00001  19.0  19.0  19.0           4220.8  4220.8  4189.6
+  0.00100  19.0  19.0  19.8           2571.6  2571.6  2522.8
+pipeline  status
+P0        ok        20
+P0ref     ok        20
+P3        ok        20
+dtype: int64
