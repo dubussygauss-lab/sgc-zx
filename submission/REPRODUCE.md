@@ -1,10 +1,10 @@
 # Reproduction record
 
-Team Learned ZX Rewriting. Recorded 8 October 2026 in the development container. `code.zip` is `git archive` of commit `41a0b3d5f99fe006b02e0b96c7c93deac49be39b`. Run every command from the repository root.
+Team Learned ZX Rewriting. Recorded 8 October 2026 in the development container. `code.zip` is `git archive` of commit `a5968ee42766a5a8b44c6d46cc5ce90c52815ad4`. Run every command from the repository root. This page follows `README.md` and report Section 5. A clean-clone run of these steps is recorded in `results/repro_2026-10-08/repro_log.md`.
 
 ## Environment
 
-Versions from `pip show` on 8 October 2026: Python 3.13.16, pytket 2.18.4, pytket-quantinuum 0.59.3, pyzx 0.10.7, qiskit 2.5.2, pygridsynth 2.0.0, selene-sim 0.3.4, guppylang 1.1.2, hugr 0.18.8, numpy 2.5.3, pandas 2.3.3, scipy 1.18.1, scikit-learn 1.9.1, matplotlib 3.11.2, aqora 0.35.1, qnexus 0.51.1, marimo 0.25.1, pytest 9.1.1. Family B1 and B1x sources: Quantinuum pyzx fork in `third_party/pyzx-fork/` at commit e695d6d.
+Versions from `pip show` (report Section 5): Python 3.13.16, pytket 2.18.4, pytket-quantinuum 0.59.3, pyzx 0.10.7, qiskit 2.5.2, pygridsynth 2.0.0, selene-sim 0.3.4, guppylang 1.1.2, hugr 0.18.8, numpy 2.5.3, pandas 2.3.3, scipy 1.18.1, scikit-learn 1.9.1, matplotlib 3.11.2, aqora 0.35.1, qnexus 0.51.1, marimo 0.25.1, pytest 9.1.1.
 
 ```
 pip install pytket==2.18.4 pytket-quantinuum==0.59.3 pyzx==0.10.7 qiskit==2.5.2 pygridsynth==2.0.0 \
@@ -14,12 +14,27 @@ pip install pytket==2.18.4 pytket-quantinuum==0.59.3 pyzx==0.10.7 qiskit==2.5.2 
 
 Selene runs and `selene/test_selene.py` need every proxy variable unset, because Selene streams results over a local TCP socket (report Section 5).
 
+## Directories not in the archive
+
+`third_party/` and `papers/` are in `.gitignore` and are not in `code.zip`.
+
+- `third_party/pyzx-fork/` is the source of the family B1 and B1x circuits. Clone it before the B1 and B1x builders:
+
+```
+git clone https://github.com/Quantinuum/pyzx.git third_party/pyzx-fork
+git -C third_party/pyzx-fork checkout e695d6d711e67b2b7223417c4714b6b1fcc09191
+```
+
+- `papers/` holds the team's manuscripts and is not distributed. The exactness-barrier manuscript is arXiv:2608.22801. The line numbers cited in the report refer to its TeX source.
+- `results/proxy_h22e_fits.log` is tracked (an exception to the `*.log` rule of `.gitignore`). `value/value_ledger.py` and `submit/h22e_stats.py` read its line 77.
+
 ## Seeds
 
 - `numpy.random.default_rng(20261006)`: family A couplings (`bench/gen_trotter.py`, `SEED`) and family B2 Haar targets (`bench/gen_haar_b2.py`, `SEED`). `seed_transpiler=0` in the B2 qiskit transpile.
 - `noise/run_proxy.py`: `default_rng(0)` for the parser self-check only.
 - `selene/run_selene.py`: per run `sha256("<pipeline>/<file>/<tag>")[:4]`, stored in column `seed`.
 - `model/cost_model.py`: fold seed 0 and `random_state=0` for gradient boosting.
+- Bootstrap sd of F_H in Tables E1 and E2: 4000 resamples, seed 20261008.
 
 ## Commands, in order (report Section 5, README)
 
@@ -36,28 +51,39 @@ Selene runs and `selene/test_selene.py` need every proxy variable unset, because
 | Table B2, Figure 3 data | `python pipelines/run_b2.py --workers 2` |
 | Table A4 | `python noise/run_proxy.py --noise h22e --family A --workers 2` |
 | Table A5 | `python noise/run_proxy.py --noise h22e --family B1 --workers 2` |
-| Proxy fits (Section 3.5) | `python noise/run_proxy.py --figure-h22e` |
+| Proxy fits (Section 3.5), `results/proxy_h22e_fits.log` | `python noise/run_proxy.py --figure-h22e > results/proxy_h22e_fits.log` |
 | Table C1 | `python barrier/run_certificates.py` |
+| Table C2 inputs | `python report/build_literature_tcounts.py results/literature_tcounts.csv` |
 | Table S1 | `HTTPS_PROXY= https_proxy= HTTP_PROXY= http_proxy= NO_PROXY= no_proxy= python selene/run_selene.py --mode both --procs 2 --shots 2000`, then `python selene/make_summary.py` |
 | Table S2 | `HTTPS_PROXY= https_proxy= HTTP_PROXY= http_proxy= NO_PROXY= no_proxy= python selene/run_selene_depol_full.py --procs 2 --shots 2000`, then `python selene/summarise_depol_full.py` |
 | Tables M1, M2, Figure 4 | `python model/cost_model.py` |
-| Section 4.7 table | `python model/build_selene_cost_inputs.py`, `python model/cost_model.py --family-a results/cost_model_selene_input_A.csv --family-b results/cost_model_selene_input_B1.csv --out <dir>`, then `python model/report_selene_cost.py` (see gap 1) |
+| Section 4.7 table | `python model/build_selene_cost_inputs.py`, `python model/cost_model.py --family-a results/cost_model_selene_input_A.csv --family-b results/cost_model_selene_input_B1.csv --prefix selene_`, then `python model/report_selene_cost.py` |
+| Section 1 value ledger, Tables 1.1 and 1.2 | `python value/value_ledger.py`, then `python value/value_by_application.py` |
+| Table E2 statistics | `python submit/h22e_stats.py` (offline, reads the stored counts) |
 | All report tables and figures | `python report/make_tables.py` |
-| Emulator jobs | `submit/syntax_check.py` and `submit/run_emulator.py`, need team credentials, pending in report v3 |
+| Emulator jobs (Tables E1, E2) | `submit/syntax_check.py`, `submit/run_emulator.py` and `submit/fetch_job.py`. They need the team credentials and spend quota. Every job is recorded in `results/emulator_jobs.csv` |
 
-## Tests, run once on 8 October 2026 (logs in `build_logs/`)
+## Tests (logs in `build_logs/`)
+
+Rerun all eleven with `bash submission/run_tests.sh`. Six run as scripts and five under pytest. The results below are from the run of 8 October 2026 stored in `build_logs/tests_summary.txt`.
 
 | File | Command | Result | Wall |
 |---|---|---|---|
-| `bench/test_gen_trotter.py` | `python bench/test_gen_trotter.py` | 12/12 passed | 80 s |
-| `noise/test_dm_sim.py` | `python noise/test_dm_sim.py` | 17/17 passed | 13 s |
-| `barrier/test_certificate.py` | `python barrier/test_certificate.py` | 69/69 checks passed | 47 s |
-| `pipelines/test_compile.py` | `python pipelines/test_compile.py` | 6/6 passed | 3 s |
-| `selene/test_selene.py` | proxy variables cleared, `python -m pytest selene/test_selene.py -q` | 6 passed | 61 s |
-| `model/test_cost_model.py` | `python model/test_cost_model.py` | 7/7 passed | 1 s |
-| `submit/test_submit.py` | `python -m pytest submit/test_submit.py -q` | 11 passed | 5 s |
+| `bench/test_gen_trotter.py` | `python bench/test_gen_trotter.py` | 12/12 passed | 70 s |
+| `noise/test_dm_sim.py` | `python noise/test_dm_sim.py` | 17/17 passed | 6 s |
+| `barrier/test_certificate.py` | `python barrier/test_certificate.py` | 69/69 checks passed | 46 s |
+| `pipelines/test_compile.py` | `python pipelines/test_compile.py` | 6/6 passed | 4 s |
+| `model/test_cost_model.py` | `python model/test_cost_model.py` | 7/7 passed | under 1 s |
+| `report/test_c2_literature.py` | `python report/test_c2_literature.py` | all checks passed | 1 s |
+| `selene/test_selene.py` | proxy variables cleared, `python -m pytest selene/test_selene.py -q` | 6 passed | 10 s |
+| `submit/test_submit.py` | `python -m pytest submit/test_submit.py -q` | 11 passed (offline, no credentials) | 5 s |
+| `submit/test_h22e_stats.py` | `python -m pytest submit/test_h22e_stats.py -q` | 7 passed | 4 s |
+| `value/test_value_ledger.py` | `python -m pytest value/test_value_ledger.py -q` | 5 passed | 4 s |
+| `value/test_value_by_application.py` | `python -m pytest value/test_value_by_application.py -q` | 5 passed | 2 s |
 
-Rerun all seven: `bash submission/run_tests.sh`. Rebuild this package: `bash submission/build.sh` (add `--tests` to rerun the tests).
+## Rebuilding this package
+
+`bash submission/build.sh` (add `--tests` to rerun the tests). The script writes `report.md` from `report/report_v5.md` without the changelog sections, renders `report.pdf`, checks that Tables 1.1, C2, E1 and E2 render every row and that no `[PENDING` or `TBD` remains, rebuilds `code.zip` with `git archive HEAD`, checks the archive for credential files and token strings, runs `check_summary_numbers.py` and writes `MANIFEST.txt`. Nothing is uploaded.
 
 ## Rubric evidence map (Engineering and Reproducibility)
 
@@ -66,9 +92,9 @@ Rerun all seven: `bash submission/run_tests.sh`. Rebuild this package: `bash sub
 | Repository | `code.zip` |
 | README | `README.md` in `code.zip` |
 | Test results | this page, `build_logs/tests_summary.txt`, `build_logs/test_*.log` |
-| Reproduction record | this page, report Section 5 |
+| Reproduction record | this page, report Section 5, `results/repro_2026-10-08/repro_log.md` in `code.zip` |
 
 ## Known gaps
 
-1. `model/cost_model.py` always writes `cost_model_metrics.csv`, `cost_model_coefficients.csv` and `fig_cost_model.*` into `--out`. No tracked script writes `results/cost_model_selene_metrics.csv` or `results/cost_model_selene_coefficients.csv`, which `model/report_selene_cost.py` reads. Running the Section 4.7 command with the default `--out` overwrites the proxy outputs of Tables M1 and M2.
-2. Emulator and syntax-checker runs are not in report v3.
+1. The clean-clone run reduced the long compilation steps and skipped the Selene runs, the hwb8 long run and the platform jobs for time and credentials. `results/repro_2026-10-08/repro_log.md` lists each reduction and its comparison with the committed files.
+2. The platform jobs need the team credentials and spend quota. They cannot be rerun from `code.zip` alone.

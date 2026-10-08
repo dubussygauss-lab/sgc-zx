@@ -1,70 +1,55 @@
 # Summary for the judges
 
-Team Learned ZX Rewriting. Quantinuum Singapore Grand Challenge, submission 1. Package draft of 8 October 2026, built from `report/report_v3.md`.
+Team Learned ZX Rewriting. Quantinuum Singapore Grand Challenge, submission 1. Built on 8 October 2026 from `report/report_v5.md` and aligned with its Section 1.
 
-Tags. `[F]` marks a statement taken from the report or checkable in the repository. `[O]` marks a judgement. Every number below is quoted from `report.pdf` (rendered from `report/report_v3.md`) with its section. No number here is new.
+`[F]` marks a statement copied from the report or from the `value/` outputs. `[O]` marks a judgement. The script `check_summary_numbers.py` finds every number of this page in `report/report_v5.md` or in `value/`.
 
-## What the submission is
+## User and decision
 
-`[O]` A two-layer resource ledger for Quantinuum H2. The NISQ layer scores ZZPhase count, two-qubit depth, HQC and fidelity under the H2-2E noise parameters. The fault-tolerant layer scores the T-count after ZX rewriting against a per-instance certified floor. `[F]` Seven compilation pipelines are compared against pytket-quantinuum 0.59.3 `default_compilation_pass(optimisation_level=2)` as the baseline P0 (Section 2.2).
+`[O]` The user runs Clifford+T subroutines on Quantinuum H2 under a fixed HQC budget. The same team will later price these subroutines in T gates on a fault-tolerant Helios. The decision is made per circuit. Should the circuit go through PyZX teleport_reduce (pipeline P2) before pytket's Quantinuum pass at level 2 (pipeline P0)? The ledger answers in HQC and in magic states. It also says when the answer is no.
 
-## Criterion 1. Problem and value (weight 0.3)
+## HQC saved on H2
 
-Report: Section 1 and Section 6. Artifacts: `docs/platform_notes.md` (sections 3.3 and 3.4), `pipelines/compile.py:hqc`.
+`[F]` At 1000 shots P2 costs 14,772.8 HQC against 15,516.0 for P0 on the 15 checked B1 circuits. The saving is 743.2 HQC or 4.8 %. P2 is cheaper on 14 of the 15 circuits. The median per-circuit saving is 3.9 %. hwb8 alone accounts for 84.6 % of the total saving and serves no sourced quantum algorithm. Without hwb8 the saving is 114.6 HQC. On the 180 Trotter circuits of family A P2 costs 1,030.4 HQC or 6.3 % more than P0.
 
-- `[F]` The H2 price is HQC = 5 + N_shots (N_1q + 10 N_2q + 5 N_M) / 5000, so a two-qubit gate costs ten single-qubit gates (Section 1).
-- `[F]` The H2-2E two-qubit error rate is p2 = 1.29e-3 against p1 = 7.3e-5 for a single-qubit gate (Section 1).
-- `[O]` The ZZPhase count is therefore the one number a compiler for H2 has to minimise today (Section 1).
-- `[O]` The user question answered is "should I run PyZX before pytket on H2", split by circuit family with the HQC consequence stated (Section 1).
-- `[O]` The certified T-count floor prices the fault-tolerant layer that Helios credits will be spent on (Section 1).
+`[O]` The median of 3.9 % is the better guide for a single circuit. A user with a Trotter circuit should skip the ZX stage.
 
-## Criterion 2. Technical performance and hardware use (weight 0.3)
+## Magic states saved
 
-Report: Section 2.4, Section 2.6, Section 3 (Tables A1 to A5, B1, B1x, B2, S1, S2). Artifacts: `results/family_A_counts.csv`, `results/family_B1_counts.csv`, `results/family_B1x_counts.csv`, `results/family_B2_counts.csv`, `results/selene.md`, `results/selene_noiseless.csv`, `results/selene_depolarizing_full.csv`, `report/notebook_skeleton.py`.
+`[F]` On a surface-code machine each T gate consumes one magic state (Litinski, arXiv:1808.02892). The ZX stage removes 2,862 of 7,048 T gates on B1. That is 40.6 %. On the 8 count-only B1x circuits it removes 798 of 1,652 or 48.3 %. On the 20 synthesised B2 Haar circuits it removes 862 of 42,396 or 2.0 %.
 
-- `[F]` Correctness. All 1260 family A rows, all 105 family B1 rows and all 100 family B2 rows pass the exactness check at tolerance 1e-8 (Section 2.4).
-- `[F]` Benchmark gain. On the 15 checked family B1 circuits P2 is below P0 on 13 and equal on 2. The mean reduction is 6.9 % and the largest is vbe_adder_3 at 26.8 % (Section 3.2).
-- `[F]` Scalability. On the 8 count-only family B1x circuits with 14 to 19 qubits P2 is below P0 on 5 and equal on 3. The aggregate ZZPhase count falls from 1329 to 1256, a reduction of 5.5 % (Section 3.2.1). These rows carry no exactness check.
-- `[F]` Control family. P0 reaches one ZZPhase per two-body term on 180 of 180 Trotter circuits and no pipeline goes below it (Section 3.1).
-- `[F]` Quantinuum tooling. 468 noiseless Selene runs on 156 compiled circuits flag no run and put no shot outside the exact support (Section 3.6, Table S1).
-- `[F]` Noisy runs. In the 468-run Selene depolarising set at H2-2E rates the mean Hellinger fidelity is 0.9716 for P0, 0.9459 for P1 and 0.9702 for P2 (Section 3.6, Table S2).
-- `[F]` Hardware status. Report v3 records no job on `H2-Emulator`, `H2-2E` or `H2-2SC` (Section 2.6, Section 3.7).
+## Certified fraction
 
-## Criterion 3. Scientific merit (weight 0.2)
+`[F]` The exactness-barrier certificate (Kam, arXiv:2608.22801) gives a per-instance floor on the T-count of every semantics-exact rewrite. It covers 24 circuits, all with n at most 5. On the 20 B2 circuits at n = 2 and 3 the floor is 41,414 against 41,534 T gates after ZX. The certified-incompressible fraction is 0.997. On the four B1 circuits at n = 5 the floor is 47 against 106 and the fraction is 0.443. The fraction 0.997 does not hold for B1.
 
-Report: Section 2.5, Section 3.4, Section 4, Section 6. Artifacts: `barrier/certificate.py`, `barrier/NOTES.md`, `results/certificates.csv`, `results/certificates.md`, `model/cost_model.py`, `results/cost_model.md`, `results/cost_model_selene.md`, `papers/barrier/`, `papers/skzx/`.
+`[O]` The certificate does not say whether the B1 gap is headroom for a better rewrite or slack in the bound.
 
-- `[F]` Algorithm rationale. The floor is the least denominator exponent of the exact Pauli channel over Z[sqrt 2]. It bounds the T-count of every semantics-exact rewrite from below (Section 2.5).
-- `[F]` Validation against the source. The certificate tests reproduce the manuscript's finite counts 24, 1536 and 18384 (Section 2.5).
-- `[F]` Certified result. On the 20 family B2 circuits the floor is at least 99.28 % of the post-ZX T-count on every instance (Section 3.4).
-- `[F]` Error analysis. On the four family B1 circuits at n = 5 the floor is 25.00 % to 55.22 % of the post-ZX T-count, so the bound is loose there (Section 3.4).
-- `[F]` Literature check. The post-ZX T-counts match Table 1 of Kissinger and van de Wetering (arXiv:1903.10477) on all 13 family B1 circuits it lists (Section 3.2).
-- `[F]` Learned cost model. Trained on family A the boosted model predicts family B1 with R^2 0.805 against 0.785 for the unfitted physics baseline. Trained on family B1 no model predicts family A and the best R^2 is 0.326 (Section 4.5).
-- `[O]` What the data support across families is the physics baseline plus a support correction (Section 4.5).
+## Application map
 
-## Criterion 4. Engineering and reproducibility (weight 0.2)
+`[F]` All B1 and B1x circuits appear in Table II of Amy and Mosca (arXiv:1601.07363). Report Table 1.3 places vbe_adder_3, mod_mult_55, mod_red_21 and qft_4 under integer factoring. gf2_pow_4_mult goes under elliptic-curve discrete log over GF(2^m). grover_5 and mod5_4 go under Grover search. hwb6, hwb8 and the two ham15 circuits have no sourced algorithm role. P2 saves 7.9 % HQC on the checked factoring circuits and 4.8 % on the checked search circuits.
 
-Report: Section 5. Artifacts: see the table.
+`[O]` The tof and barenco_tof circuits are placed in search as oracle and diffusion parts.
 
-| Rubric evidence | File |
-|---|---|
-| Repository | `code.zip` (git archive of the repository at the commit named in `REPRODUCE.md`) |
-| README | `README.md` inside `code.zip` |
-| Test results | `REPRODUCE.md` (Tests), `build_logs/tests_summary.txt`, `build_logs/test_*.log` |
-| Reproduction record | `REPRODUCE.md`, report Section 5 |
+## Emulator runs
 
-- `[F]` Seven test files ran on 8 October 2026 and their pass counts are in `REPRODUCE.md`.
-- `[F]` Two verification reports by agents that did not produce the results are in `results/verification_2026-10-07.md` and `results/verification_2026-10-07b.md` (Section 5).
-- `[F]` Every table of Section 3 is generated by `report/make_tables.py` from `results/*.csv` (report preamble).
+`[F]` Three H2-Emulator jobs with 22 circuit rows and six H2-2E jobs ran on 8 October 2026 at 1000 shots. The six H2-2E jobs carry HQC estimates that sum to 1840.0 HQC. On H2-2E the difference F_H(P2) minus F_H(P0) is +0.0050 on vbe_adder_3 (z = +0.55), -0.0150 on hwb6 (z = -1.21) and +0.0076 on grover_5 (z = +0.48). On the H2-Emulator the four Toffoli comparisons all lie within two sd of zero. Neither tier resolves P2 against P0 at 1000 shots. At the predicted gain a 2-sd resolution needs 1147 shots per pipeline on vbe_adder_3, 1974 on grover_5 and 20462 on hwb6. Nothing in the report has run on hardware.
+
+`[O]` The emulator runs confirm execution and HQC accounting on the Quantinuum platform. The P2 against P0 comparison rests on the ZZPhase counts and the Selene ensemble means.
+
+## Table C2 finding
+
+`[F]` Table C2 sets our T-count after ZX beside the smallest T-count reported in six papers and beside the certified floor. Our ZX stage matches the best published ancilla-free count on 14 of the 22 comparable circuits. On the four certified circuits the ZX stage leaves 106 T gates and the floor is 47. The best published ancilla-free counts on them sum to 105. Published optimisers therefore close 1 of the 59 gates between our count and the floor. That gate is on mod5_4. The other 58 gates are closed by neither side.
+
+`[O]` The certificate cannot tell whether the 58 open gates are headroom or slack in the bound.
 
 ## Files in this package
 
 | File | Content |
 |---|---|
-| `report.pdf` | The report, rendered from `report/report_v3.md` |
-| `code.zip` | The repository at the recorded commit |
+| `report.pdf`, `report.md` | Report v5 without its changelog sections, `figures/` holds its images |
+| `code.zip` | `git archive` of the commit named in `MANIFEST.txt` |
 | `REPRODUCE.md` | Environment, commands, tests and seeds |
-| `SUMMARY.md` | This page |
+| `SUMMARY.md`, `check_summary_numbers.py` | This page and the script that checks its numbers |
 | `MANIFEST.txt` | Size and sha256 of every file |
-| `build.sh`, `run_tests.sh`, `report.css` | Scripts that rebuild this package |
+| `build.sh`, `run_tests.sh`, `strip_changelog.py`, `check_pdf_tables.py`, `report.css` | Scripts that rebuild and check this package |
 | `build_logs/` | Build log and test logs |
