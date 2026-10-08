@@ -1,21 +1,21 @@
-report/report_v5.md: 1007 lines -> submission/report.md: 888 lines, 4 changelog sections removed
-[2026-10-08T21:56:05Z] report.md: no [PENDING or TBD
-[2026-10-08T21:56:05Z] pandoc 3.1.3, wkhtmltopdf 0.12.6
+report/report_v5.md: 1008 lines -> submission/report.md: 888 lines, 4 changelog sections removed
+[2026-10-08T21:59:26Z] report.md: no [PENDING or TBD
+[2026-10-08T21:59:26Z] pandoc 3.1.3, wkhtmltopdf 0.12.6
 QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-root'
-[2026-10-08T21:56:07Z] report.pdf written (754410 bytes, 21 pages)
-[2026-10-08T21:56:07Z] report.pdf text: no [PENDING, TBD or Changelog
+[2026-10-08T21:59:27Z] report.pdf written (754503 bytes, 21 pages)
+[2026-10-08T21:59:28Z] report.pdf text: no [PENDING, TBD or Changelog
 Table 1.1: markdown rows 10, rows found in PDF 10: ok
 Table C2: markdown rows 23, rows found in PDF 23: ok
 Table E1: markdown rows 22, rows found in PDF 22: ok
 Table E2: markdown rows 6, rows found in PDF 6: ok
-[2026-10-08T21:56:08Z] code.zip from HEAD 11f86d7ecac1098f040fd79878597ae6f7ffea00, 5261130 bytes, 2353 entries
-[2026-10-08T21:56:08Z] REPRODUCE.md names HEAD
-[2026-10-08T21:56:08Z] credential check 1: no credentials.json, *.token, *.env, aqora-home in archive listing
-[2026-10-08T21:56:08Z] exclusion check: no papers/ or third_party/ in archive
-[2026-10-08T21:56:08Z] TOKEN STRING CHECK: 1 lines with refresh_token or access_token, listed below
+[2026-10-08T21:59:28Z] code.zip from HEAD 3c6fe01ffce73e1a24d8defc48adce5b54a4cfba, 5264426 bytes, 2354 entries
+[2026-10-08T21:59:28Z] REPRODUCE.md names HEAD
+[2026-10-08T21:59:28Z] credential check 1: no credentials.json, *.token, *.env, aqora-home in archive listing
+[2026-10-08T21:59:28Z] exclusion check: no papers/ or third_party/ in archive
+[2026-10-08T21:59:29Z] TOKEN STRING CHECK: 1 lines with refresh_token or access_token, listed below
 docs/platform_notes.md:75:[F] `credentials.json` schema, from strings in `aqora/_aqora.abi3.so`: `struct CredentialsFile with 1 element`, `struct Credentials with 5 elements`, field names `client_id client_secret access_token refresh_token expires_at`. The file is written by the login flow (OAuth2 mutations `oauth2Token` / `oauth2Refresh` appear in the same binary). There is no documented way to hand-write it from a username/password.
-[2026-10-08T21:56:09Z] token string check: matches above are key names only, no token value of 20 or more characters
+[2026-10-08T21:59:29Z] token string check: matches above are key names only, no token value of 20 or more characters
 ok            59  report_v5.md (+1)
 ok            58  report_v5.md
-59 distinct numbers, 59 found, 0 missing, 0 style issues
-[2026-10-08T21:56:09Z] MANIFEST.txt written
+61 distinct numbers, 61 found, 0 missing, 0 style issues
+[2026-10-08T21:59:30Z] MANIFEST.txt written
