@@ -28,8 +28,9 @@ def _(mo):
     1. loads the result tables from `results/*.csv` and shows them with the figures,
     2. compiles one chosen circuit live through the baseline P0 (pytket level 2)
        and through P2 (PyZX `teleport_reduce` followed by P0),
-    3. submits the compiled circuits to the H2-2E emulator through `aqora.QPU`,
-       gated behind a run button.
+    3. compiles `tof_3` (family B1) with the pass selector and submits it to the
+       free H2-2SC syntax checker through `aqora.QPU`, behind a gate that is
+       closed by default.
 
     Every number shown here is read from the CSV files or computed in the cell
     that shows it. Nothing is typed in.
@@ -70,9 +71,12 @@ def _(mo):
 
     **Platform jobs**
 
-    - `[F]` The platform jobs were submitted by `submit/syntax_check.py` and
-      `submit/run_emulator.py`. The submission cell of Section 3 below was not
-      executed for the report.
+    - `[F]` The jobs of Tables E1 and E2 were submitted by
+      `submit/syntax_check.py` and `submit/run_emulator.py`.
+    - `[F]` The submission cell of Section 3 submits only to the free H2-2SC
+      syntax checker and refuses any platform whose name does not end in `SC`.
+      `report/notebook_executed.html` is an export of this notebook with that
+      gate open.
     - `[F]` Tables E1 and E2 below are read from the emulator CSVs. Nothing is
       submitted to show them.
 
@@ -80,9 +84,10 @@ def _(mo):
 
     - `[F]` The cost model (Table M) was not refit on the emulator rows of
       Tables E1 and E2.
-    - `[F]` The one completed H2-2SC syntax check (tof_3 under P0) returned no
-      cost. No official HQC from the syntax checker exists for the other
-      compiled circuits.
+    - `[F]` The H2-2SC syntax check of tof_3 under P0 submitted by
+      `submit/syntax_check.py` returned no cost (`duration` null). Section 3
+      shows the cost fields returned for the notebook's own job. No official
+      HQC from the syntax checker exists for the other compiled circuits.
     """)
     return
 
@@ -118,8 +123,11 @@ def _():
     RESULTS = os.path.join(ROOT, "results")
     FIGURES = os.path.join(ROOT, "report", "figures")
 
-    TEAM_ORG = "[TEAM_ORG placeholder: aqora organization username of the team]"
-    PLATFORM = "nexus:H2-2E"
+    # Jobs are attributed to the team organization (aqora `as_entity`), read
+    # from AQORA_TEAM_ORG as in submit/common.py. The only platform this
+    # notebook submits to is the free syntax checker.
+    TEAM_ORG = os.environ.get("AQORA_TEAM_ORG", "").strip() or None
+    PLATFORM = "nexus:H2-2SC"
     return FIGURES, PLATFORM, RESULTS, ROOT, TEAM_ORG, mo, os, pd, sys
 
 
@@ -461,67 +469,178 @@ def _(ROOT, circuit_choice, mo, os, pd):
     return C, compiled, input_circuit, live_table, ref_circuit
 
 
+@app.function
+def require_free_checker(platform):
+    """Return `platform` if its name ends in "SC" (a Quantinuum syntax
+    checker, which costs no HQC, docs/platform_notes.md 3.4). Any other
+    platform, such as nexus:H2-2E, nexus:H2-Emulator or hardware, raises
+    AssertionError before any client or job is created."""
+    if not (isinstance(platform, str) and platform.endswith("SC")):
+        raise AssertionError(
+            f"refusing platform {platform!r}: this notebook submits only to a "
+            f"free syntax checker (platform name ending in 'SC')")
+    assert platform.endswith("SC")
+    return platform
+
+
+@app.function
+def submit_free_check(platform, circuit, shots, root, family, file, label,
+                      timeout=300.0, poll=5.0):
+    """Submit one measured native circuit to a syntax checker by the route of
+    submit/syntax_check.py:submit_one (common.make_qpu with AQORA_TEAM_ORG as
+    as_entity, ledger row appended before submission and updated after, raw
+    job dump saved under results/emulator/<platform>/notebook_select/).
+    The platform guard runs first. Returns a dict with job_id, status,
+    counts, cost_fields, hqc_estimate, ledger_key, result_path, error."""
+    require_free_checker(platform)
+    import json
+    import os
+    import sys
+
+    _sub = os.path.join(root, "submit")
+    if _sub not in sys.path:
+        sys.path.insert(0, _sub)
+    import common  # submit/common.py
+
+    bad = common.native_violations(circuit)
+    if bad:
+        raise ValueError(f"non-native ops {sorted(bad)}")
+    hqc = common.hqc_estimate(circuit, shots)
+    qpu = common.make_qpu(require_free_checker(platform))
+    row = common.append_ledger(dict(platform=platform, family=family, file=file,
+                                    pipeline=label, shots=shots, options="{}",
+                                    status="SUBMITTING"))
+    key = {k: row[k] for k in ("timestamp", "platform", "file", "pipeline")}
+    out = dict(platform=platform, family=family, file=file, pipeline=label,
+               shots=shots, hqc_estimate=hqc, job_id=None, status=None,
+               counts=None, cost_fields=None, error=None, ledger_key=key,
+               result_path=None, source="report/notebook_skeleton.py")
+    try:
+        job = qpu.run(circuit, shots=shots)
+    except Exception as e:  # noqa: BLE001
+        common.update_ledger(key, status="SUBMIT_ERROR:" + repr(e)[:200])
+        out["status"] = "SUBMIT_ERROR"
+        out["error"] = repr(e)
+        return out
+    out["job_id"] = job.job_id
+    common.update_ledger(key, job_id=job.job_id, status="SUBMITTED")
+    try:
+        counts, t_wall = common.wait_counts(job, timeout=timeout, poll=poll)
+        out["counts"] = counts
+        out["t_wait"] = t_wall
+        out["results"] = [common.result_raw(r) for r in job.results(raise_on_item_error=False)]
+        status = "COMPLETED"
+    except Exception as e:  # noqa: BLE001
+        out["error"] = repr(e)
+        status = "FAILED:" + repr(e)[:200]
+    raw = common.job_raw(job)
+    out["job"] = raw
+    out["platform_reported"] = (raw.get("payload", {}).get("platform") or {}).get("name")
+    out["cost_fields"] = common.cost_fields(raw.get("payload", {}))
+    out["status"] = status
+    path = common.save_result(platform, "notebook_select", file, out)
+    out["result_path"] = str(path.relative_to(common.ROOT))
+    common.update_ledger(key, status=status,
+                         hqc_or_seconds=json.dumps(out["cost_fields"], default=str) if out["cost_fields"] else "",
+                         result_path=out["result_path"])
+    return out
+
+
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ## 3. Submission to the H2-2E emulator
+    ## 3. Submission to the free H2-2SC syntax checker
 
-    `aqora.QPU` submits programs exactly as given, so the circuits are rebased by
-    the pipeline above and measured here. Jobs are attributed to the team
-    organization through `as_entity`. The `noisy_simulation` option selects the
-    emulator's noise model. Press the button to submit. Nothing is sent before
-    that.
+    The cells below compile `bench/family_B1/tof_3.qasm` with the pass selector
+    `pipelines/pass_select.py` (candidates P0 and P2, lowest HQC estimate kept),
+    append measure-all and submit the measured circuit to `nexus:H2-2SC` as the
+    team organization (`AQORA_TEAM_ORG`), by the route of
+    `submit/syntax_check.py`. The syntax checker costs no HQC
+    (`docs/platform_notes.md` 3.4). `require_free_checker` refuses any platform
+    whose name does not end in `SC` before a client is built
+    (`report/test_notebook_submit.py`).
 
-    `[F]` This cell was not executed for the report. The jobs of Tables E1 and
-    E2 were submitted by `submit/syntax_check.py` and `submit/run_emulator.py`
-    and are listed in `results/emulator_jobs.csv`.
+    The gate is closed by default. It opens on the button, or when the notebook
+    is run with the environment variable `SGC_NOTEBOOK_SUBMIT_SC=1`. The job is
+    appended to `results/emulator_jobs.csv` (pipeline `select:<chosen>`) and its
+    raw dump is saved under `results/emulator/nexus_H2-2SC/notebook_select/`.
     """)
     return
 
 
 @app.cell
-def _(C, compiled):
-    # Measure-all appended the way results/compiled/<pipeline>/*.qasm were written,
-    # so the implicit qubit permutation left by allow_swaps=True is encoded in the
-    # measurement map.
-    to_submit = {pl: C.add_measure_all(c) for pl, c in compiled.items()}
-    return (to_submit,)
+def _(C, ROOT, mo, os, pd):
+    import pass_select  # pipelines/pass_select.py
+    from pytket.qasm import circuit_from_qasm as _from_qasm
+
+    SC_FAMILY, SC_FILE = "B1", "tof_3.qasm"
+    sc_shots = 1000
+    _input = _from_qasm(os.path.join(ROOT, "bench", "family_B1", SC_FILE))
+    _comp, sc_record = pass_select.compile_select(_input, shots=sc_shots)
+    mo.stop(_comp is None, mo.callout(mo.md(f"The pass selector kept no candidate for `{SC_FILE}`."), kind="danger"))
+    sc_circuit = C.add_measure_all(_comp)
+    _sel = pd.DataFrame([{"candidate": k, **v} for k, v in sc_record["candidates"].items()])
+    mo.vstack([mo.md(f"Pass selector on `bench/family_B1/{SC_FILE}` at {sc_shots} shots: "
+                     f"chosen **{sc_record['chosen']}**, {sc_circuit.n_qubits} qubits."),
+               mo.ui.table(_sel, selection=None)])
+    return SC_FAMILY, SC_FILE, sc_circuit, sc_record, sc_shots
 
 
 @app.cell
 def _(mo):
-    shots = mo.ui.number(start=1, stop=10000, step=100, value=1000, label="Shots")
-    noisy = mo.ui.checkbox(value=True, label="noisy_simulation")
-    submit = mo.ui.run_button(label="Submit to QPU", kind="success")
-
-    mo.hstack([shots, noisy, submit], justify="start")
-    return noisy, shots, submit
+    submit = mo.ui.run_button(label="Submit to the H2-2SC syntax checker", kind="success")
+    submit
+    return (submit,)
 
 
 @app.cell
-def _(PLATFORM, TEAM_ORG, mo, noisy, shots, submit, to_submit):
-    # Gate the job on the run button.
-    mo.stop(not submit.value, mo.callout(mo.md("Press **Submit to QPU** to run the Job"), kind="info"))
+def _(PLATFORM, ROOT, SC_FAMILY, SC_FILE, TEAM_ORG, mo, os, pd, sc_circuit, sc_record, sc_shots, submit):
+    from pytket import OpType as _Op
 
-    from aqora import QPU
+    # The platform check runs before the gate, so a paid platform set in the
+    # setup cell stops the notebook even with the gate closed.
+    require_free_checker(PLATFORM)
+    _gate = bool(submit.value) or os.environ.get("SGC_NOTEBOOK_SUBMIT_SC", "") == "1"
+    mo.stop(not _gate, mo.callout(mo.md(
+        "Gate closed. Press the button, or run with `SGC_NOTEBOOK_SUBMIT_SC=1`, to submit "
+        f"`{SC_FILE}` to `{PLATFORM}`."), kind="info"))
+    mo.stop(TEAM_ORG is None, mo.callout(mo.md("`AQORA_TEAM_ORG` is not set. Nothing was submitted."), kind="warn"))
 
-    qpu = QPU(platform=PLATFORM, as_entity=TEAM_ORG)
-    programs = [to_submit["P0"], to_submit["P2"]]
-    job = qpu.run(programs, shots=int(shots.value),
-                  options={"noisy_simulation": bool(noisy.value)})
+    sc_job = submit_free_check(PLATFORM, sc_circuit, sc_shots, ROOT, SC_FAMILY, SC_FILE,
+                               "select:" + sc_record["chosen"])
 
-    mo.md(f"Submitted job **{job.job_id}** to `{PLATFORM}` as `{TEAM_ORG}` "
-          f"with shots={int(shots.value)}, noisy_simulation={bool(noisy.value)}")
-    return QPU, job, programs, qpu
+    # HQC estimate recomputed here from the gate counts of the submitted circuit.
+    _n1 = sc_circuit.n_gates_of_type(_Op.PhasedX)
+    _n2 = sc_circuit.n_gates_of_type(_Op.ZZPhase) + sc_circuit.n_gates_of_type(_Op.ZZMax)
+    _nm = sc_circuit.n_gates_of_type(_Op.Measure)
+    _spam = sc_circuit.n_qubits + _nm + sc_circuit.n_gates_of_type(_Op.Reset)
+    _hqc = 5 + (_n1 + 10 * _n2 + 5 * _spam) * sc_shots / 5000
+    assert abs(_hqc - sc_job["hqc_estimate"]) < 1e-9
 
-
-@app.cell
-def _(job):
-    # `counts()` waits on results and returns one mapping per submitted program:
-    # index 0 is P0, index 1 is P2.
-    counts = job.counts(timeout=600)
-    counts
-    return (counts,)
+    _items = [mo.md(
+        f"Job id **`{sc_job['job_id']}`** on `{PLATFORM}` (reported platform "
+        f"`{sc_job.get('platform_reported')}`) as `{TEAM_ORG}`, status **{sc_job['status']}**, "
+        f"{sc_shots} shots, pipeline `{'select:' + sc_record['chosen']}`.\n\n"
+        f"HQC estimate from the formula 5 + (N_1q + 10 N_2q + 5 N_spam) C / 5000 with "
+        f"N_1q = {_n1}, N_2q = {_n2}, N_spam = {_spam} (qubits {sc_circuit.n_qubits} + measures {_nm}), "
+        f"C = {sc_shots}: **{_hqc:.2f}**. This is what H2-2E would charge by the formula. "
+        f"The syntax checker charges nothing.\n\n"
+        f"Cost fields returned with the job: `{sc_job['cost_fields']}`.")]
+    if sc_job["error"]:
+        _items.append(mo.callout(mo.md(f"Error: `{sc_job['error']}`"), kind="danger"))
+    if sc_job["counts"]:
+        _rows = []
+        for _i, _c in enumerate(sc_job["counts"]):
+            _top = sorted(_c.items(), key=lambda kv: -kv[1])[:5]
+            _rows.append({"program": _i, "shots_returned": sum(_c.values()),
+                          "distinct_outcomes": len(_c),
+                          "top_outcomes": ", ".join(f"{k}: {v}" for k, v in _top)})
+        _items.append(mo.md("Counts summary. The syntax checker returns all-zero outcomes by design."))
+        _items.append(mo.ui.table(pd.DataFrame(_rows), selection=None))
+    _items.append(mo.md(f"Ledger row appended to `results/emulator_jobs.csv` with key "
+                        f"`{sc_job['ledger_key']}`. Raw dump: `{sc_job['result_path']}`."))
+    mo.vstack(_items)
+    return (sc_job,)
 
 
 @app.cell(hide_code=True)
