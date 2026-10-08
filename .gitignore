@@ -2,3 +2,4 @@ __pycache__/
 third_party/
 papers/
 *.log
+!results/proxy_h22e_fits.log

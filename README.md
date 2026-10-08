@@ -31,6 +31,15 @@ Team Learned ZX Rewriting, Quantinuum Singapore Grand Challenge. A resource-cert
 
 ## Reproducing every table
 
+Two directories are not in git. `third_party/pyzx-fork/` is obtained with
+
+```
+git clone https://github.com/Quantinuum/pyzx.git third_party/pyzx-fork
+git -C third_party/pyzx-fork checkout e695d6d711e67b2b7223417c4714b6b1fcc09191
+```
+
+`papers/` holds the team's manuscripts and is not distributed. The exactness-barrier manuscript is arXiv:2608.22801. A clean-clone run of these steps is recorded in `results/repro_2026-10-08/repro_log.md`.
+
 Run from the repository root. Steps 1 to 3 regenerate the benchmark circuits (deterministic), steps 4 to 7 compile them, step 8 builds the tables.
 
 ```
