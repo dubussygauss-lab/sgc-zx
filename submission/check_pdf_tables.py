@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check that report.pdf renders the data rows of Tables 1.1, C2, E1 and E2 of report.md.
+"""Check that report.pdf renders the data rows of Tables 1.1a, 1.1, C2, E1 and E2 of report.md.
 
 Usage: python3 submission/check_pdf_tables.py submission/report.md <pdftotext -layout output>
 
@@ -17,6 +17,7 @@ pdf = re.sub(r"\s+", " ", open(txt_path, encoding="utf-8").read())
 
 # anchor text, cell indices used for the signature
 TABLES = {
+    "1.1a": ("`[F]` Table 1.1a.", range(1, 10)),
     "1.1": ("`[F]` Table 1.1.", range(1, 8)),
     "C2": ("<!-- TABLE:C2_literature -->", range(1, 5)),
     "E1": ("<!-- TABLE:E1_h2emulator -->", range(1, 6)),

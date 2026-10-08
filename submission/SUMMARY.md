@@ -1,18 +1,20 @@
 # Summary for the judges
 
-Team Learned ZX Rewriting. Quantinuum Singapore Grand Challenge, submission 1. Built on 8 October 2026 from `report/report_v5.md` and aligned with its Section 1.
+Team Learned ZX Rewriting. Quantinuum Singapore Grand Challenge, submission 1. Built on 9 October 2026 from `report/report_v5.md` and aligned with its Section 1.
 
 `[F]` marks a statement copied from the report or from the `value/` outputs. `[O]` marks a judgement. The script `check_summary_numbers.py` finds every number of this page in `report/report_v5.md` or in `value/`.
 
 ## User and decision
 
-`[O]` The user runs Clifford+T subroutines on Quantinuum H2 under a fixed HQC budget. The same team will later price these subroutines in T gates on a fault-tolerant Helios. The decision is made per circuit. Should the circuit go through PyZX teleport_reduce (pipeline P2) before pytket's Quantinuum pass at level 2 (pipeline P0)? The ledger answers in HQC and in magic states. It also says when the answer is no.
+`[O]` The user runs Clifford+T subroutines on Quantinuum H2 under a fixed HQC budget. The same team will later price these subroutines in T gates on a fault-tolerant Helios. The decision is made per circuit. Should the circuit go through PyZX teleport_reduce (pipeline P2) before pytket's Quantinuum pass at level 2 (pipeline P0)? `[F]` The delivered tool is the pass selector PSEL in `pipelines/pass_select.py`. It compiles each circuit with P0 and with P2 and keeps the compiled circuit with the lower HQC. `[O]` The ledger explains the choice in HQC and in magic states.
 
 ## HQC saved on H2
 
-`[F]` At 1000 shots P2 costs 14,772.8 HQC against 15,516.0 for P0 on the 15 checked B1 circuits. The saving is 743.2 HQC or 4.8 %. P2 is cheaper on 14 of the 15 circuits. The median per-circuit saving is 3.9 %. hwb8 alone accounts for 84.6 % of the total saving and serves no sourced quantum algorithm. Without hwb8 the saving is 114.6 HQC. On the 180 Trotter circuits of family A P2 costs 1,030.4 HQC or 6.3 % more than P0.
+`[F]` PSEL never costs more HQC than P0 on any of the 223 circuits of the four families. At 1000 shots it costs 14,772.4 HQC against 15,516.0 for P0 on the 15 checked B1 circuits. The saving is 743.6 HQC or 4.79 %. The median per-circuit saving is 3.94 %. On the 180 Trotter circuits of family A PSEL saves 46.0 HQC or 0.28 %. It never raises the ZZ gate count against P0 on any of the 223 circuits.
 
-`[O]` The median of 3.9 % is the better guide for a single circuit. A user with a Trotter circuit should skip the ZX stage.
+`[F]` P2 alone costs 14,772.8 HQC on B1 and is cheaper than P0 on 14 of the 15 circuits. hwb8 alone accounts for 84.5 % of the PSEL saving on B1 and serves no sourced quantum algorithm. Without hwb8 the PSEL saving on B1 is 115.0 HQC. On family A P2 alone would cost 6.27 % more than P0. PSEL keeps P0 on 123 of these 180 circuits and on all 60 XXZ circuits.
+
+`[O]` The median of 3.94 % is the better guide for a single circuit. A user with a Trotter circuit runs PSEL and does not need to decide in advance whether the ZX stage pays.
 
 ## Magic states saved
 
