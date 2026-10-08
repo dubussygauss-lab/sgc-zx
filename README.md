@@ -123,4 +123,4 @@ Proxy note. In the development container outbound HTTPS goes through an agent pr
 
 ## Pass selector
 
-`pipelines/pass_select.py` compiles a circuit with P0 and P2 through `compile_pipeline` (unchanged), drops a candidate that raises, leaves the native gate set or fails `compile.check` (no check above 20 qubits, marked `ok-unchecked`), and keeps the lower HQC at 1000 shots. Ties go to the lower n_2q (ZZPhase + ZZMax), then to P0. `compile_select(circ)` returns the compiled circuit and a per-candidate record. `python3 pipelines/pass_select.py <qasm files...>` prints one row per file. Tests: `python3 pipelines/test_select.py`.
+`pipelines/pass_select.py` compiles a circuit with P0 and P2 through `compile_pipeline` (unchanged), drops a candidate that raises, leaves the native gate set or fails `compile.check` (no check above 20 qubits, marked `ok-unchecked`), and keeps the lower HQC at 1000 shots. Ties go to the lower n_2q (ZZPhase + ZZMax), then to P0. `compile_select(circ)` returns the compiled circuit and a per-candidate record. `python3 pipelines/pass_select.py <qasm files...>` prints one row per file. Tests: `python3 pipelines/test_pass_select.py`.

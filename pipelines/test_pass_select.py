@@ -1,6 +1,6 @@
-"""Self-running tests for select.py.  Run: python3 pipelines/test_pass_select.py
+"""Self-running tests for pass_select.py.  Run: python3 pipelines/test_pass_select.py
 
-pass_select.py is loaded by file path (the old name select.py clashed with the stdlib
+pass_select.py is loaded by file path . The old name select.py clashed with the stdlib
 module of the same name, which is built into this interpreter.
 
 (a) on 6 circuits (family_B1: vbe_adder_3, qft_4, tof_3; family_A:
