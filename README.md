@@ -120,3 +120,7 @@ pip install pytket==2.18.4 pytket-quantinuum==0.59.3 pyzx==0.10.7 qiskit==2.5.2 
 ```
 
 Proxy note. In the development container outbound HTTPS goes through an agent proxy. pip installs were run with the proxy variables cleared for that one command: `NO_PROXY= no_proxy= pip install --break-system-packages <package>`. Local Selene runs also need every proxy variable unset (`HTTPS_PROXY= https_proxy= HTTP_PROXY= http_proxy= python ...`). aqora job submission needs the team credentials. The jobs submitted from this container on 8 October 2026 are listed in `results/emulator_jobs.csv`.
+
+## Pass selector
+
+`pipelines/select.py` compiles a circuit with P0 and P2 through `compile_pipeline` (unchanged), drops a candidate that raises, leaves the native gate set or fails `compile.check` (no check above 20 qubits, marked `ok-unchecked`), and keeps the lower HQC at 1000 shots. Ties go to the lower n_2q (ZZPhase + ZZMax), then to P0. `compile_select(circ)` returns the compiled circuit and a per-candidate record. `python3 pipelines/select.py <qasm files...>` prints one row per file. Tests: `python3 pipelines/test_select.py`.
