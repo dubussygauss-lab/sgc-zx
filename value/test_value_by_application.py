@@ -98,3 +98,13 @@ def test_control_and_b2_blocks(out, led):
     b1 = out[out.block == "family_B1_certified"].iloc[0]
     lb1 = led[(led.layer == "FT") & (led.family == "B1") & (led.row_kind == "total")].iloc[0]
     assert np.isclose(b1.certified_fraction, lb1.cert_incompressible_frac_of_remaining)
+
+
+def test_shots_affordable_capped_brute_force():
+    """The capped shot count is the largest S whose cost with ceil(S / cap) job fees fits the budget."""
+    for h in (151.6, 119.0, 68.4, 64.0, 565.6, 528.2):
+        k = (h - vba.JOB_FEE) * 5000 / vba.SHOTS_CSV
+        cost = lambda s: vba.JOB_FEE * int(np.ceil(s / vba.JOB_SHOT_CAP)) + s * k / 5000  # noqa: E731
+        s = vba.shots_affordable_capped(h)
+        assert cost(s) <= vba.BUDGET + 1e-9
+        assert cost(s + 1) > vba.BUDGET

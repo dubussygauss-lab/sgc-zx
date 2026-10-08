@@ -819,7 +819,7 @@ def emulator_h2e():
             "mean_d_proxy_B1": float(dp[mp.family == "B1"].mean())}
 
 
-def emulator_h22e():
+def emulator_h22e(e1=None):
     """Table E2: Nexus H2-2E runs (results/emulator_nexus_H2-2E.csv, counts in
     results/emulator/nexus_H2-2E/).  The statistics come from
     submit/h22e_stats.py:compute, which recomputes F_H from the counts."""
@@ -833,11 +833,17 @@ def emulator_h22e():
     m = r["rows"]
     assert r["max_abs_dF_csv"] < 1e-9, "F_H recomputed from counts differs from the CSV"
     assert r["max_abs_dF_json"] < 1e-9, "F_H recomputed from counts differs from the JSON payload"
+    if e1 is not None:
+        # The H2-Emulator sd in the cross-emulator z is the sd printed in Table E1.
+        t1 = e1["t"]
+        for x in r["cross"].itertuples():
+            sd1 = t1[(t1.file == x.file[:-5]) & (t1.pipeline == x.pipeline)]["sd F_H emulator"].iloc[0]
+            assert abs(sd1 - x.sd_h2emulator) < 1e-12, (x.file, x.pipeline, sd1, x.sd_h2emulator)
     t = pd.DataFrame({"file": m.file.str.replace(".qasm", "", regex=False), "n": m.n.astype(int),
                       "pipeline": m.pipeline, "n_2q": m.n_2q.astype(int),
                       "HQC estimate": m.hqc, "F_H": m.F_H, "sd F_H": m.sd,
                       "F_H proxy": m.F_H_proxy, "F_H Selene depol": m.F_H_selene})
-    text = ("Nexus H2-2E, noisy_simulation = True, 1000 shots per row, one job per row. F_H is the "
+    text = ("`[F]` Nexus H2-2E, noisy_simulation = True, 1000 shots per row, one job per row. F_H is the "
             "Hellinger fidelity of the returned counts to the ideal distribution. sd F_H is the binomial "
             "value sqrt(F_H (1 - F_H) / 1000) on vbe_adder_3 and hwb6, whose ideal output is a single "
             f"bit string. On grover_5 it is the sd over {h22e_stats.BOOT} multinomial bootstrap resamples "
@@ -886,7 +892,7 @@ def main():
     fs = selene()
     fsd = selene_depol_full()
     fe = emulator_h2e()
-    fe2 = emulator_h22e()
+    fe2 = emulator_h22e(fe)
     print("family A: circuits", fa["n_circuits"], "| P0 at ZZ term count:",
           fa["p0_at_floor"], "| circuits with any pipeline below it:", fa["any_below_floor"],
           "| P2 ties P0:", fa["p2_ties"], "worse:", fa["p2_worse"])
@@ -917,6 +923,9 @@ def main():
         print("H2-2E: HQC estimate total %.1f (%.2f %% of quota), slope a %.4e"
               % (fe2["hqc_total"], 100 * fe2["quota_frac"], fe2["slope"]))
         print(fe2["pairs"].to_string(index=False))
+        for x in fe2["cross"].itertuples():
+            print("H2-2E vs H2-Emulator, %s %s: sd %.4f (E1) and %.4f (E2), z %.2f"
+                  % (x.file, x.pipeline, x.sd_h2emulator, x.sd_h22e, x.z))
     for name in ["A1_zz_by_n", "A2_vs_P0", "A3_floor", "A4_proxy", "B1_per_circuit", "B1x_per_circuit", "B2_summary",
                  "M1_cost_metrics", "M2_cost_coefficients", "A5_proxy_b1", "C1_certificates", "S1_selene", "S2_selene_depol",
                  "E1_h2emulator", "E2_h22e"]:

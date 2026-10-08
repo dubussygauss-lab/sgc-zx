@@ -89,6 +89,30 @@ def b1_slope() -> float:
     return float(x @ y / (x @ x))
 
 
+def h2emulator_sd() -> dict:
+    """Bootstrap sd of F_H for every row of results/emulator_nexus_H2-Emulator.csv,
+    {(file, pipeline): sd}.  Reproduces the stream of report/make_tables.py:emulator_h2e
+    (one generator seeded with SEED, rows in CSV order, BOOT resamples per row), so the
+    values equal the sd column of Table E1.  Family A references come from the bench
+    .npy files and B1 references from the P0ref compilation."""
+    h2e = pd.read_csv(os.path.join(RESULTS, "emulator_nexus_H2-Emulator.csv"))
+    rng = np.random.default_rng(SEED)
+    out = {}
+    for x in h2e.itertuples():
+        with open(os.path.join(RESULTS, "emulator", "nexus_H2-Emulator", x.pipeline, x.file[:-5] + ".json")) as f:
+            d = json.load(f)
+        if d["family"] == "A":
+            q = np.load(os.path.join(ROOT, "bench", "family_A", x.file[:-5] + ".npy"))
+        else:
+            q = reference_probs(x.file)
+        c = counts_vector(d["counts"], int(x.n_qubits))
+        N = int(c.sum())
+        phat = c / N
+        boot = rng.multinomial(N, phat, size=BOOT) / N
+        out[(x.file, x.pipeline)] = float((np.sum(np.sqrt(boot * q[None, :]), axis=1) ** 2).std(ddof=1))
+    return out
+
+
 def compute() -> dict:
     """Return {"rows": DataFrame (one row per file and pipeline),
     "pairs": DataFrame (one row per file), "cross": DataFrame (rows also run
@@ -161,20 +185,19 @@ def compute() -> dict:
     pairs = pd.DataFrame(pairs)
 
     # Same circuit and pipeline on the Nexus H2-Emulator (Table E1): grover_5 under P0.
+    # The H2-Emulator sd is the Table E1 value, from the same bootstrap stream as
+    # report/make_tables.py:emulator_h2e (h2emulator_sd below).
     cross = []
     h2e = pd.read_csv(os.path.join(RESULTS, "emulator_nexus_H2-Emulator.csv"))
-    rng_x = np.random.default_rng(SEED)
+    sd_e1 = h2emulator_sd()
     for x in h2e[h2e.file.isin(FILES)].itertuples():
         a = t[(t.file == x.file) & (t.pipeline == x.pipeline)].iloc[0]
         q = reference_probs(x.file)
         with open(os.path.join(RESULTS, "emulator", "nexus_H2-Emulator", x.pipeline, x.file[:-5] + ".json")) as f:
             c = counts_vector(json.load(f)["counts"], int(x.n_qubits))
-        N = int(c.sum())
-        phat = c / N
-        fx = hellinger_fidelity(phat, q)
+        fx = hellinger_fidelity(c / c.sum(), q)
         assert abs(fx - x.F_H) < 1e-9
-        boot = rng_x.multinomial(N, phat, size=BOOT) / N
-        sdx = float((np.sum(np.sqrt(boot * q[None, :]), axis=1) ** 2).std(ddof=1))
+        sdx = sd_e1[(x.file, x.pipeline)]
         cross.append({"file": x.file, "pipeline": x.pipeline, "F_H_h2emulator": fx, "sd_h2emulator": sdx,
                       "F_H_h22e": float(a.F_H), "sd_h22e": float(a.sd),
                       "z": float((a.F_H - fx) / np.hypot(a.sd, sdx))})
@@ -196,6 +219,9 @@ def main():
     print(r["pairs"].to_string(index=False))
     print()
     print(r["cross"].to_string(index=False))
+    for x in r["cross"].itertuples():
+        print("H2-2E vs H2-Emulator, %s %s: dF %+.4f, sd %.4f (Table E1) and %.4f (Table E2), z %.2f"
+              % (x.file, x.pipeline, x.F_H_h22e - x.F_H_h2emulator, x.sd_h2emulator, x.sd_h22e, x.z))
     t = r["rows"]
     d = t.F_H - t.F_H_selene
     print("vs Selene: mean %+.4f, min z %.2f, max z %.2f, within 2 sd %d of %d"

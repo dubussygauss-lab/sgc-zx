@@ -1,12 +1,12 @@
 ## 1. Problem and value
 
-`[F]` Every number below comes from the script outputs `value/value_ledger.md` and `value/value_by_application.md`. P0 is pytket's Quantinuum pass at level 2. P2 runs PyZX teleport_reduce before that pass. HQC figures are for 1000 shots.
+`[F]` The HQC, shot and T-count numbers below come from the script outputs `value/value_ledger.md` and `value/value_by_application.md`. The noise parameters come from `docs/platform_notes.md` section 3.3. The manuscript line numbers refer to `papers/barrier/main.tex`. P0 is pytket's Quantinuum pass at level 2. P2 runs PyZX teleport_reduce before that pass. HQC figures are for 1000 shots.
 
 - `[O]` User. A team that runs Clifford+T subroutines on Quantinuum H2 under a fixed HQC budget and will later price them on a fault-tolerant Helios.
 - `[O]` Decision. Should this circuit go through ZX rewriting before pytket's Quantinuum pass?
 - `[F]` H2 cost. On the 15 checked B1 circuits P2 costs 14,772.8 HQC against 15,516.0 for P0. The saving is 743.2 HQC or 4.8 %. The median per-circuit saving is 3.9 %.
 - `[F]` Fault-tolerant cost. ZX removes 2,862 of 7,048 T gates on B1. Each T gate is one magic state, so the saving is 40.6 %. On the 20 synthesised B2 circuits 0.997 of the remaining T-count is certified incompressible.
-- `[F]` Algorithms. Every circuit except hwb6, hwb8 and the two ham15 circuits is an adder, multiplier, oracle or Toffoli gate from factoring, discrete-log or search algorithms (Section 1.4).
+- `[F]` Algorithms. Every circuit except hwb6, hwb8 and the two ham15 circuits is an adder, multiplier, Fourier transform, oracle, search instance or multi-controlled Toffoli. The adders, multipliers and the Fourier transform come from factoring and discrete-log circuits. grover_5 and mod5_4 come from search (Section 1.4). `[O]` The Toffoli circuits are placed in search as oracle and diffusion parts.
 
 ### 1.1 The user and the decision
 
@@ -18,7 +18,7 @@
 
 ### 1.2 What the pipeline saves on H2 today
 
-`[F]` The price of an H2 program is HQC = 5 + N_shots (N_1q + 10 N_2q + 5 N_M) / 5000. N_1q counts PhasedX gates. N_2q counts ZZPhase and ZZMax gates. N_M counts initialisations, measurements and resets. Rz gates are free. The sources are equation (1) of the Helios costing page (`docs/platform_notes.md` section 3.4) and `estimate_cost` in the organisers' sample code `src/python/pytket_cost_estimation.py` (`Quantinuum/sg_grand_challenge`). `pipelines/compile.py:hqc` reproduces that function.
+`[F]` The organisers' sample code prices an H2 program as HQC = 5 + N_shots (N_1q + 10 N_2q + 5 N_M) / 5000. N_1q counts PhasedX gates. N_2q counts ZZPhase and ZZMax gates. N_M counts initialisations, measurements and resets. Rz gates are free. The source is `estimate_cost` in `src/python/pytket_cost_estimation.py` of `Quantinuum/sg_grand_challenge`. `pipelines/compile.py:hqc` reproduces that function. `[O]` We take this as the H2 price. The Helios costing page gives the same form in its equation (1). See Reference 6 and `docs/platform_notes.md` section 3.4.
 
 `[F]` Two-qubit gates also carry the dominant error. The H2-2E emulator parameters are p2 = 1.29e-3 and p1 = 7.3e-5 per gate, readout flips 9e-4 and 1.8e-3 for states 0 and 1 and p_init = 4e-5 (`docs/platform_notes.md` section 3.3).
 
@@ -37,9 +37,11 @@
 | Reversible logic, no sourced algorithm | B1x | 2 | 1,487.6 | 1,374.4 | 113.2 | 7.6 | 6.2 |
 | All areas | B1x | 8 | 3,288.8 | 3,141.0 | 147.8 | 4.5 | 2.4 |
 
-`[F]` P2 is cheaper than P0 on 14 of the 15 B1 circuits. hwb8 alone accounts for 84.6 % of the B1 saving but serves no sourced quantum algorithm. Without hwb8 the B1 saving is 114.6 HQC. `[O]` The median of 3.9 % is the better guide for a single circuit.
+`[F]` P2 is cheaper than P0 in HQC on 14 of the 15 B1 circuits. hwb8 alone accounts for 84.6 % of the B1 saving but serves no sourced quantum algorithm. Without hwb8 the B1 saving is 114.6 HQC. `[O]` The median of 3.9 % is the better guide for a single circuit.
 
-`[F]` Saved HQC buys shots. At the 10,000 HQC team budget P0 affords 68,178 shots of vbe_adder_3 and P2 affords 87,675. That is 19,497 extra shots or 28.6 % more. On the Grover oracle mod5_4 the gain is 11,757 shots or 7.5 %.
+`[F]` Saved HQC buys shots. The following figures assume one job that pays the 5 HQC job fee once. At the 10,000 HQC team budget P0 affords 68,178 shots of vbe_adder_3 and P2 affords 87,675. That is 19,497 extra shots or 28.6 % more. On the Grover oracle mod5_4 the gain is 11,757 shots or 7.5 %.
+
+`[F]` The H2 hardware guide limits a job to 10,000 shots (`docs/platform_notes.md` section 3.4). With that limit and one fee per job P0 affords 67,974 shots of vbe_adder_3 and P2 affords 87,324. That is 19,350 extra shots or 28.5 % more. On mod5_4 the gain is 11,584 shots or 7.4 % (`value/value_by_application.md`). Whether the per-job limit applies on H2-2E is Unverifiable from the repository.
 
 `[F]` The ledger also says when not to run ZX. On the 180 Trotter circuits of family A P2 costs 17,453.0 HQC against 16,422.6 for P0. That is 1,030.4 HQC or 6.3 % more. P2 is dearer on 108 circuits and cheaper on 57. On the 60 XXZ circuits P2 is dearer on every circuit and the total rises by 12.3 %. `[O]` A user with a Trotter circuit should skip the ZX stage.
 
@@ -88,12 +90,12 @@
 
 ### 1.5 Value statement and scope of claims
 
-`[O]` For an H2 user the ledger is a reproducible answer to "should I run ZX before pytket" in HQC per area. P2 saves 7.9 % on the checked factoring circuits and 4.8 % on the checked search circuits. On Trotter circuits the answer is no. For the fault-tolerant programme the ledger gives certified magic-state counts per subroutine.
+`[O]` For an H2 user the ledger is a reproducible answer to "should I run ZX before pytket" in HQC per area. `[F]` P2 saves 7.9 % on the checked factoring circuits and 4.8 % on the checked search circuits. `[O]` On Trotter circuits the answer is no. For the fault-tolerant programme the ledger gives certified magic-state counts per subroutine.
 
 `[F]` The winner of the finals receives credits on the on-premise Helios machine in Singapore (organisers' timeline email, 25 Aug 2026). `[O]` Quantinuum's Helios roadmap targets fault tolerance. The certified T column prices the layer those credits will be spent on.
 
-`[O]` Model prediction. A proxy fit of 1.18e-3 per ZZ gate predicts a fidelity gain of 1.79 % for P2 on vbe_adder_3 and a median gain of 0.24 % over B1. These are model predictions and not measurements.
+`[F]` Model prediction. A proxy fit of 1.18e-3 per ZZ gate predicts a relative fidelity gain of 1.79 % for P2 on vbe_adder_3 and a median relative gain of 0.24 % over B1. `[O]` These are model predictions and not measurements.
 
-`[F]` On H2-2E the six jobs of vbe_adder_3, hwb6 and grover_5 under P0 and P2 cost 1,840 HQC. At 1000 shots the emulator does not resolve P2 against P0 on any of the three. On vbe_adder_3 the measured F_H was 0.954 under P0 and 0.959 under P2 (Section 3.7).
+`[F]` The six H2-2E jobs of vbe_adder_3, hwb6 and grover_5 under P0 and P2 carry HQC estimates that sum to 1,840 HQC. At 1000 shots the emulator does not resolve P2 against P0 on any of the three. On vbe_adder_3 the measured F_H was 0.954 under P0 and 0.959 under P2 (Section 3.7.1).
 
 `[F]` The ledger states value in HQC, shots and magic states and makes no claim in currency. The learned component of this submission is a cost model that predicts fidelity from compile-time features (Section 4). Learned rewriting is future work and is not claimed here.

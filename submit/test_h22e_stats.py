@@ -74,3 +74,11 @@ def test_slope_and_pairs(res):
     for r in p.itertuples():
         sd_at = lambda n: r.sd_diff * np.sqrt(1000 / n)  # noqa: E731
         assert 2 * sd_at(r.shots_2sd) <= r.dF_pred < 2 * sd_at(r.shots_2sd - 1)
+
+
+def test_cross_uses_table_e1_sd(res):
+    """The H2-Emulator sd of the cross-emulator z is the Table E1 bootstrap sd."""
+    sd_e1 = h22e_stats.h2emulator_sd()
+    for x in res["cross"].itertuples():
+        assert x.sd_h2emulator == sd_e1[(x.file, x.pipeline)]
+        assert x.z == pytest.approx((x.F_H_h22e - x.F_H_h2emulator) / np.hypot(x.sd_h22e, x.sd_h2emulator))

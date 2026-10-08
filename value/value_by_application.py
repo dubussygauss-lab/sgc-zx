@@ -35,6 +35,10 @@ H22E_CSV = ROOT / "results/emulator_nexus_H2-2E.csv"
 H22E_DIR = ROOT / "results/emulator/nexus_H2-2E"
 FAMILIES = ("B1", "B1x")
 SELECTED = ("vbe_adder_3.qasm", "mod5_4.qasm", "grover_5.qasm")
+BUDGET = 10_000           # HQC budget per team (value/value_ledger.py:BUDGET)
+SHOTS_CSV = 1000          # the ledger hqc columns are at this shot count
+JOB_SHOT_CAP = 10_000     # H2 hardware limit of shots per job (docs/platform_notes.md section 3.4)
+JOB_FEE = 5               # HQC paid once per job
 
 
 # ---------------------------------------------------------------- application table
@@ -141,15 +145,33 @@ def area_rows(led, amap, table):
     return pd.DataFrame(rows)
 
 
+def shots_affordable_capped(hqc_1000, budget=BUDGET, cap=JOB_SHOT_CAP):
+    """Largest total shot count S affordable within `budget` HQC when every job holds at
+    most `cap` shots and pays the JOB_FEE once.  Full jobs of `cap` shots are filled
+    first and the remainder goes in one last job.  hqc_1000 is the ledger HQC at 1000
+    shots, so the per-shot weight is k = (hqc_1000 - 5) 5000 / 1000."""
+    k = (float(hqc_1000) - JOB_FEE) * 5000 / SHOTS_CSV
+    full_cost = JOB_FEE + cap * k / 5000
+    n_full = int(np.floor(budget / full_cost))
+    rem = budget - n_full * full_cost
+    last = int(np.floor((rem - JOB_FEE) * 5000 / k)) if rem > JOB_FEE else 0
+    return n_full * cap + min(max(last, 0), cap)
+
+
 def selected_rows(led):
     nisq = led[(led.layer == "NISQ") & (led.row_kind == "circuit") & led.file.isin(SELECTED)]
     ft = led[(led.layer == "FT") & (led.row_kind == "circuit") & led.file.isin(SELECTED)]
     nisq = nisq.drop(columns=["T_written", "T_zx_P2", "magic_saved"])
     m = nisq.merge(ft[["file", "family", "T_written", "T_zx_P2", "magic_saved"]], on=["file", "family"])
     m = m.assign(extra_shots_pct=100 * m.extra_shots_at_budget / m.shots_at_budget_P0)
+    m = m.assign(shots_capped_P0=[shots_affordable_capped(h) for h in m.hqc_P0],
+                 shots_capped_P2=[shots_affordable_capped(h) for h in m.hqc_P2])
+    m = m.assign(extra_shots_capped=m.shots_capped_P2 - m.shots_capped_P0)
+    m = m.assign(extra_shots_capped_pct=100 * m.extra_shots_capped / m.shots_capped_P0)
     return m[["file", "family", "hqc_P0", "hqc_P2", "hqc_saved", "hqc_saved_pct", "shots_at_budget_P0",
               "shots_at_budget_P2", "extra_shots_at_budget", "extra_shots_pct", "T_written", "T_zx_P2",
-              "magic_saved"]].set_index("file").loc[list(SELECTED)].reset_index()
+              "magic_saved", "shots_capped_P0", "shots_capped_P2", "extra_shots_capped",
+              "extra_shots_capped_pct"]].set_index("file").loc[list(SELECTED)].reset_index()
 
 
 def family_a(led):
@@ -279,7 +301,15 @@ def main():
                              "T_written", "T_zx_P2", "magic_saved")}
     L += ["## Selected circuits, shots at a fixed 10,000 HQC budget", "",
           md_table(sel, sel_cols, sel_nd), "",
-          "`[F]` extra_shots_pct = 100 extra_shots_at_budget / shots_at_budget_P0.", ""]
+          "`[F]` The shots in this table assume one job that pays the 5 HQC job fee once. "
+          "extra_shots_pct = 100 extra_shots_at_budget / shots_at_budget_P0.", ""]
+    cap_cols = ["file", "family", "hqc_P0", "hqc_P2", "shots_capped_P0", "shots_capped_P2",
+                "extra_shots_capped", "extra_shots_capped_pct"]
+    cap_nd = {c: 0 for c in ("shots_capped_P0", "shots_capped_P2", "extra_shots_capped")}
+    L += [f"## Selected circuits, shots at a fixed {BUDGET:,} HQC budget with at most {JOB_SHOT_CAP:,} shots per job", "",
+          md_table(sel, cap_cols, cap_nd), "",
+          f"`[F]` Jobs of {JOB_SHOT_CAP:,} shots are filled first and the remainder goes in one last job. "
+          f"Every job pays the {JOB_FEE} HQC fee. extra_shots_capped_pct = 100 extra_shots_capped / shots_capped_P0.", ""]
     fa_cols = ["model", "n_circuits", "hqc_P0", "hqc_P2", "hqc_saved", "hqc_increase_P2_vs_P0_pct",
                "hqc_saved_pct_median", "n_P2_dearer", "n_P2_cheaper"]
     L += ["## Family A control (Trotter circuits)", "",
