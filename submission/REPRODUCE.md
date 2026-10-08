@@ -1,6 +1,6 @@
 # Reproduction record
 
-Team Learned ZX Rewriting. Recorded 8 October 2026 in the development container. `code.zip` is `git archive` of commit `a5968ee42766a5a8b44c6d46cc5ce90c52815ad4`. Run every command from the repository root. This page follows `README.md` and report Section 5. A clean-clone run of these steps is recorded in `results/repro_2026-10-08/repro_log.md`.
+Team Learned ZX Rewriting. Recorded 8 October 2026 in the development container. `code.zip` is `git archive` of commit `1cd7fd898ee0cb72047f25509489b4fc9ab5d224`. Run every command from the repository root. This page follows `README.md` and report Section 5. A clean-clone run of these steps is recorded in `results/repro_2026-10-08/repro_log.md`.
 
 ## Environment
 
@@ -25,7 +25,7 @@ git clone https://github.com/Quantinuum/pyzx.git third_party/pyzx-fork
 git -C third_party/pyzx-fork checkout e695d6d711e67b2b7223417c4714b6b1fcc09191
 ```
 
-- `papers/` holds the team's manuscripts and is not distributed. The exactness-barrier manuscript is arXiv:2608.22801. The line numbers cited in the report refer to its TeX source.
+- `papers/` holds the team's manuscripts and is not distributed. The exactness-barrier manuscript is arXiv:2608.22801. The line numbers in `barrier/NOTES.md` refer to its TeX source. The report cites the manuscript by theorem and table labels.
 - `results/proxy_h22e_fits.log` is tracked (an exception to the `*.log` rule of `.gitignore`). `value/value_ledger.py` and `submit/h22e_stats.py` read its line 77.
 
 ## Seeds

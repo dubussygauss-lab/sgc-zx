@@ -20,7 +20,7 @@ Team Learned ZX Rewriting. Quantinuum Singapore Grand Challenge, submission 1. B
 
 ## Certified fraction
 
-`[F]` The exactness-barrier certificate (Kam, arXiv:2608.22801) gives a per-instance floor on the T-count of every semantics-exact rewrite. It covers 24 circuits, all with n at most 5. On the 20 B2 circuits at n = 2 and 3 the floor is 41,414 against 41,534 T gates after ZX. The certified-incompressible fraction is 0.997. On the four B1 circuits at n = 5 the floor is 47 against 106 and the fraction is 0.443. The fraction 0.997 does not hold for B1.
+`[F]` The exactness-barrier certificate (Kam et al., arXiv:2608.22801) gives a per-instance floor on the T-count of every semantics-exact rewrite. It covers 24 circuits, all with n at most 5. On the 20 B2 circuits at n = 2 and 3 the floor is 41,414 against 41,534 T gates after ZX. The certified-incompressible fraction is 0.997. On the four B1 circuits at n = 5 the floor is 47 against 106 and the fraction is 0.443. The fraction 0.997 does not hold for B1.
 
 `[O]` The certificate does not say whether the B1 gap is headroom for a better rewrite or slack in the bound.
 
