@@ -10,7 +10,7 @@ Team Learned ZX Rewriting. Report title: "A pass selector keeps ZX rewriting onl
 
 ## HQC saved on H2
 
-`[F]` PSEL costs no more HQC than P0 on any of the 223 circuits of the four families. HQC is computed with the organisers' formula `estimate_cost` from the gate counts of the compiled circuit (report Section 1.2). At 1000 shots it costs 14,772.4 HQC against 15,516.0 for P0 on the 15 checked B1 circuits. The saving is 743.6 HQC or 4.79 %. The median per-circuit saving is 3.94 %. On the 180 Trotter circuits of family A PSEL saves 46.0 HQC or 0.28 %. It never raises the ZZ gate count against P0 on any of the 223 circuits.
+`[F]` PSEL cannot cost more HQC than P0 on a circuit where P0 passes the exactness check. This holds by construction because P0 is always one of its two candidates. It is not a measured result. PSEL picks P2 on 14 of the 15 checked B1 circuits. HQC is computed with the organisers' formula `estimate_cost` from the gate counts of the compiled circuit (report Section 1.2). At 1000 shots it costs 14,772.4 HQC against 15,516.0 for P0 on the 15 checked B1 circuits. The saving is 743.6 HQC or 4.79 %. The median per-circuit saving is 3.94 %. On the 180 Trotter circuits of family A PSEL picks P2 on 57 and saves 46.0 HQC or 0.28 %. It never raises the ZZ gate count against P0 on any of the 223 circuits.
 
 `[F]` P2 alone costs 14,772.8 HQC on B1 and is cheaper than P0 on 14 of the 15 circuits. hwb8 alone accounts for 84.5 % of the PSEL saving on B1 and serves no sourced quantum algorithm. Without hwb8 the PSEL saving on B1 is 115.0 HQC. On family A P2 alone would cost 6.27 % more than P0. PSEL keeps P0 on 123 of these 180 circuits and on all 60 XXZ circuits.
 
@@ -18,7 +18,7 @@ Team Learned ZX Rewriting. Report title: "A pass selector keeps ZX rewriting onl
 
 ## Magic states saved
 
-`[F]` On a surface-code machine each T gate consumes one magic state (Litinski, arXiv:1808.02892). The ZX stage removes 2,862 of 7,048 T gates on B1. That is 40.6 %. On the 8 count-only B1x circuits it removes 798 of 1,652 or 48.3 %. On the 20 synthesised B2 Haar circuits it removes 862 of 42,396 or 2.0 %.
+`[F]` On a surface-code machine each T gate consumes one magic state (Litinski, arXiv:1808.02892). Against the written input circuits the ZX stage removes 2,862 of 7,048 T gates on B1. That is 40.6 % of the written T-count. On the 8 count-only B1x circuits it removes 798 of 1,652 or 48.3 %. On the 20 synthesised B2 Haar circuits it removes 862 of 42,396 or 2.0 %. Our T-count after ZX equals the best ancilla-free value in the six papers of report Section 3.4 on 14 of 22 comparable B1 and B1x circuits and is above it on the other 8 (report Table C2).
 
 ## Certified fraction
 
