@@ -1,6 +1,6 @@
 # sgc-zx
 
-Team Learned ZX Rewriting, Quantinuum Singapore Grand Challenge. A resource-certification benchmark for Quantinuum H2 with two cost layers: the NISQ layer (ZZPhase count, two-qubit depth, HQC, emulated fidelity) and the fault-tolerant layer (T-count against a per-instance certified floor). The submission report is `report/report_v1.md`, the executable companion is `report/notebook_skeleton.py`.
+Team Learned ZX Rewriting, Quantinuum Singapore Grand Challenge. A resource-certification benchmark for Quantinuum H2 with two cost layers: the NISQ layer (ZZPhase count, two-qubit depth, HQC, emulated fidelity) and the fault-tolerant layer (T-count against a per-instance certified floor). The current submission report is `report/report_v4.md`. The executable companion is `report/notebook_skeleton.py`.
 
 ## Layout
 
@@ -16,8 +16,8 @@ Team Learned ZX Rewriting, Quantinuum Singapore Grand Challenge. A resource-cert
 | `pipelines/run_b2.py` | Family B2 runner. Writes `results/family_B2_counts.csv`. |
 | `noise/dm_sim.py`, `noise/h2_params.py`, `noise/run_proxy.py` | Local density-matrix noise proxy for family A (n <= 8). Writes `results/family_A_proxy.csv` and `results/fig_proxy_fidelity_vs_n2q.{pdf,png}`. Provisional until emulator runs exist. |
 | `barrier/certificate.py`, `barrier/NOTES.md` | Exact-arithmetic implementation of the T-count floor of the exactness-barrier manuscript (arXiv:2608.22801), with a line-by-line map to the manuscript. |
-| `report/make_tables.py` | Generates every table and figure of the report from `results/*.csv` and injects the tables into `report/report_v1.md`. |
-| `report/report_v1.md` | Submission report, draft v1. |
+| `report/make_tables.py` | Generates every table and figure of the report from `results/*.csv` and injects the tables into `report/report_v1.md` to `report/report_v4.md` at their `<!-- TABLE:name -->` markers. |
+| `report/report_v4.md` | Submission report, draft v4 (current). Drafts v1 to v3 are kept unchanged. |
 | `report/notebook_skeleton.py` | Marimo notebook: tables, figures, live compilation of one circuit through P0 and P2, gated submission to `nexus:H2-2E` through `aqora.QPU`. |
 | `report/tables/`, `report/figures/` | Outputs of `make_tables.py`. |
 | `results/` | All CSVs, logs and compiled QASM (hqslib1 header, measure-all appended). |
@@ -43,7 +43,8 @@ python pipelines/run_b2.py --workers 2
 # 7    noise proxy (provisional, family A n <= 8)
 python noise/run_proxy.py --workers 2
 
-# 8    tables and figures, injected into report/report_v1.md
+# 8    tables and figures, injected into report/report_v1.md to report/report_v4.md
+#      (--no-fig skips the figures, --no-inject writes report/tables/ only)
 python report/make_tables.py
 ```
 
@@ -51,13 +52,21 @@ Table A1 to A3 and the family A figure come from `results/family_A_counts.csv`. 
 
 Pending steps: certificates (`barrier/certificate.py` on family B1 n = 5 and family B2) and emulator jobs (notebook section 3). Both are marked `[PENDING: ...]` in the report.
 
-Tests, each runs as a script:
+Tests. Five run as scripts:
 
 ```
 python bench/test_gen_trotter.py
 python pipelines/test_compile.py
 python noise/test_dm_sim.py
 python barrier/test_certificate.py
+python model/test_cost_model.py
+```
+
+Two run under pytest. The Selene tests need the proxy variables cleared (see the proxy note below):
+
+```
+HTTPS_PROXY= https_proxy= HTTP_PROXY= http_proxy= NO_PROXY= no_proxy= python -m pytest selene/test_selene.py -q
+python -m pytest submit/test_submit.py -q
 ```
 
 ## Notebook
@@ -71,10 +80,10 @@ Before submitting, set `TEAM_ORG` in the second cell to the team's aqora organiz
 
 ## Environment
 
-Python 3.13, pytket 2.18.4, pytket-quantinuum 0.59.3, pyzx 0.10.7, qiskit 2.5.2, pygridsynth 2.0.0, numpy 2.5.3, pandas 2.3.3, scipy 1.18.1, matplotlib 3.11.2, aqora 0.35.1, qnexus 0.51.1, selene-sim 0.3.4, marimo 0.25.1. Full list in `report/report_v1.md`, section 5.
+Python 3.13, pytket 2.18.4, pytket-quantinuum 0.59.3, pyzx 0.10.7, qiskit 2.5.2, pygridsynth 2.0.0, numpy 2.5.3, pandas 2.3.3, scipy 1.18.1, matplotlib 3.11.2, aqora 0.35.1, qnexus 0.51.1, selene-sim 0.3.4, marimo 0.25.1. Full list in `report/report_v4.md`, section 5.
 
 ```
 pip install pytket==2.18.4 pytket-quantinuum==0.59.3 pyzx==0.10.7 qiskit==2.5.2 pygridsynth==2.0.0 aqora==0.35.1 marimo==0.25.1 numpy pandas scipy matplotlib
 ```
 
-Proxy note. In the development container outbound HTTPS goes through an agent proxy. pip installs were run with the proxy variables cleared for that one command: `NO_PROXY= no_proxy= pip install --break-system-packages <package>`. Local Selene runs also need every proxy variable unset (`HTTPS_PROXY= https_proxy= HTTP_PROXY= http_proxy= python ...`). aqora job submission needs the team credentials and has not been exercised from this container.
+Proxy note. In the development container outbound HTTPS goes through an agent proxy. pip installs were run with the proxy variables cleared for that one command: `NO_PROXY= no_proxy= pip install --break-system-packages <package>`. Local Selene runs also need every proxy variable unset (`HTTPS_PROXY= https_proxy= HTTP_PROXY= http_proxy= python ...`). aqora job submission needs the team credentials. The jobs submitted from this container on 8 October 2026 are listed in `results/emulator_jobs.csv`.

@@ -27,12 +27,15 @@ Inputs (all under results/)
   family_B1_proxy_h22e.csv  local density-matrix noise proxy (H2-2E parameters), family B1, n <= 7
   certificates.csv      exactness-barrier certificate, 20 family B2 + 4 family B1 circuits
   selene_noiseless.csv, selene_depolarizing.csv  Selene local-emulator runs
+  emulator_nexus_H2-Emulator.csv  Nexus H2-Emulator runs, 1000 shots, with the
+                        counts in emulator/nexus_H2-Emulator/<pipeline>/<file>.json
+                        (table E1 of Section 3.7)
   cost_model_metrics.csv, cost_model_coefficients.csv, fig_cost_model.png
                         written by model/cost_model.py (tables M1, M2 and the
                         cost-model figure of Section 4)
 
 The marker injection runs on report/report_v1.md, report/report_v2.md,
-report/report_v3.md and every report/v2/part*.md that exists.
+report/report_v3.md, report/report_v4.md and every report/v2/part*.md that exists.
 
 Definitions used below
   n_2q           ZZPhase + ZZMax count of the compiled native circuit
@@ -64,6 +67,7 @@ FIGURES = os.path.join(ROOT, "report", "figures")
 REPORT = os.path.join(ROOT, "report", "report_v1.md")
 REPORT_V2 = os.path.join(ROOT, "report", "report_v2.md")
 REPORT_V3 = os.path.join(ROOT, "report", "report_v3.md")
+REPORT_V4 = os.path.join(ROOT, "report", "report_v4.md")
 
 PIPELINES_A = ["P0ref", "P0", "P0L1", "P1", "P2", "P3", "P4"]
 PIPELINES_B2 = ["P0ref", "P0", "P1", "P2", "P3"]
@@ -93,7 +97,7 @@ INT_COLUMNS = {"n", "r", "circuits", "circuits per pipeline", "T written",
                "ZZ P0ref", "ZZ P0", "ZZ P0L1", "ZZ P1", "ZZ P2", "ZZ P3", "ZZ P4",
                "support", "floor", "runs", "shots per run", "flagged (TVD > 4 TVD_scale)",
                "shots outside support", "abs z <= 2",
-               "depth_2q P0", "depth_2q P2"}
+               "depth_2q P0", "depth_2q P2", "n_2q"}
 
 
 def md_table(df: pd.DataFrame, floatfmt="{:.1f}", fmt: dict = None) -> str:
@@ -682,6 +686,135 @@ def selene_depol_full():
             "mean_p2_minus_p0": float((w.P2 - w.P0).mean())}
 
 
+# ------------------------------------------------------------ H2-Emulator
+
+EMU_BOOT = 4000      # bootstrap resamples per row
+EMU_SEED = 20261008  # bootstrap seed
+
+
+def _emu_reference(family: str, file: str) -> np.ndarray:
+    """Ideal distribution used for F_H, as in submit/common.py:reference_probs:
+    family A from the bench .npy, B1 from the P0ref compilation."""
+    if family == "A":
+        return np.load(os.path.join(ROOT, "bench", "family_A", file[:-5] + ".npy"))
+    import sys
+    sys.path.insert(0, os.path.join(ROOT, "pipelines"))
+    from compile import probs_from_measured_qasm
+    with open(os.path.join(RESULTS, "compiled", "P0ref", file)) as f:
+        return probs_from_measured_qasm(f.read())
+
+
+def _emu_counts(pipeline: str, file: str, n: int):
+    import json
+    path = os.path.join(RESULTS, "emulator", "nexus_H2-Emulator", pipeline, file[:-5] + ".json")
+    with open(path) as f:
+        d = json.load(f)
+    c = np.zeros(2 ** n)
+    for key, v in d["counts"].items():
+        c[int(key.replace(" ", ""), 2)] += v
+    return c, d["family"]
+
+
+def emulator_h2e():
+    """Table E1: Nexus H2-Emulator runs (results/emulator_nexus_H2-Emulator.csv,
+    counts in results/emulator/nexus_H2-Emulator/), with the bootstrap sd of F_H
+    per row and the proxy and Selene depolarising F_H of the same (file, pipeline)."""
+    path = os.path.join(RESULTS, "emulator_nexus_H2-Emulator.csv")
+    if not os.path.exists(path):
+        write("E1_h2emulator", "[PENDING: emulator] results/emulator_nexus_H2-Emulator.csv not found.\n")
+        return None
+    e = pd.read_csv(path)
+    rng = np.random.default_rng(EMU_SEED)
+    sd, sd_delta, f_check, fams = [], [], [], []
+    for r in e.itertuples():
+        c, fam = _emu_counts(r.pipeline, r.file, int(r.n_qubits))
+        fams.append(fam)
+        q = _emu_reference(fam, r.file)
+        N = int(c.sum())
+        assert N == int(r.shots)
+        phat = c / N
+        f = float(np.sum(np.sqrt(phat * q)) ** 2)
+        f_check.append(abs(f - r.F_H))
+        boot = rng.multinomial(N, phat, size=EMU_BOOT) / N
+        fb = np.sum(np.sqrt(boot * q[None, :]), axis=1) ** 2
+        sd.append(float(fb.std(ddof=1)))
+        b = np.sqrt(f)
+        qs = float(q[phat > 0].sum())
+        sd_delta.append(float(b * np.sqrt(max(qs - b * b, 0.0) / N)))
+    e = e.assign(sd_boot=sd, sd_delta=sd_delta, family=fams)
+    assert max(f_check) < 1e-9, "F_H recomputed from counts differs from the CSV"
+    proxy = pd.concat([pd.read_csv(os.path.join(RESULTS, f"family_{fam}_proxy_h22e.csv"))
+                       for fam in ["A", "B1"]])[["file", "pipeline", "F_H"]]
+    proxy = proxy.rename(columns={"F_H": "F_H_proxy"})
+    sel = pd.read_csv(os.path.join(RESULTS, "selene_depolarizing_full.csv"))[
+        ["file", "pipeline", "F_H_selene_depol", "shots"]].rename(columns={"shots": "shots_selene"})
+    m = e.merge(proxy, on=["file", "pipeline"], how="left").merge(sel, on=["file", "pipeline"], how="left")
+    t = pd.DataFrame({"file": m.file.str.replace(".qasm", "", regex=False), "n": m.n.astype(int),
+                      "pipeline": m.pipeline, "n_2q": m.n_2q.astype(int),
+                      "F_H emulator": m.F_H, "sd F_H emulator": m.sd_boot,
+                      "F_H proxy": m.F_H_proxy, "F_H Selene depol": m.F_H_selene_depol})
+    # Comparisons.  Proxy: exact, so the sd of the difference is the emulator sd.
+    # Selene: sampled at shots_selene, its sd taken as sd_boot * sqrt(1000 / shots_selene).
+    mp = m[m.F_H_proxy.notna()]
+    dp = mp.F_H - mp.F_H_proxy
+    ms = m[m.F_H_selene_depol.notna()]
+    ss = np.sqrt(ms.sd_boot ** 2 * (1 + ms.shots / ms.shots_selene))
+    ds = ms.F_H - ms.F_H_selene_depol
+    # P2 against P0 on the same circuit.
+    w = m.pivot_table(index="file", columns="pipeline", values=["F_H", "sd_boot", "n_2q"])
+    pairs = []
+    for f in w.index:
+        if not (np.isfinite(w.loc[f, ("F_H", "P0")]) and np.isfinite(w.loc[f, ("F_H", "P2")])):
+            continue
+        pairs.append({"file": f, "dzz": int(w.loc[f, ("n_2q", "P0")] - w.loc[f, ("n_2q", "P2")]),
+                      "dF": float(w.loc[f, ("F_H", "P2")] - w.loc[f, ("F_H", "P0")]),
+                      "sd_diff": float(np.hypot(w.loc[f, ("sd_boot", "P0")], w.loc[f, ("sd_boot", "P2")]))})
+    pairs = pd.DataFrame(pairs)
+    # Expected F_H gain per removed ZZ gate: no-intercept slope of -ln F_H on n_2q,
+    # family B1 proxy (as in family_b1_proxy).
+    pb = pd.read_csv(os.path.join(RESULTS, "family_B1_proxy_h22e.csv"))
+    y, x = -np.log(pb.F_H.values), pb.n_2q.values.astype(float)
+    slope = float(x @ y / (x @ x))
+    if len(pairs):
+        f0 = np.array([float(w.loc[f, ("F_H", "P0")]) for f in pairs.file])
+        pairs["dF_expected"] = f0 * (np.exp(slope * pairs.dzz) - 1)
+        pairs["z_observed"] = pairs.dF / pairs.sd_diff
+        pairs["expected_over_sd"] = pairs.dF_expected / pairs.sd_diff
+    b1 = m[(m.support_size == 1)]
+    # Shots per pipeline for a one-gate F_H difference to equal two sd of the
+    # P2 - P0 difference on a support-1 circuit at the mean B1 F_H of the table.
+    fb = float(b1.F_H.mean())
+    d1 = fb * (np.exp(slope) - 1)
+    shots_1gate_2sd = float(2 * fb * (1 - fb) * (2 / d1) ** 2)
+    off_p = mp[(dp.abs() > 2 * mp.sd_boot)]
+    off_s = ms[(ds.abs() > 2 * ss)]
+    text = ("Nexus H2-Emulator, noisy_simulation = True, 1000 shots per row. F_H is the Hellinger "
+            "fidelity of the returned counts to the ideal distribution. sd F_H emulator is the sd of "
+            f"F_H over {EMU_BOOT} multinomial bootstrap resamples of the counts (seed {EMU_SEED}). "
+            "F_H proxy is the exact density-matrix proxy value of Section 3.5 and is empty where the "
+            "proxy has no row. F_H Selene depol is the 2000-shot Selene DepolarizingErrorModel value "
+            "of Section 3.6.\n\n"
+            + md_table(t, "{:.4f}"))
+    write("E1_h2emulator", text)
+    return {"t": t, "rows": int(len(m)), "sd_min": float(m.sd_boot.min()), "sd_max": float(m.sd_boot.max()),
+            "sd_b1_min": float(b1.sd_boot.min()), "sd_b1_max": float(b1.sd_boot.max()),
+            "sd_b1_mean": float(b1.sd_boot.mean()),
+            "sd_A_min": float(m[m.family == "A"].sd_boot.min()),
+            "sd_A_max": float(m[m.family == "A"].sd_boot.max()),
+            "max_rel_delta_vs_boot": float((np.abs(m.sd_delta - m.sd_boot) / m.sd_boot).max()),
+            "n_proxy": int(len(mp)), "mean_d_proxy": float(dp.mean()),
+            "within2_proxy": int((dp.abs() <= 2 * mp.sd_boot).sum()),
+            "n_selene": int(len(ms)), "mean_d_selene": float(ds.mean()),
+            "within2_selene": int((ds.abs() <= 2 * ss).sum()),
+            "pairs": pairs, "slope_b1": slope, "fb_mean": fb, "dF_1gate": float(d1),
+            "shots_1gate_2sd": shots_1gate_2sd,
+            "off_proxy": list(zip(off_p.file, off_p.pipeline)),
+            "off_selene": list(zip(off_s.file, off_s.pipeline)),
+            "mean_abs_d_proxy": float(dp.abs().mean()), "mean_abs_d_selene": float(ds.abs().mean()),
+            "mean_d_proxy_A": float(dp[mp.family == "A"].mean()),
+            "mean_d_proxy_B1": float(dp[mp.family == "B1"].mean())}
+
+
 # --------------------------------------------------------------- injection
 
 def inject(report_path: str):
@@ -717,6 +850,7 @@ def main():
     fc = certificates()
     fs = selene()
     fsd = selene_depol_full()
+    fe = emulator_h2e()
     print("family A: circuits", fa["n_circuits"], "| P0 at ZZ term count:",
           fa["p0_at_floor"], "| circuits with any pipeline below it:", fa["any_below_floor"],
           "| P2 ties P0:", fa["p2_ties"], "worse:", fa["p2_worse"])
@@ -740,12 +874,16 @@ def main():
     if fsd is not None:
         print("selene depol full: runs", fsd["runs"], "| circuits", fsd["circuits"], "| P0>P1 and P2>P1",
               fsd["both"], "| mean P2-P0 %.5f" % fsd["mean_p2_minus_p0"])
+    if fe is not None:
+        print("H2-Emulator:", {k: v for k, v in fe.items() if k not in ("t", "pairs")})
+        print(fe["pairs"].to_string(index=False))
     for name in ["A1_zz_by_n", "A2_vs_P0", "A3_floor", "A4_proxy", "B1_per_circuit", "B1x_per_circuit", "B2_summary",
-                 "M1_cost_metrics", "M2_cost_coefficients", "A5_proxy_b1", "C1_certificates", "S1_selene", "S2_selene_depol"]:
+                 "M1_cost_metrics", "M2_cost_coefficients", "A5_proxy_b1", "C1_certificates", "S1_selene", "S2_selene_depol",
+                 "E1_h2emulator"]:
         if os.path.exists(os.path.join(TABLES, name + ".md")):
             print(f"\n### {name}\n" + open(os.path.join(TABLES, name + ".md")).read())
     if not args.no_inject:
-        for path in ([REPORT, REPORT_V2, REPORT_V3]
+        for path in ([REPORT, REPORT_V2, REPORT_V3, REPORT_V4]
                      + sorted(glob.glob(os.path.join(ROOT, "report", "v2", "part*.md")))):
             if os.path.exists(path):
                 k = inject(path)

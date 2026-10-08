@@ -72,7 +72,11 @@ Outputs
     results/fig_cost_model.{pdf,png}
     results/cost_model.md
 
-Usage: python model/cost_model.py [--family-a CSV] [--family-b CSV] [--out DIR]
+    With --prefix TAG the four outputs are cost_model_TAGmetrics.csv,
+    cost_model_TAGcoefficients.csv, cost_model_TAGfig.{pdf,png} and
+    cost_model_TAGautoreport.md (see output_names).
+
+Usage: python model/cost_model.py [--family-a CSV] [--family-b CSV] [--out DIR] [--prefix TAG]
 """
 
 import argparse
@@ -537,12 +541,29 @@ def write_report(path, metrics, coefs, dfA, dfB, a_path, b_path, fig):
 
 # -------------------------------------------------------------------- main
 
+def output_names(prefix: str = "") -> dict:
+    """Output file names.  The empty prefix gives the original names."""
+    if not prefix:
+        return {"metrics": "cost_model_metrics.csv", "coefficients": "cost_model_coefficients.csv",
+                "figure": "fig_cost_model", "report": "cost_model.md"}
+    return {"metrics": f"cost_model_{prefix}metrics.csv",
+            "coefficients": f"cost_model_{prefix}coefficients.csv",
+            "figure": f"cost_model_{prefix}fig", "report": f"cost_model_{prefix}autoreport.md"}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--family-a", default=os.path.join(ROOT, "results", "family_A_proxy_h22e.csv"))
     ap.add_argument("--family-b", default=os.path.join(ROOT, "results", "family_B1_proxy_h22e.csv"))
     ap.add_argument("--out", default=os.path.join(ROOT, "results"))
+    ap.add_argument("--prefix", default="",
+                    help="output name tag. Empty (default) writes cost_model_metrics.csv, "
+                         "cost_model_coefficients.csv, fig_cost_model.{pdf,png} and cost_model.md. "
+                         "A tag such as selene_ writes cost_model_selene_metrics.csv, "
+                         "cost_model_selene_coefficients.csv, cost_model_selene_fig.{pdf,png} and "
+                         "cost_model_selene_autoreport.md.")
     args = ap.parse_args()
+    names = output_names(args.prefix)
 
     dfA = pd.read_csv(args.family_a)
     dfB = pd.read_csv(args.family_b)
@@ -553,11 +574,11 @@ def main():
     coefs = coefficient_table(dfA, dfB, pool, factories, oof)
 
     os.makedirs(args.out, exist_ok=True)
-    metrics.to_csv(os.path.join(args.out, "cost_model_metrics.csv"), index=False)
-    coefs.to_csv(os.path.join(args.out, "cost_model_coefficients.csv"), index=False)
-    fig = os.path.join(args.out, "fig_cost_model")
+    metrics.to_csv(os.path.join(args.out, names["metrics"]), index=False)
+    coefs.to_csv(os.path.join(args.out, names["coefficients"]), index=False)
+    fig = os.path.join(args.out, names["figure"])
     make_figure(pool, oof, pred_A_to_B, coefs, fig)
-    write_report(os.path.join(args.out, "cost_model.md"), metrics, coefs, dfA, dfB,
+    write_report(os.path.join(args.out, names["report"]), metrics, coefs, dfA, dfB,
                  args.family_a, args.family_b, fig)
     pd.set_option("display.width", 200)
     print(metrics.to_string(index=False, float_format=lambda v: "%.4g" % v))
