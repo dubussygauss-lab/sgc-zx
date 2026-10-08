@@ -2,7 +2,7 @@
 # Runs every test file once from the repository root and writes one log per file
 # plus a summary to submission/build_logs/. Rerunnable.
 cd "$(dirname "$0")/.."
-# 11 test files: 6 run as scripts, 5 under pytest. See REPRODUCE.md (Tests).
+# 12 test files: 6 run as scripts, 6 under pytest. See REPRODUCE.md (Tests).
 LOG=submission/build_logs
 mkdir -p "$LOG"
 : > "$LOG/tests_summary.txt"
@@ -22,6 +22,7 @@ run selene        env HTTPS_PROXY= https_proxy= HTTP_PROXY= http_proxy= NO_PROXY
 run cost_model    python model/test_cost_model.py
 run submit        python -m pytest submit/test_submit.py -q
 run h22e_stats    python -m pytest submit/test_h22e_stats.py -q
+run h22e_pooled   python -m pytest submit/test_h22e_pooled.py -q
 run value_ledger  python -m pytest value/test_value_ledger.py -q
 run value_by_app  python -m pytest value/test_value_by_application.py -q
 run c2_literature python report/test_c2_literature.py

@@ -122,3 +122,23 @@ def test_holm(res):
     expect = {lo: min(1, 2 * lo), hi: max(min(1, 2 * lo), hi)}
     for x in res["pairs"].itertuples():
         assert x.p_holm == pytest.approx(expect[x.p], abs=1e-15)
+
+
+def test_holm_three_circuits(res):
+    """Holm over vbe_adder_3 and grover_5 (pooled) and hwb6 (single run, Table E2)."""
+    import h22e_stats
+    hw = h22e_stats.compute()["pairs"]
+    z = float(hw[hw.file == "hwb6.qasm"].z.iloc[0])
+    p = dict(zip(res["pairs"].file, res["pairs"].p))
+    p["hwb6.qasm"] = math.erfc(abs(z) / math.sqrt(2))
+    order = sorted(p, key=p.get)
+    adj, run = {}, 0.0
+    for i, f in enumerate(order):
+        run = max(run, min(1.0, (3 - i) * p[f]))
+        adj[f] = run
+    fam = res["family3"]
+    assert len(fam) == 3
+    for x in fam.itertuples():
+        assert x.p_holm3 == pytest.approx(adj[x.file], abs=1e-15)
+    for x in res["pairs"].itertuples():
+        assert x.p_holm3 == pytest.approx(adj[x.file], abs=1e-15)

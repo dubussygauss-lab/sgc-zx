@@ -29,6 +29,10 @@ What it computes for vbe_adder_3 and grover_5 under P0 and P2
   dF_pred        pooled F_H(P0) (exp(a dN_2q) - 1) with a = h22e_stats.SLOPE_LOG.
   z_vs_pred      (dF - dF_pred) / sd.
   p_holm         Holm step-down adjustment of the two-sided p over the circuits.
+  p_holm3        Holm adjustment over all three H2-2E circuits: the pooled p of
+                 vbe_adder_3 and grover_5 and the single-run p of hwb6
+                 (h22e_stats.compute, Table E2).  The repeat circuits were chosen
+                 after Table E2, so this is the family-wide adjustment.
   HQC            sum of hqc_estimate over every H2-2E JSON (original + repeats).
                  Completed-only and all-submitted totals are both printed.
 
@@ -256,9 +260,20 @@ def compute() -> dict:
     pairs = pd.DataFrame(pairs)
     if len(pairs):
         pairs["p_holm"] = holm(pairs.p.values)
+    # Family of all three H2-2E circuits: hwb6 enters with its single-run p (Table E2).
+    hw = h22e_stats.compute()["pairs"]
+    hw = hw[hw.file == "hwb6.qasm"].iloc[0]
+    family = pd.DataFrame([{"file": x.file, "source": "pooled", "z": x.z, "p": x.p}
+                           for x in pairs.itertuples()]
+                          + [{"file": "hwb6.qasm", "source": "single run", "z": float(hw.z),
+                              "p": math.erfc(abs(float(hw.z)) / math.sqrt(2))}])
+    family["p_holm3"] = holm(family.p.values)
+    if len(pairs):
+        pairs["p_holm3"] = [float(family[family.file == f].p_holm3.iloc[0]) for f in pairs.file]
     hq = hqc_totals()
     final = bool(len(cells) == len(FILES) * len(PIPELINES) and (cells.runs == EXPECTED_RUNS).all())
     return {"runs": runs.drop(columns=["counts"]), "per_run": per_run, "cells": cells, "pairs": pairs,
+            "family3": family,
             "pending": pd.DataFrame(pending), "warnings": warnings, "final": final, **hq,
             "hqc_pct": 100 * hq["hqc_completed"] / QUOTA_HQC,
             "hqc_pct_submitted": 100 * hq["hqc_submitted"] / QUOTA_HQC}
@@ -339,13 +354,15 @@ def prose_values(r: dict) -> dict:
         v[k + "_z"] = "%+.2f" % pr.z
         v[k + "_p"] = _p(pr.p)
         v[k + "_p_holm"] = _p(pr.p_holm)
+        v[k + "_p_holm3"] = _p(pr.p_holm3)
         v[k + "_pred"] = _f4(pr.dF_pred)
         side = "below" if pr.z_vs_pred < 0 else "above"
         v[k + "_vs_pred"] = "%.2f sd %s" % (abs(pr.z_vs_pred), side)
         name = pr.file[:-5]
         if abs(pr.z) >= 2:
-            s = ("On %s the pooled data resolve the difference at %s. P2 is %s P0 by %.4f with z = %+.2f."
-                 % (name, _shots_phrase(pr), "above" if pr.dF > 0 else "below", abs(pr.dF), pr.z))
+            s = ("On %s at %s P2 is %s P0 by %.4f with z = %+.2f. The difference is significant at 0.05"
+                 " before correction." % (name, _shots_phrase(pr), "above" if pr.dF > 0 else "below",
+                                          abs(pr.dF), pr.z))
         else:
             s = ("On %s the difference is not resolved at %s. Its z is %+.2f."
                  % (name, _shots_phrase(pr), pr.z))
@@ -361,14 +378,26 @@ def prose_values(r: dict) -> dict:
         kept = [f for f in res_ if f in sig]
         lost = [f for f in res_ if f not in sig]
         if kept:
-            concl.append("After Holm adjustment over the %s circuits the difference on %s stays below p = 0.05."
+            concl.append("After Holm adjustment over the %s repeated circuits the difference on %s stays below p = 0.05."
                          % (WORD.get(m, str(m)), " and ".join(kept)))
         if lost:
-            concl.append("After Holm adjustment over the %s circuits the difference on %s is no longer below"
+            concl.append("After Holm adjustment over the %s repeated circuits the difference on %s is no longer below"
                          " p = 0.05." % (WORD.get(m, str(m)), " and ".join(lost)))
     else:
         concl.append("No circuit reaches p = 0.05 before or after Holm adjustment over the %s circuits."
                      % WORD.get(m, str(m)))
+    sig3 = [pr.file[:-5] for pr in pairs.itertuples() if pr.p_holm3 < 0.05]
+    for f in res_:
+        if f in sig and f not in sig3:
+            concl.append("After Holm adjustment over all three H2-2E circuits the difference on %s is not below"
+                         " p = 0.05." % f)
+        elif f in sig3:
+            concl.append("After Holm adjustment over all three H2-2E circuits the difference on %s stays below"
+                         " p = 0.05." % f)
+    fam = r["family3"]
+    hw = fam[fam.file == "hwb6.qasm"].iloc[0]
+    v["hwb6_p1"] = _p(hw.p)
+    v["hwb6_p_holm3"] = _p(hw.p_holm3)
     v["conclusion"] = " ".join(concl)
     if rej:
         v["hom_caveat"] = (" The rejected homogeneity test means the runs vary by more than sampling error."
@@ -413,6 +442,9 @@ def main():
     print(cells[cols].to_string(index=False))
     print()
     print(r["pairs"].to_string(index=False))
+    print()
+    print("Holm over all three H2-2E circuits (repeat circuits chosen after Table E2):")
+    print(r["family3"].to_string(index=False))
     print()
     print("slope a = %.4e per ZZ gate" % SLOPE)
     print("HQC estimate, completed H2-2E jobs: %d jobs, %.1f HQC = %.2f %% of %.0f"
