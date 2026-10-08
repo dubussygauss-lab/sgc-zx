@@ -1,6 +1,6 @@
-"""Self-running tests for select.py.  Run: python3 pipelines/test_select.py
+"""Self-running tests for select.py.  Run: python3 pipelines/test_pass_select.py
 
-select.py is loaded by file path: `import select` would return the stdlib
+pass_select.py is loaded by file path (the old name select.py clashed with the stdlib
 module of the same name, which is built into this interpreter.
 
 (a) on 6 circuits (family_B1: vbe_adder_3, qft_4, tof_3; family_A:
@@ -26,7 +26,7 @@ sys.path.insert(0, HERE)
 import compile as C  # noqa: E402
 
 _spec = importlib.util.spec_from_file_location(
-    "pass_select", os.path.join(HERE, "select.py"))
+    "pass_select", os.path.join(HERE, "pass_select.py"))
 S = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(S)
 

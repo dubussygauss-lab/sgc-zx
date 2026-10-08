@@ -3,7 +3,7 @@
 No new experiments.  Every number in value/selector_ledger.csv and
 value/selector_ledger.md is computed here from CSVs already in the repository.
 
-Selector rule (approved by Kam, implemented in pipelines/select.py):
+Selector rule (approved by Kam, implemented in pipelines/pass_select.py):
   for each circuit compile P0 (pytket L2) and P2 (ZX teleport_reduce + L2),
   keep the one with the lower HQC; on an HQC tie keep the one with the lower
   n_2q; on a further tie keep P0.

@@ -16,7 +16,7 @@ Exactness check: compile.check(comp, circ), unitary up to 8 qubits and
 statevector beyond.  Above `check_max_qubits` (default 20) no check is run;
 such a candidate is kept and marked "ok-unchecked" in the record.
 
-CLI: python3 pipelines/select.py [--shots N] [--candidates P0,P2] <qasm files...>
+CLI: python3 pipelines/pass_select.py [--shots N] [--candidates P0,P2] <qasm files...>
 prints one row per file.
 """
 
