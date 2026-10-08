@@ -1,6 +1,6 @@
 # Reproduction record
 
-Team Learned ZX Rewriting. Recorded 8 October 2026 in the development container. `code.zip` is `git archive` of commit `75634face342f414c978013672142c92fdd433ab`. Run every command from the repository root. This page follows `README.md` and report Section 5. A clean-clone run of these steps is recorded in `results/repro_2026-10-08/repro_log.md`.
+Team Learned ZX Rewriting. Recorded 8 October 2026 in the development container. `code.zip` is `git archive` of commit `85ceb64aba0e105c0a95c8b28cee1b57ba5e20d5`. Run every command from the repository root. This page follows `README.md` and report Section 5. A clean-clone run of these steps is recorded in `results/repro_2026-10-08/repro_log.md`.
 
 ## Environment
 
