@@ -10,8 +10,8 @@ Tags: `[F]` marks a statement verifiable from an artifact in the repository or f
 
 | Criterion | Weight | Where the evidence is |
 |---|---|---|
-| Problem & Value | 30 % | Section 1, Section 6 |
-| Technical Performance & Hardware Use | 30 % | Section 1.2 and Table 1.1a for the pass selector PSEL from `value/selector_ledger.md`, Section 3 (count tables A1 to B2 and the count-only table B1x, proxy tables A4 and A5, Selene tables S1 and S2, H2-Emulator table E1, H2-2E tables E2 and E3), Section 2.6 and `results/selene.md` for the Selene runs, Sections 3.7 and 3.7.1 and `results/emulator_jobs.csv` for the platform jobs, notebook `report/notebook_skeleton.py` |
+| Problem & Value | 30 % | Section 1, Section 7 |
+| Technical Performance & Hardware Use | 30 % | Section 1.2 and Table 1.1a for the pass selector PSEL from `value/selector_ledger.md`, Section 3 (count tables A1 to B2 and the count-only table B1x, proxy tables A4 and A5, Selene tables S1 and S2, H2-Emulator table E1, H2-2E tables E2 and E3), Section 2.6 and `results/selene.md` for the Selene runs, Sections 3.7 and 3.7.1 and `results/emulator_jobs.csv` for the platform jobs, Section 6 for the H2 hardware plan of the finals, notebook `report/notebook_skeleton.py` |
 | Scientific Merit | 20 % | Section 2.5 (certificate), Section 3.4 and `results/certificates.md`, arXiv:2608.22801 and arXiv:2608.22810 |
 | Engineering & Reproducibility | 20 % | Section 5 (environment, seeds, script table, test table, verification reports), `pipelines/pass_select.py` with `pipelines/test_pass_select.py`, `value/selector_ledger.py` with `value/test_selector_ledger.py`, `README.md`, the tests under `bench/`, `noise/`, `barrier/`, `pipelines/`, `selene/`, `model/`, `submit/` and `value/`, Section 4.7 for the refit command |
 
@@ -834,12 +834,13 @@ Figure 4. Learned cost model on the proxy data. Left, predicted F_H = exp(-y_hat
 | Published T-counts of Table C2 | `python report/build_literature_tcounts.py results/literature_tcounts.csv` | `results/family_B1_counts.csv`, `results/family_B1x_counts.csv`, values copied from the six papers of Section 3.4 | `results/literature_tcounts.csv` |
 | Pass selector | `python pipelines/pass_select.py [--shots N] [--candidates P0,P2] <qasm files>` | QASM files of the input circuits | one row per file with the chosen pipeline and the HQC and n_2q of each candidate, printed |
 | Selector ledger, Table 1.1a | `python value/selector_ledger.py` | `value/value_ledger.csv`, `results/family_B2_counts.csv` | `value/selector_ledger.md`, `value/selector_ledger.csv`, `value/selector_ledger_circuits.csv` |
+| Finals hardware plan, Section 6 | `python value/finals_plan.py` | the H2-2E counts of Tables E2 and E3, `results/compiled/P0/` and `results/compiled/P2/` | `value/finals_plan.md` |
 | Tables and figures | `python report/make_tables.py` | `results/*.csv` | `report/tables/*.md`, `report/figures/*.png`, injected into the report |
 | Emulator jobs | `python3 submit/syntax_check.py` and `python3 submit/run_emulator.py`, with platform, shots and options of each job recorded in `results/emulator_jobs.csv` | `results/compiled/<pipeline>/` | `results/emulator_jobs.csv`, `results/emulator_nexus_H2-Emulator.csv`, `results/emulator/<platform>/<pipeline>/<file>.json` |
 
 `[F]` The Selene command clears every proxy variable because Selene streams its results over a local TCP socket that the container proxy intercepts (`results/selene.md`, section 1).
 
-`[F]` Tests. Each file was run once with the versions above, on 7 October 2026 unless the table gives 8 or 9 October. Seven files run as scripts. Seven files run under pytest. These are `selene/test_selene.py`, `submit/test_submit.py`, `submit/test_h22e_stats.py`, `submit/test_h22e_pooled.py`, `value/test_value_ledger.py`, `value/test_value_by_application.py` and `value/test_selector_ledger.py`.
+`[F]` Tests. Each file was run once with the versions above, on 7 October 2026 unless the table gives 8 or 9 October. Seven files run as scripts. Eight files run under pytest. These are `selene/test_selene.py`, `submit/test_submit.py`, `submit/test_h22e_stats.py`, `submit/test_h22e_pooled.py`, `value/test_value_ledger.py`, `value/test_value_by_application.py`, `value/test_selector_ledger.py` and `value/test_finals_plan.py`.
 
 | File | Command | Result | Wall time |
 |---|---|---|---|
@@ -856,6 +857,7 @@ Figure 4. Learned cost model on the proxy data. Left, predicted F_H = exp(-y_hat
 | `value/test_value_ledger.py` | `python -m pytest value/test_value_ledger.py -q` | 5 of 5 passed, 8 October | 2.9 s |
 | `value/test_value_by_application.py` | `python -m pytest value/test_value_by_application.py -q` | 5 of 5 passed, 8 October | 1.1 s |
 | `value/test_selector_ledger.py` | `python -m pytest value/test_selector_ledger.py -q` | 4 of 4 passed, 9 October | 1.6 s |
+| `value/test_finals_plan.py` | `python -m pytest value/test_finals_plan.py -q` | 5 of 5 passed, 9 October | 7.0 s |
 | `report/test_c2_literature.py` | `python report/test_c2_literature.py` | all checks passed (12 assert statements), 8 October | 0.6 s |
 
 `[F]` The compile tests check every pipeline against the unitary of the input and check that the measured QASM encodes the implicit qubit permutation left by `allow_swaps=True`. The certificate tests reproduce the finite verifications of the barrier manuscript (the counts 24, 1536 and 18384). The Selene tests check the bit order of the returned array with a permuted measure map and check that a seed reproduces the counts. The cost-model tests check that OLS recovers a known law without noise and that the physics baseline is exact on its own law. The pass selector tests rerun PSEL on six circuits of families A and B1 and compare its choice and HQC with the stored P0 and P2 rows. They also check that PSEL never costs more than P0 and test the tie-break rule. The selector ledger tests check the same two properties on all 223 circuits and check the family totals. The submit tests run offline. They check the native gate set, the HQC formula, the bit order of returned counts, F_H and TVD, the job ledger, the job plans, the credential detection and the rubric rendering.
@@ -868,13 +870,37 @@ Figure 4. Learned cost model on the proxy data. Left, predicted F_H = exp(-y_hat
 
 - `[F]` `results/verification_2026-10-07c.md` rechecked report v2 item by item, from Sections 1 and 2 to the prose rules.
 - `[F]` `results/verification_2026-10-08a.md` rechecked the family B1x numbers of report v3 and recompiled tof_10 and rc_adder_6.
-- `[F]` `results/verification_2026-10-08b.md` checked Section 1, Section 3.7.1, the Section 6 hardware sentence, the scoring map and the v5 changelog.
+- `[F]` `results/verification_2026-10-08b.md` checked Section 1, Section 3.7.1, the hardware sentence of the Limitations section (now Section 7), the scoring map and the v5 changelog.
 - `[F]` `results/verification_2026-10-08c.md` checked Table C2 and the overclaim fixes.
 - `[F]` `results/verification_2026-10-08d.md` checked the report from the title to the References. Its fixes F2 to F31 are applied in this draft. F32 is not applied because the generated captions it names are shared with drafts v1 to v4.
 - `[F]` `results/verification_2026-10-09a.md` checked the pooled H2-2E results of Section 3.7.1.
-- `[F]` `results/verification_2026-10-09b.md` checked the pass selector PSEL, Table 1.1a and the PSEL statements of Sections 1, 2.2, 5 and 6 and of `submission/SUMMARY.md`.
+- `[F]` `results/verification_2026-10-09b.md` checked the pass selector PSEL, Table 1.1a and the PSEL statements of Sections 1, 2.2, 5 and 7 (then numbered 6) and of `submission/SUMMARY.md`.
 
-## 6. Limitations
+## 6. Plan for H2 hardware in the finals
+
+`[F]` Hardware access opens only at the Grand Finale on 21 October 2026. The shortlist is announced on 20 October. Submission 2 is due on 14 November and the finals are on 19 November. These dates come from the organisers' timeline email of 25 August 2026 as recorded in the team plan. No copy of the email is in the repository.
+
+`[F]` No HQC budget for finalists on H2 hardware is published in the sources the team holds. The quota of Section 3.7 covers the H2-1E and H2-2E emulators only. The H2 hardware user guide limits a job to 10,000 shots and a shot to 50 HQC (`docs/platform_notes.md`, section 3.4). `[O]` The plan is priced with the HQC formula of Reference 6 applied to the compiled circuits. That H2 hardware charges by this formula is inferred from the Helios costing page.
+
+`[F]` `value/finals_plan.py` computes the numbers below from Table E3 and the compiled QASM files in `results/compiled/`. It writes `value/finals_plan.md`. `value/test_finals_plan.py` checks the inputs against Tables E2 and E3 and the shot counts by brute force. It also recomputes each HQC value from the gate counts of the QASM file. The sd of F_H(P2) - F_H(P0) is scaled from its pooled value at 4000 shots per pipeline as one over the square root of the shot count.
+
+`[O]` Primary test. vbe_adder_3 runs under P0 and P2 on H2 hardware. PSEL picks P2 on this circuit (`value/selector_ledger_circuits.csv`). The alternative hypothesis is F_H(P2) > F_H(P0) because P2 has 15 fewer ZZPhase gates. The test is one-sided at alpha 0.05 with critical z 1.645. It is the only confirmatory test of the plan and needs no multiplicity correction.
+
+`[F]` The shot count uses the measured H2-2E gain of Table E3 and not the slope prediction. The measured gain is +0.0108 with sd 0.0045 at 4000 shots per pipeline. It equals 2 sd of the difference at 2823 shots per pipeline. The plan rounds this up to 2900. At 2900 shots the sd of the difference is 0.0053 and the expected z at the measured gain is 2.03. The power at the measured gain is 0.65. The smallest difference that reaches z = 1.645 is 0.0087. A power of 0.80 would need 4363 shots per pipeline.
+
+`[O]` Primary decision rule, stated before any hardware data. A z of 1.645 or more confirms that P2 raises F_H over P0 on vbe_adder_3 on H2 hardware. A z of -1.645 or less refutes it. Any other z leaves the comparison unresolved. The report then makes no hardware claim for P2.
+
+`[O]` Secondary test. grover_5 runs under P0 and P2. It tests whether the shortfall of Section 3.7.1 recurs on hardware. On H2-2E the measured gain lies 2.94 sd below the slope prediction. The secondary test does not enter the primary decision.
+
+`[F]` The measured H2-2E shortfall is 0.0229 - 0.0007 = 0.0221 with sd 0.0075 at 4000 shots per pipeline. It equals 2 sd of the difference at 1854 shots per pipeline. The plan rounds this up to 1900. There the sd of the difference is 0.0109 and the power at the measured shortfall is 0.65. Section 3.7.1 gives 1974 shots for a 2-sd resolution of the predicted gain from the single runs of Table E2.
+
+`[O]` Secondary decision rule, stated before any hardware data. The hardware prediction is F_H(P0) (exp(22 a) - 1) with a = 1.1801e-3 and F_H(P0) measured on hardware. The statistic is z_short = (prediction - measured difference) / sd. A z_short of 1.645 or more refutes the slope model on grover_5. A z_short below 1.645 together with a gain z of 1.645 or more is consistent with the model. Any other outcome is unresolved.
+
+`[F]` Cost. The plan has four jobs, one per circuit and pipeline. vbe_adder_3 costs 430.1 HQC under P0 and 335.6 HQC under P2 at 2900 shots. grover_5 costs 1070.1 HQC under P0 and 999.1 HQC under P2 at 1900 shots. The primary test costs 765.7 HQC and the secondary test 2069.2 HQC. The total is 2835.0 HQC. Every job stays within the H2 limits per job and per shot. The remaining H2-2E emulator quota is 4066.8 HQC by the same formula, 10,000 minus the 5933.2 of Section 3.7.1.
+
+`[O]` If the finals budget is below 2835.0 HQC the primary test runs alone at 765.7 HQC.
+
+## 7. Limitations
 
 `[F]` ZX extraction worsens the ZZPhase count. On family A the pipelines P1, P3 and P4 are above P0 on 180 of 180 circuits, with ZZ ratios from 1.28 to 10.32 (P1), 1.31 to 7.91 (P3) and 1.44 to 10.36 (P4). On family B1 (`results/family_B1_counts.csv`) P1 is above P0 on 14 of 15, P3 on 14 of 15 and P4 on 15 of 15. Only teleport reduction, which does not extract, helps on H2.
 
@@ -886,7 +912,7 @@ Figure 4. Learned cost model on the proxy data. Left, predicted F_H = exp(-y_hat
 
 `[F]` The noise proxy is a density-matrix simulation with the published H2-2E default parameters (p1 = 7.3e-5, p2 = 1.29e-3, p_meas = (9e-4, 1.8e-3), p_init = 4e-5) and depolarising gate channels only. The published H2-2E model has in addition a spontaneous-emission branch that applies leakage half of the time, measurement and initialisation crosstalk, quadratic and linear dephasing during transport and idling, and a two-qubit fault probability that scales with the RZZ angle (`docs/platform_notes.md`, section 3.2). The proxy has none of these. The Selene cross-check in `results/selene.md` compares two depolarising models that share the same per-gate convention, so the agreement of 32 of 34 runs within two standard deviations for the like-for-like variant confirms the implementation of the proxy and its measure-map handling, not its fidelity to H2-2E. `[F]` In the compiled P0 and P2 circuits of the 14 B1 circuits other than hwb8, 1421 of the 1661 ZZPhase gates have angle pi/2, where the scaling gives p2. Another 238 have angle pi/4, where it gives 0.62 p2. Two have angle 0.375 pi. `[O]` The angles of family A are small, so the published scaling lowers the two-qubit fault probability below p2 and the proxy is pessimistic there.
 
-`[F]` Nothing in this report has run on hardware. The 22 H2-Emulator rows of Section 3.7 and the 18 H2-2E jobs of Section 3.7.1 are emulator runs. vbe_adder_3 at 4000 shots per pipeline is the only emulator comparison of P2 against P0 with z above 2. Its z is +2.38 and its two-sided p is 0.017. The repeat circuits were chosen after Table E2. The Holm-adjusted p is 0.035 over the two repeated circuits and 0.052 over all three H2-2E circuits. `[O]` The vbe_adder_3 gain is significant before correction and after correction over the two repeated circuits. It is not significant at 0.05 after correction over all three H2-2E circuits. `[F]` No other emulator comparison of P2 against P0 is resolved. The 468 noiseless, the 68 depolarising and the 468 full depolarising Selene runs are local. They use the Quest statevector backend and do not contain the H2-2E noise model. The submission cell of `report/notebook_skeleton.py` has not been executed. Its stored marimo session `report/__marimo__/session/notebook_skeleton.py.json` stops at the Submit to QPU gate. The platform jobs were submitted by `submit/syntax_check.py` and `submit/run_emulator.py`.
+`[F]` Nothing in this report has run on hardware. Section 6 gives the plan for H2 hardware in the finals. The 22 H2-Emulator rows of Section 3.7 and the 18 H2-2E jobs of Section 3.7.1 are emulator runs. vbe_adder_3 at 4000 shots per pipeline is the only emulator comparison of P2 against P0 with z above 2. Its z is +2.38 and its two-sided p is 0.017. The repeat circuits were chosen after Table E2. The Holm-adjusted p is 0.035 over the two repeated circuits and 0.052 over all three H2-2E circuits. `[O]` The vbe_adder_3 gain is significant before correction and after correction over the two repeated circuits. It is not significant at 0.05 after correction over all three H2-2E circuits. `[F]` No other emulator comparison of P2 against P0 is resolved. The 468 noiseless, the 68 depolarising and the 468 full depolarising Selene runs are local. They use the Quest statevector backend and do not contain the H2-2E noise model. The submission cell of `report/notebook_skeleton.py` has not been executed. Its stored marimo session `report/__marimo__/session/notebook_skeleton.py.json` stops at the Submit to QPU gate. The platform jobs were submitted by `submit/syntax_check.py` and `submit/run_emulator.py`.
 
 `[F]` The cost model is fitted on proxy fidelities, not on emulator output. Under gradient boosting with the grouped split `cv5g` held-out whole circuit classes give R^2 = 0.990 on family A rows and 0.830 on family B1 rows. This measures interpolation within the families. Across families the evidence runs in one direction. Trained on family A the boosted model predicts the 7 family B1 circuits with R^2 = 0.805 and MAE(F_H) 0.0083. Ridge reaches R^2 = 0.840 and the unfitted physics baseline 0.785. Trained on the 35 family B1 rows no model predicts family A and the best R^2 is 0.326. `[O]` Seven B1 circuits do not establish generalisation, and learned rewriting itself is not attempted in this submission.
 
@@ -898,7 +924,7 @@ Figure 4. Learned cost model on the proxy data. Left, predicted F_H = exp(-y_hat
 
 `[F]` Table B2 has five circuits per row against 50 and 8 in the manuscript. The agreement of the means is a consistency check, not a statistical result.
 
-## 7. Team and roles
+## 8. Team and roles
 
 `[F]` Members, affiliations and academic status follow the team registration table circulated by F. Cadet on 19 and 31 August 2026. Kam's affiliations follow his registration email of 20 August 2026. Contributions follow the arXiv author lists of References 1 and 2 and the team emails of July and August 2026. No copy of these emails is in the repository.
 
@@ -1059,3 +1085,4 @@ Changelog, part 2 (Section 3), 7 October 2026.
 - [F] Judge round 3, 9 October 2026. Section 1 summary bullet, Section 1.5 and `submission/SUMMARY.md` state that PSEL costing no more HQC than P0 holds by construction because P0 is always a candidate. They keep the measured P2 picks and savings. Section 1 summary bullet, Section 1.3 and `submission/SUMMARY.md` state that the 40.6 % magic-state saving is measured against the written input circuits and add the Table C2 count of 14 of 22 circuits equal to the best ancilla-free value and 8 above it, recomputed from `results/literature_tcounts.csv`. Section 2.2 states that the P0 reproduction has not been compared against `QuantinuumBackend.default_compilation_pass` on a live backend object. `report/sec1_v5.md` updated identically.
 - [F] Section 7 rewritten from the team registration email of 31 August 2026: names, affiliations, recorded academic status and the contributions that a source records. The placeholder on member roles is removed.
 - [F] Section 7 completed from the full team email threads of July and August 2026 and the arXiv author lists of arXiv:2608.22801 and arXiv:2608.22810, fetched 9 October 2026. Kam's affiliations corrected to Université de La Réunion and Università degli Studi di Palermo as given in his registration.
+- [F] 9 October 2026. New Section 6, plan for H2 hardware in the finals, approved by Kam. Limitations and Team and roles renumbered to Sections 7 and 8. The scoring map, the Limitations hardware paragraph, the Section 5 verification list, script table and test table updated. The numbers come from the new `value/finals_plan.py`, which writes `value/finals_plan.md` from Table E3 and the compiled circuits. `value/test_finals_plan.py` passes 5 of 5. Primary test vbe_adder_3 at 2900 shots per pipeline, 765.7 HQC. Secondary test grover_5 at 1900 shots per pipeline, 2069.2 HQC. Total 2835.0 HQC.
