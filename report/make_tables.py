@@ -856,6 +856,72 @@ def emulator_h22e(e1=None):
     return r
 
 
+
+def literature_c2():
+    """Table C2: best published T-count beside our T after ZX and the certified floor.
+    Reads results/literature_tcounts.csv (one row per circuit and published column) and
+    results/certificates.csv.  A published number counts toward 'best ancilla-free' only
+    when ancilla_free == yes, same_circuit == yes and reported_error == no."""
+    path = os.path.join(RESULTS, "literature_tcounts.csv")
+    if not os.path.exists(path):
+        return None
+    lit = pd.read_csv(path)
+    cert = pd.read_csv(os.path.join(RESULTS, "certificates.csv"))
+    cert = cert[cert.family == "B1"].assign(circuit=lambda d: d.file.str.replace(".qasm", "", regex=False))
+    floor = dict(zip(cert.circuit, cert.lde_floor))
+    tzx_cert = dict(zip(cert.circuit, cert.t_zx_P2))
+    ok = lit[(lit.ancilla_free == "yes") & (lit.same_circuit == "yes") & (lit.reported_error == "no")]
+    anc = lit[(lit.ancilla_free == "no") & (lit.same_circuit == "yes")]
+    order = lit.drop_duplicates("circuit")[["circuit", "family", "n", "t_written", "t_zx_P2"]]
+    order = order.sort_values(["family", "n", "circuit"]).reset_index(drop=True)
+    rows = []
+    for r in order.itertuples():
+        g = ok[ok.circuit == r.circuit]
+        best = int(g.published_t.min()) if len(g) else np.nan
+        src = ", ".join(sorted(set(g[g.published_t == best].source_key))) if len(g) else ""
+        ga = anc[anc.circuit == r.circuit]
+        besta = int(ga.published_t.min()) if len(ga) else np.nan
+        srca = ", ".join(sorted(set(ga[ga.published_t == besta].source_key))) if len(ga) else ""
+        fl = floor.get(r.circuit, np.nan)
+        if r.circuit in tzx_cert:
+            assert tzx_cert[r.circuit] == r.t_zx_P2, (r.circuit, tzx_cert[r.circuit], r.t_zx_P2)
+        rows.append({"family": r.family, "circuit": r.circuit, "n": int(r.n), "T written": int(r.t_written),
+                     "T after ZX": int(r.t_zx_P2), "best ancilla-free": best, "source": src,
+                     "best with ancillas": besta, "source (ancillas)": srca, "floor": fl,
+                     "T after ZX - best": r.t_zx_P2 - best if not np.isnan(best) else np.nan,
+                     "best - floor": best - fl if not (np.isnan(best) or np.isnan(fl)) else np.nan})
+    t = pd.DataFrame(rows)
+    c = t[t.floor.notna()]
+    tot = {"T after ZX": int(c["T after ZX"].sum()), "best": int(c["best ancilla-free"].sum()),
+           "floor": int(c.floor.sum())}
+    tot["headroom"] = tot["T after ZX"] - tot["best"]
+    tot["open"] = tot["best"] - tot["floor"]
+    tot["gap"] = tot["T after ZX"] - tot["floor"]
+    assert tot["headroom"] + tot["open"] == tot["gap"]
+    t_anc_cert = int(c["best with ancillas"].sum())
+    fmt_int = lambda v: "" if (isinstance(v, float) and np.isnan(v)) else str(int(v))
+    show = t.copy()
+    for col in ["best ancilla-free", "best with ancillas", "floor", "T after ZX - best", "best - floor"]:
+        show[col] = show[col].map(fmt_int)
+    text = ("`[F]` Per circuit of families B1 and B1x. T after ZX is the P2 T-count. best ancilla-free is the "
+            "smallest published T-count on the same n qubits, taken over the columns of "
+            "`results/literature_tcounts.csv` with ancilla_free = yes, same_circuit = yes and reported_error = no. "
+            "best with ancillas is the smallest published T-count of a method that adds Hadamard ancillas "
+            "(TODD, or AlphaTensor-Quantum where its compiled qubit count exceeds n). The floor is the certified "
+            "lde floor of Table C1 and exists for the four n = 5 circuits only. T after ZX - best is the part of the "
+            "ZX output that a published ancilla-free method is known to remove. best - floor is the part that "
+            "neither a published method nor the certificate has closed. Source keys: AMM2014 arXiv:1303.2042 "
+            "Table 1, AM2016 arXiv:1601.07363 Table II, Nam2018 arXiv:1710.07345 Table 4, TODD2018 and TODDpart2018 "
+            "arXiv:1712.01557 Tables I and II, KvdW2020 arXiv:1903.10477 Table 1, AQ2024 arXiv:2402.14396 Table 2. "
+            "grover_5 has no same-circuit published value.\n\n"
+            + md_table(show, "{:.0f}")
+            + f"\nOn the {len(c)} circuits with a floor: T after ZX {tot['T after ZX']}, best ancilla-free "
+              f"{tot['best']}, floor {tot['floor']}. T after ZX - best = {tot['headroom']}, best - floor = "
+              f"{tot['open']}, sum {tot['gap']}. Best with ancillas on the same circuits: {t_anc_cert}.\n")
+    write("C2_literature", text)
+    return {"t": t, "tot": tot, "anc_cert": t_anc_cert}
+
+
 # --------------------------------------------------------------- injection
 
 def inject(report_path: str):
@@ -893,6 +959,7 @@ def main():
     fsd = selene_depol_full()
     fe = emulator_h2e()
     fe2 = emulator_h22e(fe)
+    fl2 = literature_c2()
     print("family A: circuits", fa["n_circuits"], "| P0 at ZZ term count:",
           fa["p0_at_floor"], "| circuits with any pipeline below it:", fa["any_below_floor"],
           "| P2 ties P0:", fa["p2_ties"], "worse:", fa["p2_worse"])
@@ -926,9 +993,11 @@ def main():
         for x in fe2["cross"].itertuples():
             print("H2-2E vs H2-Emulator, %s %s: sd %.4f (E1) and %.4f (E2), z %.2f"
                   % (x.file, x.pipeline, x.sd_h2emulator, x.sd_h22e, x.z))
+    if fl2 is not None:
+        print("C2 literature: totals on certified circuits", fl2["tot"], "| best with ancillas", fl2["anc_cert"])
     for name in ["A1_zz_by_n", "A2_vs_P0", "A3_floor", "A4_proxy", "B1_per_circuit", "B1x_per_circuit", "B2_summary",
                  "M1_cost_metrics", "M2_cost_coefficients", "A5_proxy_b1", "C1_certificates", "S1_selene", "S2_selene_depol",
-                 "E1_h2emulator", "E2_h22e"]:
+                 "E1_h2emulator", "E2_h22e", "C2_literature"]:
         if os.path.exists(os.path.join(TABLES, name + ".md")):
             print(f"\n### {name}\n" + open(os.path.join(TABLES, name + ".md")).read())
     if not args.no_inject:
