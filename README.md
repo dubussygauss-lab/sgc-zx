@@ -47,6 +47,9 @@ python pipelines/run_b2.py --workers 2
 # 7    noise proxy (provisional, family A n <= 8)
 python noise/run_proxy.py --workers 2
 
+# 7b   published T-counts of Table C2 (reads results/family_B1_counts.csv and results/family_B1x_counts.csv)
+python report/build_literature_tcounts.py results/literature_tcounts.csv
+
 # 8    tables and figures, injected into report/report_v1.md to report/report_v5.md
 #      (--no-fig skips the figures, --no-inject writes report/tables/ only)
 python report/make_tables.py
@@ -69,7 +72,7 @@ python value/value_ledger.py
 python value/value_by_application.py
 ```
 
-Tests. Five run as scripts:
+Tests. Six run as scripts:
 
 ```
 python bench/test_gen_trotter.py
@@ -77,6 +80,7 @@ python pipelines/test_compile.py
 python noise/test_dm_sim.py
 python barrier/test_certificate.py
 python model/test_cost_model.py
+python report/test_c2_literature.py
 ```
 
 Five run under pytest. The Selene tests need the proxy variables cleared (see the proxy note below):

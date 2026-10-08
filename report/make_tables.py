@@ -904,7 +904,7 @@ def literature_c2():
     for col in ["best ancilla-free", "best with ancillas", "floor", "T after ZX - best", "best - floor"]:
         show[col] = show[col].map(fmt_int)
     text = ("`[F]` Per circuit of families B1 and B1x. T after ZX is the P2 T-count. best ancilla-free is the "
-            "smallest published T-count on the same n qubits, taken over the columns of "
+            "smallest T-count reported in the six papers on the same n qubits, taken over the columns of "
             "`results/literature_tcounts.csv` with ancilla_free = yes, same_circuit = yes and reported_error = no. "
             "best with ancillas is the smallest published T-count of a method that adds Hadamard ancillas "
             "(TODD, or AlphaTensor-Quantum where its compiled qubit count exceeds n). The floor is the certified "
@@ -915,7 +915,7 @@ def literature_c2():
             "arXiv:1712.01557 Tables I and II, KvdW2020 arXiv:1903.10477 Table 1, AQ2024 arXiv:2402.14396 Table 2. "
             "grover_5 has no same-circuit published value.\n\n"
             + md_table(show, "{:.0f}")
-            + f"\nOn the {len(c)} circuits with a floor: T after ZX {tot['T after ZX']}, best ancilla-free "
+            + f"\n`[F]` On the {len(c)} circuits with a floor: T after ZX {tot['T after ZX']}, best ancilla-free "
               f"{tot['best']}, floor {tot['floor']}. T after ZX - best = {tot['headroom']}, best - floor = "
               f"{tot['open']}, sum {tot['gap']}. Best with ancillas on the same circuits: {t_anc_cert}.\n")
     write("C2_literature", text)
