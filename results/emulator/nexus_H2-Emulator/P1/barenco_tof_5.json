@@ -1,0 +1,80 @@
+{
+ "F_H": 0.9160000000000005,
+ "TVD": 0.08399999999999977,
+ "cost_fields": {
+  "duration": 953
+ },
+ "counts": {
+  "000000000": 916,
+  "000000001": 9,
+  "000000010": 10,
+  "000000011": 2,
+  "000000100": 5,
+  "000000101": 1,
+  "000000110": 2,
+  "000001000": 7,
+  "000001010": 2,
+  "000001100": 5,
+  "000010000": 3,
+  "000010001": 2,
+  "000010010": 1,
+  "000010011": 1,
+  "000011111": 1,
+  "000100000": 3,
+  "000100100": 2,
+  "000100110": 4,
+  "000101000": 1,
+  "000101011": 1,
+  "001000000": 2,
+  "001000010": 3,
+  "001000100": 2,
+  "001001000": 1,
+  "001001010": 1,
+  "001001100": 2,
+  "001001110": 1,
+  "001011111": 1,
+  "100000000": 1,
+  "100000100": 1,
+  "100000110": 1,
+  "100001000": 2,
+  "100001010": 1,
+  "100001100": 1,
+  "110000000": 1,
+  "110001100": 1
+ },
+ "family": "B1",
+ "fetched_by_id": true,
+ "file": "barenco_tof_5.qasm",
+ "hqc_estimate": 184.0,
+ "index": 7,
+ "job": {
+  "attributes": {
+   "client": "<aqora.Client object at 0x7f12681dbaf0>",
+   "job_id": "AFByb3ZpZGVySm9iAaEcfSKHfOKupN9nXyFL_A",
+   "serialization_format": null
+  },
+  "payload": {
+   "__typename": "ProviderJob",
+   "createdAt": "2026-10-08T17:08:45.319929+00:00",
+   "duration": 953,
+   "error": null,
+   "id": "AFByb3ZpZGVySm9iAaEcfSKHfOKupN9nXyFL_A",
+   "platform": {
+    "id": "AFByb3ZpZGVyUGxhdGZvcm0Bn9iRp3dxorQTsB0HCRdl",
+    "name": "H2-Emulator",
+    "provider": "NEXUS"
+   },
+   "provider": "nexus",
+   "resultCount": 10,
+   "status": "COMPLETED"
+  }
+ },
+ "job_id": "AFByb3ZpZGVySm9iAaEcfSKHfOKupN9nXyFL_A",
+ "options": {
+  "noisy_simulation": true
+ },
+ "pipeline": "P1",
+ "platform": "nexus:H2-Emulator",
+ "shots": 1000,
+ "t_wait": 4.659026473999987
+}

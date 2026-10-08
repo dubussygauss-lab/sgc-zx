@@ -1,0 +1,51 @@
+{
+ "F_H": 0.9981145476308778,
+ "TVD": 0.006461939067138407,
+ "cost_fields": {
+  "duration": 309
+ },
+ "counts": {
+  "0000": 959,
+  "0001": 12,
+  "0010": 12,
+  "0100": 8,
+  "0101": 1,
+  "1000": 7,
+  "1010": 1
+ },
+ "family": "A",
+ "fetched_by_id": true,
+ "file": "ladder_n4_r1_uniform_s1.qasm",
+ "hqc_estimate": 22.6,
+ "index": 2,
+ "job": {
+  "attributes": {
+   "client": "<aqora.Client object at 0x7f35a8e43af0>",
+   "job_id": "AFByb3ZpZGVySm9iAaEcfSA2eCCAm4oHj_0khA",
+   "serialization_format": null
+  },
+  "payload": {
+   "__typename": "ProviderJob",
+   "createdAt": "2026-10-08T17:08:44.726527+00:00",
+   "duration": 309,
+   "error": null,
+   "id": "AFByb3ZpZGVySm9iAaEcfSA2eCCAm4oHj_0khA",
+   "platform": {
+    "id": "AFByb3ZpZGVyUGxhdGZvcm0Bn9iRp3dxorQTsB0HCRdl",
+    "name": "H2-Emulator",
+    "provider": "NEXUS"
+   },
+   "provider": "nexus",
+   "resultCount": 10,
+   "status": "COMPLETED"
+  }
+ },
+ "job_id": "AFByb3ZpZGVySm9iAaEcfSA2eCCAm4oHj_0khA",
+ "options": {
+  "noisy_simulation": true
+ },
+ "pipeline": "P2",
+ "platform": "nexus:H2-Emulator",
+ "shots": 1000,
+ "t_wait": 7.705160453999994
+}

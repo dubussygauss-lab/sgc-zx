@@ -1,0 +1,41 @@
+{
+ "cost_fields": {
+  "duration": 823
+ },
+ "error": "RuntimeError(\"aqora provider job 'AFByb3ZpZGVySm9iAaEck1J5cKCxXJRRv_BIzw' failed: QuotaExceedException: Quota 'simulation' would be exceeded.\")",
+ "family": "B1",
+ "fetched_by_id": true,
+ "file": "grover_5.qasm",
+ "hqc_estimate": 610.0,
+ "index": 0,
+ "job": {
+  "attributes": {
+   "client": "<aqora.Client object at 0x7fcd46a3faf0>",
+   "job_id": "AFByb3ZpZGVySm9iAaEck1J5cKCxXJRRv_BIzw",
+   "serialization_format": null
+  },
+  "payload": {
+   "__typename": "ProviderJob",
+   "createdAt": "2026-10-08T17:32:59.385137+00:00",
+   "duration": 823,
+   "error": "QuotaExceedException: Quota 'simulation' would be exceeded.",
+   "id": "AFByb3ZpZGVySm9iAaEck1J5cKCxXJRRv_BIzw",
+   "platform": {
+    "id": "AFByb3ZpZGVyUGxhdGZvcm0Bn9iRp3dxorQTsB0HCRdl",
+    "name": "H2-Emulator",
+    "provider": "NEXUS"
+   },
+   "provider": "nexus",
+   "resultCount": null,
+   "status": null
+  }
+ },
+ "job_id": "AFByb3ZpZGVySm9iAaEck1J5cKCxXJRRv_BIzw",
+ "options": {
+  "noisy_simulation": true
+ },
+ "pipeline": "P1",
+ "platform": "nexus:H2-Emulator",
+ "shots": 1000,
+ "t_wait": 0.18663808499997003
+}
