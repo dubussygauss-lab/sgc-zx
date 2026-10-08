@@ -1,4 +1,4 @@
-# A certified resource ledger shows where ZX rewriting pays on Quantinuum H2
+# A pass selector keeps ZX rewriting only where it lowers the cost of a circuit on Quantinuum H2
 
 Team Learned ZX Rewriting. Quantinuum Singapore Grand Challenge, submission 1, draft v5 (8 October 2026).
 

@@ -1,10 +1,10 @@
-# code.zip = git archive of commit 85ceb64aba0e105c0a95c8b28cee1b57ba5e20d5 (submission/ excluded)
+# code.zip = git archive of commit 0dc16e39eeae87493537c98918422d3586c3163c (submission/ excluded)
 # report.pdf and report.md built from report/report_v5.md at that commit, changelog sections removed
-# sha256  size_bytes  path (relative to submission/), generated 2026-10-08T22:27:49Z
-77f7a559ff56a104e5d9732cd4ac0d846e4ea9dcee0f1e96497fbd3dab1ae2e9        8262  REPRODUCE.md
-1122d266b5e08c65962df73ffbf0ab25fd80e7c2b1391ed4ab11ab0e267f5bd9        6485  SUMMARY.md
-6325269ac558413d08c4ada521e8019a22584bb9edfd99d0b8202ac3b0e60b7b        5696  build.sh
-98757cef9a38e24c7eb334b712d26885081889263df51e3c5f6dbcdaebb67e0d        1809  build_logs/build.log
+# sha256  size_bytes  path (relative to submission/), generated 2026-10-08T22:30:34Z
+bccd2a67c5f297080305cd1ea5100ef4bacc81fcc9499e80305f6c7c62cd30c0        8262  REPRODUCE.md
+41ec3637f56d8aa49a2be50a9acf1545da0561ab446031a7eae5d16e5309c818        6597  SUMMARY.md
+6f53cf1cccde049c983ea34cb2ff66e5d3a1928bd37195b544c40f813a57bb85        5716  build.sh
+4e40b47eee2714d1ecd978772844827a4dd1bb31dd0a3f48fdbc7381e3636724        1809  build_logs/build.log
 99ff932482879ebad38314fe15549919401cc08cfbec703d54490de9bc9fe5bb          38  build_logs/test_c2_literature.log
 9b44e58a1eeebdd41a41de3be2165ef89a3f8f0a6c09e21c0aeb8485ff62b5fe        3730  build_logs/test_certificate.log
 8985b89300693d482a193858eff53dd1aab96b462abe94440cf76462837a822b         168  build_logs/test_compile.log
@@ -22,13 +22,13 @@ d0fc9847de06804a4ca98823e0cb104c240cf7bc72f31fb9fee6115075b33073          99  bu
 d95277267cd423c08640722e88d19f2f0003d29b2e102fe6a839eca3e4d85675        1136  build_logs/tests_summary.txt
 ce4ff06b546a97900f62e248e5e84d7508549be13d81661a13a45dda919af6ad        1927  check_pdf_tables.py
 2cdca3d67ff873d16d0d96fe1fe503653fbc2b1864060ac8208dafda3541613b        3179  check_summary_numbers.py
-88064e049ded8d09c32bdef435b14aae51deddf1692225c11270e06360d74443     5292878  code.zip
+173b167853cfc1e3b990b54131fab52181d64320adaf6f753268b93e1f40b176     5292989  code.zip
 64674c19f8310d3d9fa78ba40465f41bf2ee17ec20bc6199bb2dddaf9dbcaa9a       94548  figures/fig_A_zz_ratio.png
 6e4ee395255f144a39b88d298dd49770e7dab2eb70516dc7cda3caee80a102a4       73781  figures/fig_B1_zz.png
 f45283b15f906701203d2eb56cb560256c39ae4b7a087d5df18e45ec5d1bb8d1       53399  figures/fig_B2_t.png
 85e649a98882d2ead44ba9853fd165b2829a1c49b04889e74d5a3929b918b19c      160224  figures/fig_cost_model.png
 3985303b5dc002f24e2231aea37bc65d94328a8923526a9b022040df2fea8893         812  report.css
-bd28202ea21bb071dd7ec6fb874442168ffab6fa785d17d66886de24017da6e9      129348  report.md
-941228ed3d53d2bf392fe84af653b59a21677138ec72fe013dff23abf6b19f17      766103  report.pdf
+95e96c3b349d20923e65c700df5cdbc2f77b846326a98bf1c65c90b9bfe1af5e      129368  report.md
+cf9fe5ce849a804438409a036ec686a0614359ce4a709f4ef2d086f771cdbf0b      766132  report.pdf
 aec513cd34bf777ecb4493bb67fc2b4d897b1c20bf60e8d138c31bf4826a0723        1456  run_tests.sh
 64eb4118118c3135c32a82a5f3badbd74eb41cf6d01ffe99229b29f06b286a0a        1247  strip_changelog.py
