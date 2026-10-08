@@ -900,19 +900,19 @@ Figure 4. Learned cost model on the proxy data. Left, predicted F_H = exp(-y_hat
 
 ## 7. Team and roles
 
-`[F]` Members and affiliations as registered for the challenge in the team's email of 31 August 2026. No copy of that email is in the repository.
+`[F]` Members, affiliations and academic status follow the team registration table circulated by F. Cadet on 19 and 31 August 2026. Kam's affiliations follow his registration email of 20 August 2026. Contributions follow the arXiv author lists of References 1 and 2 and the team emails of July and August 2026. No copy of these emails is in the repository.
 
-| Member | Affiliation | Recorded academic status | Contribution recorded in this submission |
+| Member | Affiliation | Recorded academic status | Recorded contribution |
 |---|---|---|---|
-| Chon-Fai Kam | Università degli Studi di Palermo and Université Paris Cité | | Team lead and owner of the Aqora organisation `learned_zx_rewriting`. First author of the exactness-barrier manuscript arXiv:2608.22801 (Reference 1). |
-| Anuradha Mahasinghe | University of Colombo | | |
-| Dulari De Silva | University of Colombo | BSc (Hons) in Computational Mathematics | First author of the Solovay-Kitaev and ZX manuscript arXiv:2608.22810 (Reference 2). |
+| Chon-Fai Kam | Université de La Réunion and Università degli Studi di Palermo | | Team lead. Registered the team and owns the Aqora organisation `learned_zx_rewriting`. First author of arXiv:2608.22801 and co-author of arXiv:2608.22810. |
+| Anuradha Mahasinghe | University of Colombo | Professor in Computational Mathematics | Co-author of arXiv:2608.22801 and arXiv:2608.22810. Supervises D. De Silva. |
+| Dulari De Silva | University of Colombo | BSc (Hons) in Computational Mathematics | First author of arXiv:2608.22810. Wrote the Solovay-Kitaev and ZX implementation of that study. |
 | Nethmini Karunarathne | University of Colombo | BSc student in Computer Engineering | |
-| Frédéric Cadet | PEACCEL, Paris | | |
+| Frédéric Cadet | PEACCEL, Paris | | Proposed the entry and assembled the team. Prepared the mentor-discussion notes. Co-author of arXiv:2608.22801 and arXiv:2608.22810. |
 | Miloud Bessafi | PEACCEL, Paris | | |
-| Kaushika De Silva | QUISA, The University of Western Australia | | |
+| Kaushika De Silva | QUISA, The University of Western Australia | | Co-author of arXiv:2608.22801 and arXiv:2608.22810. |
 
-`[F]` An empty cell means that no source available to the authors of this report records the entry.
+`[F]` An empty cell means that none of these sources records the entry.
 
 ## References
 
