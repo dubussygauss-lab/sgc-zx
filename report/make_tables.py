@@ -30,12 +30,15 @@ Inputs (all under results/)
   emulator_nexus_H2-Emulator.csv  Nexus H2-Emulator runs, 1000 shots, with the
                         counts in emulator/nexus_H2-Emulator/<pipeline>/<file>.json
                         (table E1 of Section 3.7)
+  emulator_nexus_H2-2E.csv  Nexus H2-2E runs, 1000 shots, counts in
+                        emulator/nexus_H2-2E/<pipeline>/<file>.json, statistics
+                        from submit/h22e_stats.py (table E2 of Section 3.7.1)
   cost_model_metrics.csv, cost_model_coefficients.csv, fig_cost_model.png
                         written by model/cost_model.py (tables M1, M2 and the
                         cost-model figure of Section 4)
 
 The marker injection runs on report/report_v1.md, report/report_v2.md,
-report/report_v3.md, report/report_v4.md and every report/v2/part*.md that exists.
+report/report_v3.md, report/report_v4.md, report/report_v5.md and every report/v2/part*.md that exists.
 
 Definitions used below
   n_2q           ZZPhase + ZZMax count of the compiled native circuit
@@ -68,6 +71,7 @@ REPORT = os.path.join(ROOT, "report", "report_v1.md")
 REPORT_V2 = os.path.join(ROOT, "report", "report_v2.md")
 REPORT_V3 = os.path.join(ROOT, "report", "report_v3.md")
 REPORT_V4 = os.path.join(ROOT, "report", "report_v4.md")
+REPORT_V5 = os.path.join(ROOT, "report", "report_v5.md")
 
 PIPELINES_A = ["P0ref", "P0", "P0L1", "P1", "P2", "P3", "P4"]
 PIPELINES_B2 = ["P0ref", "P0", "P1", "P2", "P3"]
@@ -815,6 +819,37 @@ def emulator_h2e():
             "mean_d_proxy_B1": float(dp[mp.family == "B1"].mean())}
 
 
+def emulator_h22e():
+    """Table E2: Nexus H2-2E runs (results/emulator_nexus_H2-2E.csv, counts in
+    results/emulator/nexus_H2-2E/).  The statistics come from
+    submit/h22e_stats.py:compute, which recomputes F_H from the counts."""
+    if not os.path.exists(os.path.join(RESULTS, "emulator_nexus_H2-2E.csv")):
+        write("E2_h22e", "[PENDING: H2-2E] results/emulator_nexus_H2-2E.csv not found.\n")
+        return None
+    import sys
+    sys.path.insert(0, os.path.join(ROOT, "submit"))
+    import h22e_stats
+    r = h22e_stats.compute()
+    m = r["rows"]
+    assert r["max_abs_dF_csv"] < 1e-9, "F_H recomputed from counts differs from the CSV"
+    assert r["max_abs_dF_json"] < 1e-9, "F_H recomputed from counts differs from the JSON payload"
+    t = pd.DataFrame({"file": m.file.str.replace(".qasm", "", regex=False), "n": m.n.astype(int),
+                      "pipeline": m.pipeline, "n_2q": m.n_2q.astype(int),
+                      "HQC estimate": m.hqc, "F_H": m.F_H, "sd F_H": m.sd,
+                      "F_H proxy": m.F_H_proxy, "F_H Selene depol": m.F_H_selene})
+    text = ("Nexus H2-2E, noisy_simulation = True, 1000 shots per row, one job per row. F_H is the "
+            "Hellinger fidelity of the returned counts to the ideal distribution. sd F_H is the binomial "
+            "value sqrt(F_H (1 - F_H) / 1000) on vbe_adder_3 and hwb6, whose ideal output is a single "
+            f"bit string. On grover_5 it is the sd over {h22e_stats.BOOT} multinomial bootstrap resamples "
+            f"of the counts (seed {h22e_stats.SEED}). HQC estimate is the formula value stored with each "
+            "job. F_H proxy is the exact density-matrix proxy value of Section 3.5 and is empty where the "
+            "proxy has no row (n > 7). F_H Selene depol is the 2000-shot Selene DepolarizingErrorModel "
+            "value of Section 3.6.\n\n"
+            + md_table(t, "{:.4f}", fmt={"HQC estimate": "{:.1f}"}))
+    write("E2_h22e", text)
+    return r
+
+
 # --------------------------------------------------------------- injection
 
 def inject(report_path: str):
@@ -851,6 +886,7 @@ def main():
     fs = selene()
     fsd = selene_depol_full()
     fe = emulator_h2e()
+    fe2 = emulator_h22e()
     print("family A: circuits", fa["n_circuits"], "| P0 at ZZ term count:",
           fa["p0_at_floor"], "| circuits with any pipeline below it:", fa["any_below_floor"],
           "| P2 ties P0:", fa["p2_ties"], "worse:", fa["p2_worse"])
@@ -877,13 +913,17 @@ def main():
     if fe is not None:
         print("H2-Emulator:", {k: v for k, v in fe.items() if k not in ("t", "pairs")})
         print(fe["pairs"].to_string(index=False))
+    if fe2 is not None:
+        print("H2-2E: HQC estimate total %.1f (%.2f %% of quota), slope a %.4e"
+              % (fe2["hqc_total"], 100 * fe2["quota_frac"], fe2["slope"]))
+        print(fe2["pairs"].to_string(index=False))
     for name in ["A1_zz_by_n", "A2_vs_P0", "A3_floor", "A4_proxy", "B1_per_circuit", "B1x_per_circuit", "B2_summary",
                  "M1_cost_metrics", "M2_cost_coefficients", "A5_proxy_b1", "C1_certificates", "S1_selene", "S2_selene_depol",
-                 "E1_h2emulator"]:
+                 "E1_h2emulator", "E2_h22e"]:
         if os.path.exists(os.path.join(TABLES, name + ".md")):
             print(f"\n### {name}\n" + open(os.path.join(TABLES, name + ".md")).read())
     if not args.no_inject:
-        for path in ([REPORT, REPORT_V2, REPORT_V3, REPORT_V4]
+        for path in ([REPORT, REPORT_V2, REPORT_V3, REPORT_V4, REPORT_V5]
                      + sorted(glob.glob(os.path.join(ROOT, "report", "v2", "part*.md")))):
             if os.path.exists(path):
                 k = inject(path)
