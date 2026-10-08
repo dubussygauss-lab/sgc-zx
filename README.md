@@ -72,7 +72,7 @@ Status on 8 October 2026:
 - Selene done. 468 noiseless and 468 full depolarising runs plus a 68-run comparison. Report Tables S1 and S2 and `results/selene.md`.
 - H2-Emulator done. Three jobs with 22 circuit rows. Report Table E1, `results/emulator_nexus_H2-Emulator.csv`.
 - H2-2E done. 18 jobs with an HQC estimate of 5933.2 in total. Six single runs are in Report Table E2 and `results/emulator_nexus_H2-2E.csv`. Three repeat runs of vbe_adder_3 and grover_5 under P0 and P2 are in `results/emulator_nexus_H2-2E_r2.csv` to `_r4.csv`, pooled by `submit/h22e_pooled.py` into Table E3. Repeat runs set `EMU_RUN_TAG` so they do not overwrite the first run.
-- The submission cell of `report/notebook_skeleton.py` has not been executed. The platform jobs were submitted by the `submit/` scripts.
+- The submission cell of `report/notebook_skeleton.py` was executed once on the free H2-2SC syntax checker (job `AFByb3ZpZGVySm9iAaEdzTywfrOWhGbnlXxd-w`, export `report/notebook_executed.html`). It refuses any platform whose name does not end in SC. The emulator jobs were submitted by the `submit/` scripts.
 
 Value ledger, run after the compilation steps:
 
