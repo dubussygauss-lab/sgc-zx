@@ -11,17 +11,18 @@ Tags: `[F]` marks a statement verifiable from an artifact in the repository or f
 | Criterion | Weight | Where the evidence is |
 |---|---|---|
 | Problem & Value | 30 % | Section 1, Section 6 |
-| Technical Performance & Hardware Use | 30 % | Section 3 (count tables A1 to B2 and the count-only table B1x, proxy tables A4 and A5, Selene tables S1 and S2, H2-Emulator table E1, H2-2E tables E2 and E3), Section 2.6 and `results/selene.md` for the Selene runs, Sections 3.7 and 3.7.1 and `results/emulator_jobs.csv` for the platform jobs, notebook `report/notebook_skeleton.py` |
+| Technical Performance & Hardware Use | 30 % | Section 1.2 and Table 1.1a for the pass selector PSEL from `value/selector_ledger.md`, Section 3 (count tables A1 to B2 and the count-only table B1x, proxy tables A4 and A5, Selene tables S1 and S2, H2-Emulator table E1, H2-2E tables E2 and E3), Section 2.6 and `results/selene.md` for the Selene runs, Sections 3.7 and 3.7.1 and `results/emulator_jobs.csv` for the platform jobs, notebook `report/notebook_skeleton.py` |
 | Scientific Merit | 20 % | Section 2.5 (certificate), Section 3.4 and `results/certificates.md`, arXiv:2608.22801 and arXiv:2608.22810 |
-| Engineering & Reproducibility | 20 % | Section 5 (environment, seeds, script table, test table, verification reports), `README.md`, the tests under `bench/`, `noise/`, `barrier/`, `pipelines/`, `selene/`, `model/`, `submit/` and `value/`, Section 4.7 for the refit command |
+| Engineering & Reproducibility | 20 % | Section 5 (environment, seeds, script table, test table, verification reports), `pipelines/pass_select.py` with `pipelines/test_pass_select.py`, `value/selector_ledger.py` with `value/test_selector_ledger.py`, `README.md`, the tests under `bench/`, `noise/`, `barrier/`, `pipelines/`, `selene/`, `model/`, `submit/` and `value/`, Section 4.7 for the refit command |
 
 ## 1. Problem and value
 
-`[F]` The HQC, shot and T-count numbers below come from the script outputs `value/value_ledger.md` and `value/value_by_application.md`. The noise parameters come from `docs/platform_notes.md` section 3.3. Manuscript statements are cited by their labels in arXiv:2608.22801. P0 is pytket's Quantinuum pass at level 2. P2 runs PyZX teleport_reduce before that pass. HQC figures are for 1000 shots.
+`[F]` The HQC, shot and T-count numbers below come from the script outputs `value/selector_ledger.md`, `value/value_ledger.md` and `value/value_by_application.md`. The noise parameters come from `docs/platform_notes.md` section 3.3. Manuscript statements are cited by their labels in arXiv:2608.22801. P0 is pytket's Quantinuum pass at level 2. P2 runs PyZX teleport_reduce before that pass. The pass selector PSEL compiles each circuit with P0 and with P2 and keeps the result with the lower HQC. HQC figures are for 1000 shots.
 
+- `[F]` Tool. The delivered tool is the pass selector PSEL in `pipelines/pass_select.py`. It compiles each circuit with P0 and with P2 and keeps the compiled circuit with the lower HQC.
+- `[F]` H2 cost. PSEL never costs more HQC than P0. It saves 743.6 HQC or 4.79 % on the 15 checked B1 circuits and 46.0 HQC or 0.28 % on the 180 circuits of family A. It never raises n_2q against P0 on any of the 223 circuits of the four families. P2 run on every family A circuit would cost 6.27 % more than P0.
 - `[O]` User. A team that runs Clifford+T subroutines on Quantinuum H2 under a fixed HQC budget and will later price them on a fault-tolerant Helios.
-- `[O]` Decision. Should this circuit go through ZX rewriting before pytket's Quantinuum pass?
-- `[F]` H2 cost. On the 15 checked B1 circuits P2 costs 14,772.8 HQC against 15,516.0 for P0. The saving is 743.2 HQC or 4.8 %. The median per-circuit saving is 3.9 %.
+- `[O]` Decision. Should this circuit go through ZX rewriting before pytket's Quantinuum pass? `[F]` PSEL takes this decision per circuit from the HQC of both compilations.
 - `[F]` Fault-tolerant cost. ZX removes 2,862 of 7,048 T gates on B1. Each T gate is one magic state, so the saving is 40.6 %. On the four B1 circuits with a certificate the certified fraction of the remaining T-count is 0.443. The fraction 0.997 holds for the 20 synthesised B2 Haar circuits at n = 2 and 3 and not for the B1 circuits.
 - `[F]` Algorithms. Every circuit except hwb6, hwb8 and the two ham15 circuits is an adder, multiplier, Fourier transform, oracle, search instance or multi-controlled Toffoli. The adders, multipliers and the Fourier transform come from factoring and discrete-log circuits. grover_5 and mod5_4 come from search (Section 1.4). `[O]` The Toffoli circuits are placed in search as oracle and diffusion parts.
 
@@ -29,7 +30,7 @@ Tags: `[F]` marks a statement verifiable from an artifact in the repository or f
 
 `[O]` The user pays each H2 run in HQC from a fixed budget. On a fault-tolerant machine the same subroutines are priced in T gates. `[F]` The track budget is 10,000 HQC per team on H2-1E and H2-2E according to the Aqora forum topic "Emulator Cost" by Irfan Khan of Quantinuum (Section 3.7). No copy is in the repository.
 
-`[O]` The decision is made per circuit: run P0 alone or insert the ZX stage first. The ledger answers it in HQC and in magic states. It also says when the answer is no.
+`[F]` The decision is made per circuit between P0 alone and the ZX stage followed by P0. PSEL takes it from the HQC of both compilations. `[O]` The ledger explains the decision in HQC and in magic states and shows where the answer is no.
 
 `[F]` No user interview or survey is part of this submission. `[O]` The need rests on the H2 cost formula and on the algorithm literature of Section 1.4. None of the six papers of Section 3.4 compares ZX rewriting against pytket's Quantinuum pass on the native H2 gate set.
 
@@ -39,7 +40,22 @@ Tags: `[F]` marks a statement verifiable from an artifact in the repository or f
 
 `[F]` p2 = 1.29e-3 is the largest gate fault rate of the H2-2E emulator. The H2-2E emulator parameters are p2 = 1.29e-3 and p1 = 7.3e-5 per gate, readout flips 9e-4 and 1.8e-3 for states 0 and 1 and p_init = 4e-5 (`docs/platform_notes.md` section 3.3).
 
-`[F]` Table 1.1. HQC at 1000 shots by application area. B1 is checked. B1x is count-only and is never merged with B1. Saved % is computed on the area sums. Source: `value/value_by_application.md`.
+`[F]` The tool we deliver is the pass selector PSEL in `pipelines/pass_select.py`. It compiles each circuit with P0 and with P2 and keeps the compiled circuit with the lower HQC. An HQC tie goes to the lower n_2q and a further tie goes to P0. A candidate that fails the exactness check of `pipelines/compile.py:check` is dropped. Section 2.2 defines PSEL next to the other pipelines.
+
+`[F]` Table 1.1a. HQC at 1000 shots of PSEL against P0 and P2, per family. B1x is count-only and is never merged with B1. Saved % is computed on the family sums. The median is over per-circuit percentages against P0. Source: `value/selector_ledger.md`, computed from the P0 and P2 rows of `value/value_ledger.csv` and `results/family_B2_counts.csv`.
+
+| Family | Circuits | PSEL picks P2 | HQC P0 | HQC P2 | HQC PSEL | Saved vs P0 | Saved vs P0 % | Saved vs P2 | Median per-circuit % vs P0 |
+|---|---|---|---|---|---|---|---|---|---|
+| A, Trotter | 180 | 57 | 16,422.6 | 17,453.0 | 16,376.6 | 46.0 | 0.28 | 1,076.4 | 0.00 |
+| B1, checked | 15 | 14 | 15,516.0 | 14,772.8 | 14,772.4 | 743.6 | 4.79 | 0.4 | 3.94 |
+| B1x, count-only | 8 | 7 | 3,288.8 | 3,141.0 | 3,141.0 | 147.8 | 4.49 | 0.0 | 2.40 |
+| B2, Haar | 20 | 0 | 730.0 | 731.6 | 730.0 | 0.0 | 0.00 | 1.6 | 0.00 |
+
+`[F]` By construction PSEL never costs more HQC than P0 on any circuit. The four families hold 223 circuits. PSEL saves 743.6 HQC or 4.79 % on B1. It saves 147.8 HQC or 4.49 % on B1x. On family A it saves 46.0 HQC or 0.28 %. On B2 it saves nothing because P2 is never cheaper than P0 there.
+
+`[F]` PSEL never raises the ZZ gate count against P0 on any of the 223 circuits. It lowers n_2q on 13 of the 15 B1 circuits and on 5 of the 8 B1x circuits. The choice that minimises n_2q agrees with the choice that minimises HQC on all 223 circuits (`value/selector_ledger.md`).
+
+`[F]` Table 1.1. HQC at 1000 shots of P2 against P0 by application area. B1 is checked. B1x is count-only and is never merged with B1. Saved % is computed on the area sums. Source: `value/value_by_application.md`.
 
 | Area | Family | Circuits | HQC P0 | HQC P2 | HQC saved | Saved % | Median per-circuit % |
 |---|---|---|---|---|---|---|---|
@@ -54,13 +70,15 @@ Tags: `[F]` marks a statement verifiable from an artifact in the repository or f
 | Reversible logic, no sourced algorithm | B1x | 2 | 1,487.6 | 1,374.4 | 113.2 | 7.6 | 6.2 |
 | All areas | B1x | 8 | 3,288.8 | 3,141.0 | 147.8 | 4.5 | 2.4 |
 
-`[F]` P2 is cheaper than P0 in HQC on 14 of the 15 B1 circuits. hwb8 alone accounts for 84.6 % of the B1 saving but serves no sourced quantum algorithm. Without hwb8 the B1 saving is 114.6 HQC. `[O]` The median of 3.9 % is the better guide for a single circuit.
+`[F]` P2 is cheaper than P0 in HQC on 14 of the 15 B1 circuits. The exception is qft_4 in the integer factoring row. There P2 costs 0.4 HQC more and PSEL keeps P0. This is the only HQC difference between PSEL and P2 on B1 and B1x.
 
-`[F]` Saved HQC buys shots. The following figures assume one job that pays the 5 HQC job fee once. At the 10,000 HQC team budget P0 affords 68,178 shots of vbe_adder_3 and P2 affords 87,675. That is 19,497 extra shots or 28.6 % more. vbe_adder_3 has the largest per-circuit percentage saving of the 15 B1 circuits. The median extra-shot gain over the 15 circuits is 4.3 % (`value/value_by_application.md`). On the Grover oracle mod5_4 the gain is 11,757 shots or 7.5 %.
+`[F]` hwb8 alone accounts for 84.5 % of the PSEL saving on B1 but serves no sourced quantum algorithm. Without hwb8 the PSEL saving on B1 is 115.0 HQC. `[O]` The median of 3.94 % is the better guide for a single circuit.
 
-`[F]` The H2 hardware guide limits a job to 10,000 shots (`docs/platform_notes.md` section 3.4). With that limit and one fee per job P0 affords 67,974 shots of vbe_adder_3 and P2 affords 87,324. That is 19,350 extra shots or 28.5 % more. On mod5_4 the gain is 11,584 shots or 7.4 % (`value/value_by_application.md`). Whether the per-job limit applies on H2-2E is Unverifiable from the repository.
+`[F]` Saved HQC buys shots. The following figures assume one job that pays the 5 HQC job fee once. PSEL picks P2 for vbe_adder_3. At the 10,000 HQC team budget P0 affords 68,178 shots of vbe_adder_3 and PSEL affords 87,675. That is 19,497 extra shots or 28.6 % more. vbe_adder_3 has the largest per-circuit percentage saving of the 15 B1 circuits. The median extra-shot gain of P2 over the 15 circuits is 4.3 % (`value/value_by_application.md`). On the Grover oracle mod5_4 PSEL also picks P2 and the gain is 11,757 shots or 7.5 %.
 
-`[F]` The ledger also says when not to run ZX. On the 180 Trotter circuits of family A P2 costs 17,453.0 HQC against 16,422.6 for P0. That is 1,030.4 HQC or 6.3 % more. P2 is dearer on 108 circuits and cheaper on 57. On the 60 XXZ circuits P2 is dearer on every circuit and the total rises by 12.3 %. `[O]` A user with a Trotter circuit should skip the ZX stage.
+`[F]` The H2 hardware guide limits a job to 10,000 shots (`docs/platform_notes.md` section 3.4). With that limit and one fee per job P0 affords 67,974 shots of vbe_adder_3 and PSEL affords 87,324. That is 19,350 extra shots or 28.5 % more. On mod5_4 the gain is 11,584 shots or 7.4 % (`value/value_by_application.md`). Whether the per-job limit applies on H2-2E is Unverifiable from the repository.
+
+`[F]` PSEL keeps P0 on 123 of the 180 family A circuits. P2 is dearer on 108 of them and ties P0 in HQC on 15. Run on every family A circuit P2 would cost 17,453.0 HQC against 16,422.6 for P0. That is 6.27 % more. On the 60 XXZ circuits P2 is dearer on every circuit and would raise the total by 12.33 %. PSEL keeps P0 on all 60 of them. On the 60 TFIM circuits PSEL picks P2 on 32 and saves 0.62 % against P0. On the 60 ladder circuits it picks P2 on 25 and saves 0.52 %. `[O]` A user with a Trotter circuit runs PSEL and does not need to decide in advance whether the ZX stage pays.
 
 ### 1.3 What it saves on the fault-tolerant layer
 
@@ -107,7 +125,7 @@ Tags: `[F]` marks a statement verifiable from an artifact in the repository or f
 
 ### 1.5 Value statement and scope of claims
 
-`[O]` For an H2 user the ledger is a reproducible answer to "should I run ZX before pytket" in HQC per area. `[F]` P2 saves 7.9 % on the checked factoring circuits and 4.8 % on the checked search circuits. `[O]` On Trotter circuits the answer is no. `[F]` The ledger gives magic-state counts for every B1, B1x and B2 circuit. The certificate covers only the 24 circuits of `results/certificates.csv`, all with n at most 5. Four of them are B1 subroutines with a pooled certified fraction of 0.443. The other 20 are the synthesised B2 Haar circuits at n = 2 and 3 with a pooled fraction of 0.997.
+`[F]` The delivered tool is PSEL in `pipelines/pass_select.py`. It answers "should I run ZX before pytket" per circuit and never costs more HQC than P0. It saves 4.79 % on the checked B1 circuits and 0.28 % on family A. P2 saves 7.9 % on the checked factoring circuits and 4.8 % on the checked search circuits. On family A P2 alone would cost 6.27 % more and PSEL keeps P0 on 123 of the 180 circuits. `[O]` A user does not need to decide in advance whether the ZX stage pays. `[F]` The ledger gives magic-state counts for every B1, B1x and B2 circuit. The certificate covers only the 24 circuits of `results/certificates.csv`, all with n at most 5. Four of them are B1 subroutines with a pooled certified fraction of 0.443. The other 20 are the synthesised B2 Haar circuits at n = 2 and 3 with a pooled fraction of 0.997.
 
 `[F]` The winner of the finals receives credits on the on-premise Helios machine in Singapore according to the organisers' timeline email of 25 Aug 2026. No copy is in the repository. `[O]` Quantinuum's Helios roadmap targets fault tolerance. The T-count column prices a later fault-tolerant layer. `[F]` The Helios HQC formula charges no Rz gate (`docs/platform_notes.md` section 3.4). The T-count therefore does not change the cost of the finals credits.
 
@@ -131,7 +149,7 @@ Tags: `[F]` marks a statement verifiable from an artifact in the repository or f
 
 ### 2.2 Pipelines
 
-`[F]` All pipelines are in `pipelines/compile.py` and target the H2 gate set {Rz, PhasedX, ZZPhase, ZZMax, Measure, Reset} with all-to-all connectivity. Seven pipelines run on families A and B1, five (P0ref, P0, P1, P2, P3) on family B2 and three (P0ref, P0, P2) on the count-only family B1x.
+`[F]` All compile pipelines are in `pipelines/compile.py` and target the H2 gate set {Rz, PhasedX, ZZPhase, ZZMax, Measure, Reset} with all-to-all connectivity. Seven compile pipelines run on families A and B1. Five run on family B2 and three run on the count-only family B1x. These are P0ref, P0, P1, P2 and P3 on B2 and P0ref, P0 and P2 on B1x. The pass selector PSEL is a selector over P0 and P2 and not an eighth compile pipeline. It is defined after the table.
 
 | Name | Stages |
 |---|---|
@@ -142,6 +160,8 @@ Tags: `[F]` marks a statement verifiable from an artifact in the repository or f
 | P2 | PyZX `teleport_reduce`, `Circuit.from_graph`, `basic_optimization`, then P0. |
 | P3 | pytket `ZXGraphlikeOptimisation`, then P0. |
 | P4 | The ZX stage of P1, then P0 without FullPeepholeOptimise. |
+
+`[F]` PSEL is the pass selector in `pipelines/pass_select.py`. It is a choice between pipelines and adds no compilation stage of its own. It compiles the input circuit with P0 and with P2 through `pipelines/compile.py` unchanged. It drops a candidate that raises an error, leaves the native gate set or fails the exactness check of `pipelines/compile.py:check`. Of the survivors it returns the compiled circuit with the lowest HQC at the requested shot count. An HQC tie goes to the lower n_2q and a further tie goes to P0. Above 20 qubits no exactness check is run and the candidate is marked ok-unchecked. The family totals of PSEL in Section 1.2 are computed in `value/selector_ledger.py` from the existing P0 and P2 rows of `value/value_ledger.csv` and `results/family_B2_counts.csv`. They are not a rerun of `pipelines/pass_select.py`.
 
 `[F]` The ZX stages run on the circuit as written, in the gate set the ZX tools accept, and the pytket pass runs afterwards on the result. Angles are passed to PyZX through QASM, and the rounding introduced by PyZX's float-to-fraction conversion is recorded per circuit in the column `pyzx_angle_err` of `results/family_A_counts.csv`. Its maximum over the 1260 family A rows is 1.48e-10 rad, which is 4.7e-11 x pi.
 
@@ -808,12 +828,14 @@ Figure 4. Learned cost model on the proxy data. Left, predicted F_H = exp(-y_hat
 | Selene cost-model refit | `python model/cost_model.py --family-a results/cost_model_selene_input_A.csv --family-b results/cost_model_selene_input_B1.csv --prefix selene_` | the two Selene input CSVs | `results/cost_model_selene_metrics.csv`, `results/cost_model_selene_coefficients.csv`, `results/cost_model_selene_fig.{pdf,png}`, `results/cost_model_selene_autoreport.md` |
 | Selene cost-model summary | `python model/report_selene_cost.py` | the Selene and proxy metric and coefficient CSVs, the two Selene input CSVs, `results/selene_depolarizing_full.csv` | `results/cost_model_selene.md` |
 | Published T-counts of Table C2 | `python report/build_literature_tcounts.py results/literature_tcounts.csv` | `results/family_B1_counts.csv`, `results/family_B1x_counts.csv`, values copied from the six papers of Section 3.4 | `results/literature_tcounts.csv` |
+| Pass selector | `python pipelines/pass_select.py [--shots N] [--candidates P0,P2] <qasm files>` | QASM files of the input circuits | one row per file with the chosen pipeline and the HQC and n_2q of each candidate, printed |
+| Selector ledger, Table 1.1a | `python value/selector_ledger.py` | `value/value_ledger.csv`, `results/family_B2_counts.csv` | `value/selector_ledger.md`, `value/selector_ledger.csv`, `value/selector_ledger_circuits.csv` |
 | Tables and figures | `python report/make_tables.py` | `results/*.csv` | `report/tables/*.md`, `report/figures/*.png`, injected into the report |
 | Emulator jobs | `python3 submit/syntax_check.py` and `python3 submit/run_emulator.py`, with platform, shots and options of each job recorded in `results/emulator_jobs.csv` | `results/compiled/<pipeline>/` | `results/emulator_jobs.csv`, `results/emulator_nexus_H2-Emulator.csv`, `results/emulator/<platform>/<pipeline>/<file>.json` |
 
 `[F]` The Selene command clears every proxy variable because Selene streams its results over a local TCP socket that the container proxy intercepts (`results/selene.md`, section 1).
 
-`[F]` Tests. Each file was run once with the versions above, on 7 October 2026 unless the table gives 8 October. Six files run as scripts. Six files run under pytest. These are `selene/test_selene.py`, `submit/test_submit.py`, `submit/test_h22e_stats.py`, `submit/test_h22e_pooled.py`, `value/test_value_ledger.py` and `value/test_value_by_application.py`.
+`[F]` Tests. Each file was run once with the versions above, on 7 October 2026 unless the table gives 8 or 9 October. Seven files run as scripts. Seven files run under pytest. These are `selene/test_selene.py`, `submit/test_submit.py`, `submit/test_h22e_stats.py`, `submit/test_h22e_pooled.py`, `value/test_value_ledger.py`, `value/test_value_by_application.py` and `value/test_selector_ledger.py`.
 
 | File | Command | Result | Wall time |
 |---|---|---|---|
@@ -821,6 +843,7 @@ Figure 4. Learned cost model on the proxy data. Left, predicted F_H = exp(-y_hat
 | `noise/test_dm_sim.py` | `python noise/test_dm_sim.py` | 17 of 17 passed | 3 s |
 | `barrier/test_certificate.py` | `python barrier/test_certificate.py` | 69 of 69 checks passed | 29 s (44 s in `results/verification_2026-10-07.md`) |
 | `pipelines/test_compile.py` | `python pipelines/test_compile.py` | 6 of 6 passed | 2 s |
+| `pipelines/test_pass_select.py` | `python pipelines/test_pass_select.py` | 3 of 3 passed, 9 October | 5.9 s |
 | `selene/test_selene.py` | proxy variables cleared, `python -m pytest selene/test_selene.py -q` | 6 of 6 passed (5 functions, one parametrised twice) | 7 s |
 | `model/test_cost_model.py` | `python model/test_cost_model.py` | 7 of 7 passed, rerun 8 October after the `--prefix` change | under 1 s |
 | `submit/test_submit.py` | `python -m pytest submit/test_submit.py -q` | 11 of 11 passed, 8 October, offline with no credentials | 4 s |
@@ -828,9 +851,10 @@ Figure 4. Learned cost model on the proxy data. Left, predicted F_H = exp(-y_hat
 | `submit/test_h22e_pooled.py` | `python -m pytest submit/test_h22e_pooled.py -q` | 9 of 9 passed, 8 October | 6.2 s |
 | `value/test_value_ledger.py` | `python -m pytest value/test_value_ledger.py -q` | 5 of 5 passed, 8 October | 2.9 s |
 | `value/test_value_by_application.py` | `python -m pytest value/test_value_by_application.py -q` | 5 of 5 passed, 8 October | 1.1 s |
+| `value/test_selector_ledger.py` | `python -m pytest value/test_selector_ledger.py -q` | 4 of 4 passed, 9 October | 1.6 s |
 | `report/test_c2_literature.py` | `python report/test_c2_literature.py` | all checks passed (12 assert statements), 8 October | 0.6 s |
 
-`[F]` The compile tests check every pipeline against the unitary of the input and check that the measured QASM encodes the implicit qubit permutation left by `allow_swaps=True`. The certificate tests reproduce the finite verifications of the barrier manuscript (the counts 24, 1536 and 18384). The Selene tests check the bit order of the returned array with a permuted measure map and check that a seed reproduces the counts. The cost-model tests check that OLS recovers a known law without noise and that the physics baseline is exact on its own law. The submit tests run offline. They check the native gate set, the HQC formula, the bit order of returned counts, F_H and TVD, the job ledger, the job plans, the credential detection and the rubric rendering.
+`[F]` The compile tests check every pipeline against the unitary of the input and check that the measured QASM encodes the implicit qubit permutation left by `allow_swaps=True`. The certificate tests reproduce the finite verifications of the barrier manuscript (the counts 24, 1536 and 18384). The Selene tests check the bit order of the returned array with a permuted measure map and check that a seed reproduces the counts. The cost-model tests check that OLS recovers a known law without noise and that the physics baseline is exact on its own law. The pass selector tests rerun PSEL on six circuits of families A and B1 and compare its choice and HQC with the stored P0 and P2 rows. They also check that PSEL never costs more than P0 and test the tie-break rule. The selector ledger tests check the same two properties on all 223 circuits and check the family totals. The submit tests run offline. They check the native gate set, the HQC formula, the bit order of returned counts, F_H and TVD, the job ledger, the job plans, the credential detection and the rubric rendering.
 
 `[F]` Checks recorded per row in every counts CSV: `check_kind` and `check_dev`, `dist_maxdiff` and `qasm_dist_maxdiff`, `check_ok` and `status`, `pyzx_angle_err`, and the timings `t_zx`, `t_tket` and `t_total`. `[F]` The flag `--no-check` of `pipelines/run_bench_B.py` skips the unitary, statevector and distribution checks and keeps the gate-set check. Under it `check_kind` is `none`, the check columns are NaN and `status` is `ok-unchecked` for a native circuit and `FLAGGED-unchecked` otherwise. Family B1x is the only family compiled under it, and all 24 of its rows are `ok-unchecked` with a total wall time of 36.8 s.
 
@@ -848,7 +872,9 @@ Figure 4. Learned cost model on the proxy data. Left, predicted F_H = exp(-y_hat
 
 `[F]` ZX extraction worsens the ZZPhase count. On family A the pipelines P1, P3 and P4 are above P0 on 180 of 180 circuits, with ZZ ratios from 1.28 to 10.32 (P1), 1.31 to 7.91 (P3) and 1.44 to 10.36 (P4). On family B1 (`results/family_B1_counts.csv`) P1 is above P0 on 14 of 15, P3 on 14 of 15 and P4 on 15 of 15. Only teleport reduction, which does not extract, helps on H2.
 
-`[F]` On the Trotter family no pipeline goes below P0 in ZZPhase count. Under P0 alone the ZZPhase count equals one gate per two-body term on 180 of 180 circuits, where `n_2q` equals `n_cx / 2` of the manifest. No pipeline has fewer ZZPhase gates than P0 on any family A circuit, 0 of 180 for each of P0ref, P0L1, P1, P2, P3 and P4. The family measures the cost of a rewrite instead of its benefit. `[O]` The Trotter family is the right control, because a Trotter circuit is what an H2 user runs most, and a method that damages it has to be caught.
+`[F]` On the Trotter family no pipeline goes below P0 in ZZPhase count. Under P0 alone the ZZPhase count equals one gate per two-body term on 180 of 180 circuits, where `n_2q` equals `n_cx / 2` of the manifest. No pipeline has fewer ZZPhase gates than P0 on any family A circuit, 0 of 180 for each of P0ref, P0L1, P1, P2, P3 and P4. The family measures the cost of a rewrite instead of its benefit. `[O]` The Trotter family is the right control, because a Trotter circuit is what an H2 user runs most, and a method that damages it has to be caught. `[F]` PSEL catches it in HQC. It keeps P0 on all 60 XXZ circuits and on 123 of the 180 family A circuits (`value/selector_ledger.md`).
+
+`[F]` PSEL compiles every circuit twice. Its family totals in Section 1.2 come from the stored P0 and P2 rows and not from a rerun of `pipelines/pass_select.py`. `pipelines/test_pass_select.py` reruns the selector on six circuits and checks that its choice and HQC equal those derived from the stored rows.
 
 `[F]` A single-qubit T gate is an Rz on H2, which is free in HQC and absent from the gate-noise model. The T-count layer of the ledger has no effect on any H2 number in this report. Its value is for a fault-tolerant target.
 
@@ -1007,3 +1033,8 @@ Changelog, part 2 (Section 3), 7 October 2026.
 - [F] Section 3.7.1: twelve repeat H2-2E jobs of vbe_adder_3 and grover_5 under P0 and P2 (runs r2 to r4, 1000 shots each, `results/emulator/nexus_H2-2E_r2/` to `_r4/`, `results/emulator_nexus_H2-2E_r2.csv` to `_r4.csv`) pooled with the original run by the new `submit/h22e_pooled.py`. New Table E3 (`<!-- TABLE:E3_h22e_pooled -->`) generated by `emulator_h22e_pooled()` in `report/make_tables.py`. The three pooled paragraphs are filled by the script from `report/sec371_pooled_v5.md` into `report/sec371_pooled_v5.filled.md` and spliced before the closing conclusion. Pooled at 4000 shots: vbe_adder_3 P2 minus P0 +0.0108, sd 0.0045, z +2.38, p 0.017, Holm 0.035. grover_5 +0.0007, sd 0.0075, z +0.10, p 0.92. No cell rejects homogeneity. H2-2E HQC total 5933.2 (59.3 % of quota). Sections 1.5, 2.6, 3.2, 3.7, the 3.7.1 cost and closing paragraphs, Section 6 and the scoring map updated to the pooled numbers. `report/sec1_v5.md` updated identically. `submit/test_h22e_pooled.py` added with 9 of 9 passed and listed in the Section 5 test table. `submit/common.py` gains the EMU_RUN_TAG directory suffix used by the repeats.
 - [F] Verification 2026-10-09a: Section 1.5 and `submission/SUMMARY.md` now state that grover_5 is not resolved at 4000 shots and lies 2.94 sd below the predicted gain. `README.md` lists the 18 H2-2E jobs and Table E3.
 - [F] Judge note 2026-10-09: three circuits ran on H2-2E and the repeat circuits were chosen after Table E2. `submit/h22e_pooled.py` now also prints the Holm adjustment over all three H2-2E circuits with the single-run hwb6 p of `submit/h22e_stats.py`. vbe_adder_3 gives 0.035 over the two repeated circuits and 0.052 over all three. Sections 1.5, 3.2, 3.7.1 and 6 and `submission/SUMMARY.md` state both values. The unqualified statements that the pooled runs resolve vbe_adder_3 are removed.
+- [F] 9 October 2026. Pass selector PSEL approved by Kam. Section 1.2 replaced by `report/sec12_selector_v5.md` with the new Table 1.1a from `value/selector_ledger.md`. Table 1.1 is now captioned as P2 against P0.
+- [F] Section 1 summary bullets lead with PSEL. The H2 cost bullet states that PSEL never costs more HQC than P0, saves 4.79 % on B1 and 0.28 % on family A and never raises n_2q against P0 on 223 circuits. The Decision bullet, Section 1.1 and the Section 1.5 value statement name PSEL as the delivered tool. The two sentences that told a Trotter user to skip the ZX stage are replaced by the PSEL choice on family A. `report/sec1_v5.md` updated identically.
+- [F] Section 2.2 states seven compile pipelines and defines PSEL as a selector over P0 and P2 from `report/sec22_selector_v5.md`. It is not an eighth compile pipeline.
+- [F] Section 6 states that PSEL keeps P0 on all 60 XXZ circuits and on 123 of 180 family A circuits. It states that PSEL compiles twice and that its family totals come from the stored rows.
+- [F] Scoring map rows Technical and Engineering name PSEL, `value/selector_ledger.py` and their tests. Section 5 lists `pipelines/pass_select.py` and `value/selector_ledger.py` in the script table and `pipelines/test_pass_select.py` with 3 of 3 passed and `value/test_selector_ledger.py` with 4 of 4 passed in the test table, each run once on 9 October 2026.
