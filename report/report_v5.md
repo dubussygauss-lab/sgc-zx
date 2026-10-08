@@ -1,6 +1,6 @@
 # A pass selector keeps ZX rewriting only where it lowers the cost of a circuit on Quantinuum H2
 
-Team Learned ZX Rewriting. Quantinuum Singapore Grand Challenge, submission 1, draft v5 (8 October 2026).
+Team Learned ZX Rewriting. Quantinuum Singapore Grand Challenge, submission 1, report version 5 (9 October 2026).
 
 Tags: `[F]` marks a statement verifiable from an artifact in the repository or from the cited source. `[O]` marks a judgement or a plan. Every number in a results table of Section 3 is produced by `report/make_tables.py` from `results/*.csv`. The emulator runs are reported in Sections 3.7 and 3.7.1.
 
@@ -1043,3 +1043,4 @@ Changelog, part 2 (Section 3), 7 October 2026.
 - [F] Section 5 test table: `submit/test_h22e_pooled.py` now passes 10 of 10 after the three-circuit Holm test was added on 9 October.
 - [F] Fixes F1 to F5 of `results/verification_2026-10-09b.md` applied with the optional Section 6 deletion. Sections 1, 1.2 and 1.5 bound the PSEL cost by the 223 circuits and the exactness check. Section 1.5 states the per-circuit P0 or P2 decision. Section 1.2 states the n_2q tie rule, recomputed as 223 of 223 from `value/selector_ledger_circuits.csv`. Section 5 lists nine verification reports. `submission/SUMMARY.md` states that HQC comes from the organisers' formula. `report/sec1_v5.md` and `report/sec12_selector_v5.md` updated identically.
 - [F] Title changed on Kam's instruction on 9 October 2026 from "A certified resource ledger shows where ZX rewriting pays on Quantinuum H2" to "A pass selector keeps ZX rewriting only where it lowers the cost of a circuit on Quantinuum H2". The old title overclaimed per verification 2026-10-08d F1.
+- [F] Header line: "draft v5" replaced by "report version 5" for the submitted PDF.
