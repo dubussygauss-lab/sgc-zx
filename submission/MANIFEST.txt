@@ -1,0 +1,17 @@
+# sha256  size_bytes  path (relative to submission/), generated 2026-10-08T17:46:03Z from HEAD 41a0b3d
+bdb818aedd570f8865eb28f88b7c72e687e8fdac8b2b2843890316f0cf2993ba        5368  REPRODUCE.md
+de970d5790fa5322dc26d47d5bf28f6029cb047692a2cd1b2d55ecbd65634c0e        5997  SUMMARY.md
+530eeea3860725d3b4587b725be0254657e7bb6d1d5a0fc41e36fa8298f6365d        3027  build.sh
+18f3ff042e51f05e6775c37be3752c648c3683ceb5c78068c0a5ee3b51620d47         374  build_logs/build.log
+3d8e1ce3541aa525f0bfb45a8d5c5af9f7b40df1c88e888301366371d83b6254        3730  build_logs/test_certificate.log
+8985b89300693d482a193858eff53dd1aab96b462abe94440cf76462837a822b         168  build_logs/test_compile.log
+290a02ff356c0ae53f19ea09789ff5f2cb6fe7131b810bfbdc4100176c68f242         256  build_logs/test_cost_model.log
+80fd708944ed12eaa8bb10176838c2cafdcf4d695590261e8c6af4348a02cfff         568  build_logs/test_dm_sim.log
+8c02563cb19847cf2ce9d074b4be0e1a686e35fcbacfcfb77b2380114c80541c         468  build_logs/test_gen_trotter.log
+2bcdce01b4142a1e91c1a8f900e4706ef17992189da7d2efa7b3a8085632d3e2          99  build_logs/test_selene.log
+94f8745ebe03ae060696ec72b6f6e02f067e14e0f2a97d6c1dd16bb0a05dc92c          99  build_logs/test_submit.log
+52bfde65fbbd0aca27e6d28ac3a4a9e629d89e72147a056d351ea8ea84567bc9         560  build_logs/tests_summary.txt
+207efc3524a2e5f8b5b11d37bebabbaf92a98135b7344ad6df975710d139e7f9     4960913  code.zip
+3985303b5dc002f24e2231aea37bc65d94328a8923526a9b022040df2fea8893         812  report.css
+3a4ecb831aaae930b616fe8eb9a1f051988962b15ba68fd4ac7ffa1296e09f45      714479  report.pdf
+517586d0e4e73f3e437b2f1b0fdb74e83a22ebaf164f83cb4be3e7ba3beefacd         933  run_tests.sh

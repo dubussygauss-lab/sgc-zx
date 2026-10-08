@@ -1,0 +1,7 @@
+ok test_bell
+ok test_cx_cx_cancels
+ok test_random_clifford_t
+ok test_family_a_tfim_n4
+ok test_implicit_permutation_and_sim
+ok test_pyzx_angle_rounding
+all tests passed

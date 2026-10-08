@@ -1,0 +1,19 @@
+PASS test_against_sv_module
+PASS test_asymmetric_spam
+PASS test_bell_native_exact
+PASS test_density_matrix_physical
+PASS test_depolarising_equals_pauli_sum
+PASS test_gate_definitions
+PASS test_idle_dephasing
+PASS test_init_flip
+PASS test_layer_reordering_preserves_unitary
+PASS test_measure_subset_and_errors
+PASS test_metrics_and_sampling
+PASS test_p1_depolarising_formula
+PASS test_qasm_parser
+PASS test_rz_virtual_flag
+PASS test_spam
+  n=8, 500 gates (ideal + noisy run): 12.32 s, F_H=0.9831, TVD=0.0795
+PASS test_timing_n8
+PASS test_zzmax_depolarised
+17/17 passed

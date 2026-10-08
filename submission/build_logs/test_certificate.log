@@ -1,0 +1,71 @@
+PASS  omega^8 = 1 
+PASS  omega^4 = -1 
+PASS  sqrt2^2 = 2 
+PASS  i^2 = -1 
+PASS  sqrt2 = omega + omega^-1 
+PASS  conj(omega) = omega^7 
+PASS  |omega|^2 = 1 
+PASS  sqrt2 divisibility test and quotient 
+PASS  every multiple of sqrt2 has a==c, b==d mod 2 
+PASS  Zw complex evaluation is a ring homomorphism 
+PASS  real_sqrt2 
+PASS  H^2 = I exactly 
+PASS  sde(T) = 0 
+PASS  sde(H) = 1 
+PASS  sde(HTH) = 2 (derived: 1+omega not divisible by sqrt2) 
+PASS  sde(S)=sde(X)=sde(Z)=0 
+PASS  sde(HSH) = 1 (derived: HSH = [[w, w^7],[w^7, w]]/sqrt2) 
+PASS  (HT)^k exact matrices agree with numpy, k<=29 
+PASS  s sdg = I 
+PASS  t tdg = I 
+PASS  U U^dag = 2^k I 
+PASS  random 2-4 qubit words agree with numpy to 1e-10 
+PASS  3-qubit M M^dag = 2^k I 
+PASS  sde invariant under global phase omega 
+PASS  entrywise sde of H is 1 everywhere 
+PASS  Bloch(T) = (A + B sqrt2)/sqrt2 with A=[[1,-1],[1,1]] block, B=diag(0,0,1) 
+PASS  lde(T^) = 1 (Lemma mqval(a)) 
+PASS  exact Bloch matrix agrees with float on 100 random words 
+PASS  projective Clifford group has order 24 
+PASS  8 Cliffords lie in N(Z) 
+PASS  n=1: 4x4 channel lde == Bloch lde, structured == dense (120 words) 
+PASS  n=2,3: structured accumulator == dense channel (numerators and exponent) 
+PASS  channel(g1 g2) = channel(g1) channel(g2) 
+PASS  channel is orthogonal (float check) 
+PASS  Fig. tiers: THSSHT has t_min = lde = 0 
+PASS  Fig. normalizer (a): T S T -> t_min 0 
+PASS  Fig. normalizer (b): T HSSH T -> t_min 0 
+PASS  Fig. normalizer (c): T H T -> lde 2, P != 0 mod 2 
+PASS  (HZ)^4 has lde 0 
+PASS  planted family: 48 cases, t_min = 0 iff c in N (8 of 24), else 2 
+PASS  residue automaton: 24 states, 6 seeds, 1536 transitions, 0 reducible {'states': 24, 'seed_states': 6, 'transitions': 1536, 'reducible_states': 0, 'interior_cliffords': 16}
+PASS  sharpness run: 34 states, 10 reducible {'states': 34, 'seed_states': 6, 'transitions': 3264, 'reducible_states': 10, 'interior_cliffords': 24}
+PASS  separated words have lde = n (n = 1..8, 50 each) 
+PASS  unrestricted words: deficit n - lde even, linkage agrees (paper: 69% with lde<n; here 73%) 
+PASS  MA enumeration t<=8: 18,384 words 
+PASS  MA enumeration: 18,384 distinct projective elements 
+PASS  MA histogram 24*[1,3,6,12,24,48,96,192,384] 
+PASS  t_min = lde on every MA element (Lemma bridge) 19.9s
+PASS  is_matsumoto_amano on grammar words 
+PASS  CS word implements diag(1,1,1,i) 
+PASS  controlled-S: channel lde = 2 with T-count 3 
+PASS  Theorem C(a): MA blocks rigid, also embedded on wire 1 of 3 
+PASS  single-qubit random words (len<=200): T-count >= floor 
+PASS  single-qubit: linkage count == lde(Bloch) == lde(channel) 
+PASS  single-qubit: floor and sde invariant under HH, SSSS, T^8 insertion 
+PASS  single-qubit: criterion fires iff lde fails to rise; otherwise rises by exactly 1 
+NOTE  DISCREPANCY (Lemma mqval(b) refinement): at n=1 every criterion-positive step gives lde = m-1, not m (625 collapses, 625 violate 'equals m') 
+NOTE  DISCREPANCY: T T = S: criterion fires at step 2 with m=1 and lde drops to 0 (paper: 'equals m') 
+PASS  floor invariant under word reversal and inversion 
+PASS  n=2,3,4 random circuits: T-count >= floor 
+PASS  n=2,3,4: floor invariant under identity insertion 
+PASS  n=2,3,4: criterion fires iff lde fails to rise; otherwise rises by exactly 1 
+NOTE  DISCREPANCY: at n>=2 criterion-positive steps give lde in {m, m-1}; sizes (1+m-lde_after): {2: 44, 1: 7} 
+PASS  Clifford steps leave lde unchanged; T steps raise it by at most one 
+PASS  qasm parse: n=2, 5 gates 
+PASS  qasm certificate (controlled-S): lde 2, t 3 
+PASS  qasm: word = reversed time order (unitary of circuit) 
+PASS  qasm rejects rz 
+PASS  qasm round trip of a random 3-qubit word 
+
+69/69 checks passed in 46.4s

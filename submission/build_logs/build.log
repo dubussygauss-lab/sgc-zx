@@ -1,0 +1,6 @@
+[2026-10-08T17:46:00Z] pandoc 3.1.3, wkhtmltopdf 0.12.6
+QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-root'
+[2026-10-08T17:46:02Z] report.pdf written (714479 bytes)
+[2026-10-08T17:46:03Z] code.zip from HEAD 41a0b3d, 4960913 bytes, 2205 entries
+[2026-10-08T17:46:03Z] credential check: no credentials.json, *.token, aqora-home, .env in archive listing
+[2026-10-08T17:46:03Z] MANIFEST.txt written

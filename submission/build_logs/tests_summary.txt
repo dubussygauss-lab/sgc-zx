@@ -1,0 +1,8 @@
+gen_trotter | rc=0 | wall=80s | cmd: python bench/test_gen_trotter.py
+dm_sim | rc=0 | wall=13s | cmd: python noise/test_dm_sim.py
+certificate | rc=0 | wall=47s | cmd: python barrier/test_certificate.py
+compile | rc=0 | wall=3s | cmd: python pipelines/test_compile.py
+selene | rc=0 | wall=61s | cmd: env HTTPS_PROXY= https_proxy= HTTP_PROXY= http_proxy= NO_PROXY= no_proxy= python -m pytest selene/test_selene.py -q
+cost_model | rc=0 | wall=1s | cmd: python model/test_cost_model.py
+submit | rc=0 | wall=5s | cmd: python -m pytest submit/test_submit.py -q
+done
