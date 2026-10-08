@@ -20,10 +20,10 @@ Tags: `[F]` marks a statement verifiable from an artifact in the repository or f
 `[F]` The HQC, shot and T-count numbers below come from the script outputs `value/selector_ledger.md`, `value/value_ledger.md` and `value/value_by_application.md`. The noise parameters come from `docs/platform_notes.md` section 3.3. Manuscript statements are cited by their labels in arXiv:2608.22801. P0 is pytket's Quantinuum pass at level 2. P2 runs PyZX teleport_reduce before that pass. The pass selector PSEL compiles each circuit with P0 and with P2 and keeps the result with the lower HQC. HQC figures are for 1000 shots.
 
 - `[F]` Tool. The delivered tool is the pass selector PSEL in `pipelines/pass_select.py`. It compiles each circuit with P0 and with P2 and keeps the compiled circuit with the lower HQC.
-- `[F]` H2 cost. PSEL costs no more HQC than P0 on any of the 223 circuits. It saves 743.6 HQC or 4.79 % on the 15 checked B1 circuits and 46.0 HQC or 0.28 % on the 180 circuits of family A. It never raises n_2q against P0 on any of the 223 circuits of the four families. P2 run on every family A circuit would cost 6.27 % more than P0.
+- `[F]` H2 cost. PSEL cannot cost more HQC than P0 on a circuit where P0 passes the exactness check, because P0 is always one of its two candidates. This holds by construction and is not a measured result. PSEL picks P2 on 14 of the 15 checked B1 circuits and saves 743.6 HQC or 4.79 % there. It picks P2 on 57 of the 180 circuits of family A and saves 46.0 HQC or 0.28 %. It never raises n_2q against P0 on any of the 223 circuits of the four families. P2 run on every family A circuit would cost 6.27 % more than P0.
 - `[O]` User. A team that runs Clifford+T subroutines on Quantinuum H2 under a fixed HQC budget and will later price them on a fault-tolerant Helios.
 - `[O]` Decision. Should this circuit go through ZX rewriting before pytket's Quantinuum pass? `[F]` PSEL takes this decision per circuit from the HQC of both compilations.
-- `[F]` Fault-tolerant cost. ZX removes 2,862 of 7,048 T gates on B1. Each T gate is one magic state, so the saving is 40.6 %. On the four B1 circuits with a certificate the certified fraction of the remaining T-count is 0.443. The fraction 0.997 holds for the 20 synthesised B2 Haar circuits at n = 2 and 3 and not for the B1 circuits.
+- `[F]` Fault-tolerant cost. Against the written input circuits ZX removes 2,862 of 7,048 T gates on B1. Each T gate is one magic state, so the saving against the written circuits is 40.6 %. Our T-count after ZX equals the best ancilla-free value in the six papers of Section 3.4 on 14 of 22 comparable B1 and B1x circuits and is above it on the other 8 (Table C2). On the four B1 circuits with a certificate the certified fraction of the remaining T-count is 0.443. The fraction 0.997 holds for the 20 synthesised B2 Haar circuits at n = 2 and 3 and not for the B1 circuits.
 - `[F]` Algorithms. Every circuit except hwb6, hwb8 and the two ham15 circuits is an adder, multiplier, Fourier transform, oracle, search instance or multi-controlled Toffoli. The adders, multipliers and the Fourier transform come from factoring and discrete-log circuits. grover_5 and mod5_4 come from search (Section 1.4). `[O]` The Toffoli circuits are placed in search as oracle and diffusion parts.
 
 ### 1.1 The user and the decision
@@ -99,6 +99,8 @@ Tags: `[F]` marks a statement verifiable from an artifact in the repository or f
 | Reversible logic, no sourced algorithm | B1x | 735 | 309 | 426 | 58.0 |
 | All areas | B1x | 1,652 | 854 | 798 | 48.3 |
 
+`[F]` The 40.6 % saving on B1 in Table 1.2 is measured against the written input circuits and not against published optimisers. Our T-count after ZX equals the best ancilla-free value in the six papers of Section 3.4 on 14 of 22 comparable B1 and B1x circuits and is above it on the other 8 (Table C2).
+
 `[F]` The exactness-barrier manuscript gives a per-instance floor (Kam et al., arXiv:2608.22801). The least denominator exponent of the exact Pauli channel of a Clifford+T circuit over Z[sqrt 2] is a lower bound on the T-count of every semantics-exact rewrite. The statements are Theorem B, Corollary cert and Theorem C of arXiv:2608.22801.
 
 `[F]` On the 20 synthesised Haar circuits of family B2 the ZX stage removes 862 of 42,396 T gates or 2.0 %. The certified floor is 41,414 against 41,534 T gates after ZX. The certified-incompressible fraction is 0.997. Further exact T optimisation of these instances can gain at most 0.3 % of the remaining T-count. On the worst single instance the bound is 0.7 %.
@@ -125,7 +127,7 @@ Tags: `[F]` marks a statement verifiable from an artifact in the repository or f
 
 ### 1.5 Value statement and scope of claims
 
-`[F]` The delivered tool is PSEL in `pipelines/pass_select.py`. It decides per circuit whether to run PyZX teleport_reduce before pytket's Quantinuum pass. It costs no more HQC than P0 on any of the 223 circuits. It saves 4.79 % on the checked B1 circuits and 0.28 % on family A. P2 saves 7.9 % on the checked factoring circuits and 4.8 % on the checked search circuits. On family A P2 alone would cost 6.27 % more and PSEL keeps P0 on 123 of the 180 circuits. `[O]` A user does not need to decide in advance whether the ZX stage pays. `[F]` The ledger gives magic-state counts for every B1, B1x and B2 circuit. The certificate covers only the 24 circuits of `results/certificates.csv`, all with n at most 5. Four of them are B1 subroutines with a pooled certified fraction of 0.443. The other 20 are the synthesised B2 Haar circuits at n = 2 and 3 with a pooled fraction of 0.997.
+`[F]` The delivered tool is PSEL in `pipelines/pass_select.py`. It decides per circuit whether to run PyZX teleport_reduce before pytket's Quantinuum pass. It cannot cost more HQC than P0 where P0 passes the exactness check, because P0 is always one of its candidates. This holds by construction. It picks P2 on 14 of the 15 checked B1 circuits and saves 4.79 % there. It saves 0.28 % on family A. P2 saves 7.9 % on the checked factoring circuits and 4.8 % on the checked search circuits. On family A P2 alone would cost 6.27 % more and PSEL keeps P0 on 123 of the 180 circuits. `[O]` A user does not need to decide in advance whether the ZX stage pays. `[F]` The ledger gives magic-state counts for every B1, B1x and B2 circuit. The certificate covers only the 24 circuits of `results/certificates.csv`, all with n at most 5. Four of them are B1 subroutines with a pooled certified fraction of 0.443. The other 20 are the synthesised B2 Haar circuits at n = 2 and 3 with a pooled fraction of 0.997.
 
 `[F]` The winner of the finals receives credits on the on-premise Helios machine in Singapore according to the organisers' timeline email of 25 Aug 2026. No copy is in the repository. `[O]` Quantinuum's Helios roadmap targets fault tolerance. The T-count column prices a later fault-tolerant layer. `[F]` The Helios HQC formula charges no Rz gate (`docs/platform_notes.md` section 3.4). The T-count therefore does not change the cost of the finals credits.
 
@@ -160,6 +162,8 @@ Tags: `[F]` marks a statement verifiable from an artifact in the repository or f
 | P2 | PyZX `teleport_reduce`, `Circuit.from_graph`, `basic_optimization`, then P0. |
 | P3 | pytket `ZXGraphlikeOptimisation`, then P0. |
 | P4 | The ZX stage of P1, then P0 without FullPeepholeOptimise. |
+
+`[F]` The P0 reproduction has not been compared against `QuantinuumBackend.default_compilation_pass` on a live backend object. `[O]` A difference between the two passes would shift every P0 count and every saving quoted against P0. The baseline therefore rests on our reading of the pytket-quantinuum 0.59.3 source.
 
 `[F]` PSEL is the pass selector in `pipelines/pass_select.py`. It is a choice between pipelines and adds no compilation stage of its own. It compiles the input circuit with P0 and with P2 through `pipelines/compile.py` unchanged. It drops a candidate that raises an error, leaves the native gate set or fails the exactness check of `pipelines/compile.py:check`. Of the survivors it returns the compiled circuit with the lowest HQC at the requested shot count. An HQC tie goes to the lower n_2q and a further tie goes to P0. Above 20 qubits no exactness check is run and the candidate is marked ok-unchecked. The family totals of PSEL in Section 1.2 are computed in `value/selector_ledger.py` from the existing P0 and P2 rows of `value/value_ledger.csv` and `results/family_B2_counts.csv`. They are not a rerun of `pipelines/pass_select.py`.
 
@@ -896,11 +900,19 @@ Figure 4. Learned cost model on the proxy data. Left, predicted F_H = exp(-y_hat
 
 ## 7. Team and roles
 
-`[F]` The team members are C.-F. Kam, A. Mahasinghe, D. De Silva, Karunarathne, F. Cadet, Bessafi and K. De Silva.
+`[F]` Members and affiliations as registered for the challenge in the team's email of 31 August 2026. No copy of that email is in the repository.
 
-`[F]` C.-F. Kam is the first author of the exactness-barrier manuscript arXiv:2608.22801 (Reference 1). `[O]` Kam is the team owner on Aqora as stated by the team. No artifact in the repository records it.
+| Member | Affiliation | Recorded academic status | Contribution recorded in this submission |
+|---|---|---|---|
+| Chon-Fai Kam | Università degli Studi di Palermo and Université Paris Cité | | Team lead and owner of the Aqora organisation `learned_zx_rewriting`. First author of the exactness-barrier manuscript arXiv:2608.22801 (Reference 1). |
+| Anuradha Mahasinghe | University of Colombo | | |
+| Dulari De Silva | University of Colombo | BSc (Hons) in Computational Mathematics | First author of the Solovay-Kitaev and ZX manuscript arXiv:2608.22810 (Reference 2). |
+| Nethmini Karunarathne | University of Colombo | BSc student in Computer Engineering | |
+| Frédéric Cadet | PEACCEL, Paris | | |
+| Miloud Bessafi | PEACCEL, Paris | | |
+| Kaushika De Silva | QUISA, The University of Western Australia | | |
 
-`[O]` Roles of the other members to be confirmed by Kam before submission.
+`[F]` An empty cell means that no source available to the authors of this report records the entry.
 
 ## References
 
