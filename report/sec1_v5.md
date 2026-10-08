@@ -3,7 +3,7 @@
 `[F]` The HQC, shot and T-count numbers below come from the script outputs `value/selector_ledger.md`, `value/value_ledger.md` and `value/value_by_application.md`. The noise parameters come from `docs/platform_notes.md` section 3.3. Manuscript statements are cited by their labels in arXiv:2608.22801. P0 is pytket's Quantinuum pass at level 2. P2 runs PyZX teleport_reduce before that pass. The pass selector PSEL compiles each circuit with P0 and with P2 and keeps the result with the lower HQC. HQC figures are for 1000 shots.
 
 - `[F]` Tool. The delivered tool is the pass selector PSEL in `pipelines/pass_select.py`. It compiles each circuit with P0 and with P2 and keeps the compiled circuit with the lower HQC.
-- `[F]` H2 cost. PSEL never costs more HQC than P0. It saves 743.6 HQC or 4.79 % on the 15 checked B1 circuits and 46.0 HQC or 0.28 % on the 180 circuits of family A. It never raises n_2q against P0 on any of the 223 circuits of the four families. P2 run on every family A circuit would cost 6.27 % more than P0.
+- `[F]` H2 cost. PSEL costs no more HQC than P0 on any of the 223 circuits. It saves 743.6 HQC or 4.79 % on the 15 checked B1 circuits and 46.0 HQC or 0.28 % on the 180 circuits of family A. It never raises n_2q against P0 on any of the 223 circuits of the four families. P2 run on every family A circuit would cost 6.27 % more than P0.
 - `[O]` User. A team that runs Clifford+T subroutines on Quantinuum H2 under a fixed HQC budget and will later price them on a fault-tolerant Helios.
 - `[O]` Decision. Should this circuit go through ZX rewriting before pytket's Quantinuum pass? `[F]` PSEL takes this decision per circuit from the HQC of both compilations.
 - `[F]` Fault-tolerant cost. ZX removes 2,862 of 7,048 T gates on B1. Each T gate is one magic state, so the saving is 40.6 %. On the four B1 circuits with a certificate the certified fraction of the remaining T-count is 0.443. The fraction 0.997 holds for the 20 synthesised B2 Haar circuits at n = 2 and 3 and not for the B1 circuits.
@@ -34,9 +34,9 @@
 | B1x, count-only | 8 | 7 | 3,288.8 | 3,141.0 | 3,141.0 | 147.8 | 4.49 | 0.0 | 2.40 |
 | B2, Haar | 20 | 0 | 730.0 | 731.6 | 730.0 | 0.0 | 0.00 | 1.6 | 0.00 |
 
-`[F]` By construction PSEL never costs more HQC than P0 on any circuit. The four families hold 223 circuits. PSEL saves 743.6 HQC or 4.79 % on B1. It saves 147.8 HQC or 4.49 % on B1x. On family A it saves 46.0 HQC or 0.28 %. On B2 it saves nothing because P2 is never cheaper than P0 there.
+`[F]` PSEL costs more HQC than P0 only if P0 is dropped by an error or by the exactness check. No P0 row of the four families was dropped. The four families hold 223 circuits. PSEL saves 743.6 HQC or 4.79 % on B1. It saves 147.8 HQC or 4.49 % on B1x. On family A it saves 46.0 HQC or 0.28 %. On B2 it saves nothing because P2 is never cheaper than P0 there.
 
-`[F]` PSEL never raises the ZZ gate count against P0 on any of the 223 circuits. It lowers n_2q on 13 of the 15 B1 circuits and on 5 of the 8 B1x circuits. The choice that minimises n_2q agrees with the choice that minimises HQC on all 223 circuits (`value/selector_ledger.md`).
+`[F]` PSEL never raises the ZZ gate count against P0 on any of the 223 circuits. It lowers n_2q on 13 of the 15 B1 circuits and on 5 of the 8 B1x circuits. The choice that minimises n_2q, with an n_2q tie broken by HQC, agrees with the choice of PSEL on all 223 circuits (`value/selector_ledger.md`).
 
 `[F]` Table 1.1. HQC at 1000 shots of P2 against P0 by application area. B1 is checked. B1x is count-only and is never merged with B1. Saved % is computed on the area sums. Source: `value/value_by_application.md`.
 
@@ -108,7 +108,7 @@
 
 ### 1.5 Value statement and scope of claims
 
-`[F]` The delivered tool is PSEL in `pipelines/pass_select.py`. It answers "should I run ZX before pytket" per circuit and never costs more HQC than P0. It saves 4.79 % on the checked B1 circuits and 0.28 % on family A. P2 saves 7.9 % on the checked factoring circuits and 4.8 % on the checked search circuits. On family A P2 alone would cost 6.27 % more and PSEL keeps P0 on 123 of the 180 circuits. `[O]` A user does not need to decide in advance whether the ZX stage pays. `[F]` The ledger gives magic-state counts for every B1, B1x and B2 circuit. The certificate covers only the 24 circuits of `results/certificates.csv`, all with n at most 5. Four of them are B1 subroutines with a pooled certified fraction of 0.443. The other 20 are the synthesised B2 Haar circuits at n = 2 and 3 with a pooled fraction of 0.997.
+`[F]` The delivered tool is PSEL in `pipelines/pass_select.py`. It decides per circuit whether to run PyZX teleport_reduce before pytket's Quantinuum pass. It costs no more HQC than P0 on any of the 223 circuits. It saves 4.79 % on the checked B1 circuits and 0.28 % on family A. P2 saves 7.9 % on the checked factoring circuits and 4.8 % on the checked search circuits. On family A P2 alone would cost 6.27 % more and PSEL keeps P0 on 123 of the 180 circuits. `[O]` A user does not need to decide in advance whether the ZX stage pays. `[F]` The ledger gives magic-state counts for every B1, B1x and B2 circuit. The certificate covers only the 24 circuits of `results/certificates.csv`, all with n at most 5. Four of them are B1 subroutines with a pooled certified fraction of 0.443. The other 20 are the synthesised B2 Haar circuits at n = 2 and 3 with a pooled fraction of 0.997.
 
 `[F]` The winner of the finals receives credits on the on-premise Helios machine in Singapore according to the organisers' timeline email of 25 Aug 2026. No copy is in the repository. `[O]` Quantinuum's Helios roadmap targets fault tolerance. The T-count column prices a later fault-tolerant layer. `[F]` The Helios HQC formula charges no Rz gate (`docs/platform_notes.md` section 3.4). The T-count therefore does not change the cost of the finals credits.
 
