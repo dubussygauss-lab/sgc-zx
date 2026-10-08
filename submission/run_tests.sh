@@ -2,7 +2,7 @@
 # Runs every test file once from the repository root and writes one log per file
 # plus a summary to submission/build_logs/. Rerunnable.
 cd "$(dirname "$0")/.."
-# 14 test files: 7 run as scripts, 7 under pytest. See REPRODUCE.md (Tests).
+# 16 test files: 7 run as scripts, 9 under pytest. See REPRODUCE.md (Tests).
 LOG=submission/build_logs
 mkdir -p "$LOG"
 : > "$LOG/tests_summary.txt"
@@ -28,4 +28,6 @@ run value_ledger  python -m pytest value/test_value_ledger.py -q
 run value_by_app  python -m pytest value/test_value_by_application.py -q
 run selector_ledger python -m pytest value/test_selector_ledger.py -q
 run c2_literature python report/test_c2_literature.py
+run notebook_submit python -m pytest report/test_notebook_submit.py -q
+run finals_plan   python -m pytest value/test_finals_plan.py -q
 echo done >> "$LOG/tests_summary.txt"
