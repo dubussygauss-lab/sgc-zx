@@ -449,6 +449,8 @@ Provisional local proxy. Density-matrix simulation with the published H2-2E emul
 | P3 | 0.9717 | 0.0482 | 64.4 | 72.9 |
 <!-- /TABLE:A4_proxy -->
 
+`[F]` Contrary to the generated caption, Table E1 of Section 3.7 holds 10 family A rows on four ladder circuits and Table E2 holds none, so this proxy stays the primary noise data for family A.
+
 `[F]` P0 and P2 have the highest fidelity in every one of the nine (model, n) cells of family A and P0 is above P0ref on 108 of 108 circuits. P0 and P2 differ by at most 0.0056 in any cell (xxz at n = 8), and per circuit P2 is above P0 on 43 and below on 65. P1 and P3 are below P0 and below P2 in every cell. The position of P0ref depends on the model. On ladder and tfim P0ref is above P1 and P3 in all six cells and on 36 of 36 circuits each. On xxz P0ref is below P1 in all three cells and below P3 at n = 4 and n = 6, because on xxz the extraction pipelines leave a ZZPhase count close to the P0ref count (30.3 against 42.0 at n = 4 under P1) while on ladder and tfim they leave 1.4 to 3.2 times the P0ref count. Over the 36 circuits at each n the ordering is P0 ~ P2 > P0ref > P1 ~ P3 at n = 6 and n = 8, and at n = 4 P1 and P3 (both 0.9893) sit above P0ref (0.9867).
 
 `[F]` Table A5. The same proxy on the seven family B1 circuits with n <= 7, 35 rows in `results/family_B1_proxy_h22e.csv`. The ideal distribution is the noise-free output of the P0ref circuit. "support" is the number of outcomes with probability above 1e-12.
@@ -473,7 +475,7 @@ Provisional local proxy. Density-matrix simulation with the published H2-2E emul
 
 `[O]` The slope follows the support of the ideal distribution. A depolarising error after a two-qubit gate moves probability off the ideal outcomes, and the Hellinger fidelity pays for it in full when the ideal distribution is a single outcome and only in part when the ideal distribution already covers most strings. The B1 slope close to p2 is the first case and the ladder and tfim slopes near 0.18 p2 are the second. A cost model that predicts F_H from gate counts therefore needs the support as a feature, which is the reason it enters Section 4.
 
-`[O]` The proxy contains no leakage, crosstalk, idle dephasing or the RZZ angle scaling of the published H2-2E model, so it ranks pipelines by their ZZPhase count under the H2-2E gate rates and does not predict the emulator's absolute fidelity. The emulator runs of Section 3.7 replace it.
+`[O]` The proxy contains no leakage, crosstalk, idle dephasing or the RZZ angle scaling of the published H2-2E model, so it ranks pipelines by their ZZPhase count under the H2-2E gate rates and does not predict the emulator's absolute fidelity. The four family A circuits of Table E1 are too few to replace it.
 
 ### 3.6 Selene runs
 
@@ -958,3 +960,4 @@ Changelog, part 2 (Section 3), 7 October 2026.
 - [O] The title "A certified resource ledger" is unchanged. The certificate covers 24 circuits and the title wording is left to Kam.
 - [F] Section 3.4: Table C2 and two paragraphs from `report/sec34_c2_v5.md` added after Table C1. They compare the T-count after ZX with published T-counts in `results/literature_tcounts.csv` and with the certified floor.
 - [F] Fixes F1 to F7 of `results/verification_2026-10-08c.md` applied. Section 3.4 and `report/sec34_c2_v5.md` state the AQ2024 and Nam2018 name match, scope the comparison to the six papers, give the hwb6 source and the move from 146 written T gates to 105, and keep `[O]` on the certificate sentence only. `literature_c2()` scopes the C2 caption to the six papers and tags the summary line `[F]`. `README.md` and the Section 5 tables list `report/build_literature_tcounts.py` and `report/test_c2_literature.py`.
+- [F] Stale pending text removed. `report/notebook_skeleton.py` now points to v5 and loads Tables E1 and E2 and the jobs ledger from `results/emulator_nexus_H2-Emulator.csv`, `results/emulator_nexus_H2-2E.csv` and `results/emulator_jobs.csv` without submitting. It states that the platform jobs came from `submit/syntax_check.py` and `submit/run_emulator.py` and that its own submission cell was not executed. The Table A4 caption in `report/make_tables.py` is shared with v1 to v4 and is unchanged. Section 3.5 gains one sentence after Table A4 and its last sentence no longer says the emulator runs replace the proxy.

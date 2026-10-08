@@ -23,7 +23,7 @@ def _(mo):
 
     Team **Learned ZX Rewriting**, Quantinuum Singapore Grand Challenge, submission 1.
 
-    This notebook is the executable companion of `report/report_v1.md`. It
+    This notebook is the executable companion of `report/report_v5.md`. It
 
     1. loads the result tables from `results/*.csv` and shows them with the figures,
     2. compiles one chosen circuit live through the baseline P0 (pytket level 2)
@@ -40,11 +40,12 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ### What this notebook shows and what is pending
+    ### What this notebook shows and what is open
 
-    The scoring map of `report/report_v3.md` assigns the technical-performance
+    The scoring map of `report/report_v5.md` assigns the technical-performance
     evidence to the count tables A1 to B2, the count-only table B1x, the proxy
-    tables A4 and A5, the Selene table S1 and this notebook.
+    tables A4 and A5, the Selene tables S1 and S2, the emulator tables E1 and E2
+    and this notebook.
 
     **Shown here, read from `results/*.csv`**
 
@@ -56,6 +57,9 @@ def _(mo):
     | Table B2 (family B2 means) | `family_B2_counts.csv` | checked rows |
     | Table B2-check (family B2 compiled QASM re-read) | `family_B2_compiled_check.csv` | 100 rows |
     | Table A4 (local noise proxy, family A) | `family_A_proxy_h22e.csv` | proxy, not emulator |
+    | Table E1 (Nexus H2-Emulator runs) | `emulator_nexus_H2-Emulator.csv` | emulator, 1000 shots |
+    | Table E2 (Nexus H2-2E runs) | `emulator_nexus_H2-2E.csv` | emulator, 1000 shots |
+    | Jobs ledger | `emulator_jobs.csv` | every platform submission |
     | Table C (exactness-barrier certificates) | `certificates.csv` | computed |
     | Table S (Selene noiseless runs) | `selene_noiseless.csv` | local emulator |
     | Table M (cost model) | `cost_model_metrics.csv` | fitted on proxy rows |
@@ -64,12 +68,21 @@ def _(mo):
     Table A5 (proxy on family B1) and Table S1 (Selene summary with the
     depolarising runs) are in the report only.
 
-    **Pending `[PENDING: emulator]`**
+    **Platform jobs**
 
-    - H2-2E emulator runs through `aqora.QPU` (Section 3 below): Hellinger
-      fidelity and TVD per (circuit, pipeline). No job has been submitted.
-    - Cost model (Table M) refitted on emulator rows instead of proxy rows.
-    - Official HQC from the H2-2SC syntax checker for every compiled circuit.
+    - `[F]` The platform jobs were submitted by `submit/syntax_check.py` and
+      `submit/run_emulator.py`. The submission cell of Section 3 below was not
+      executed for the report.
+    - `[F]` Tables E1 and E2 below are read from the emulator CSVs. Nothing is
+      submitted to show them.
+
+    **Open**
+
+    - `[F]` The cost model (Table M) was not refit on the emulator rows of
+      Tables E1 and E2.
+    - `[F]` The one completed H2-2SC syntax check (tof_3 under P0) returned no
+      cost. No official HQC from the syntax checker exists for the other
+      compiled circuits.
     """)
     return
 
@@ -139,8 +152,12 @@ def _(RESULTS, os, pd):
     cost_model_metrics = _load("cost_model_metrics.csv")
     family_B1x = _load("family_B1x_counts.csv")
     family_B2_check = _load("family_B2_compiled_check.csv")
-    return (certificates, cost_model_metrics, family_A, family_A_proxy,
-            family_B1, family_B1x, family_B2, family_B2_check, selene_noiseless)
+    emulator_E1 = _load("emulator_nexus_H2-Emulator.csv")
+    emulator_E2 = _load("emulator_nexus_H2-2E.csv")
+    emulator_jobs = _load("emulator_jobs.csv")
+    return (certificates, cost_model_metrics, emulator_E1, emulator_E2,
+            emulator_jobs, family_A, family_A_proxy, family_B1, family_B1x,
+            family_B2, family_B2_check, selene_noiseless)
 
 
 @app.cell
@@ -181,7 +198,8 @@ def _(family_B1, mo):
     _tab["T after ZX"] = _t["P1"].fillna(_t["P4"])
     _tab = _tab.sort_values(["n", "t_count_written"]).reset_index()
     mo.vstack([mo.md("**Table B1.** Family B1, ZZPhase count per circuit and pipeline. "
-                     "Empty cells are timeouts (hwb8 under P1 and P2)."),
+                     "hwb8 under P1 and P2 comes from the 5400 s run in "
+                     "`results/family_B1_hwb8_long_counts.csv`, merged into the CSV."),
                mo.ui.table(_tab, selection=None)])
     return
 
@@ -267,16 +285,44 @@ def _(family_B2_check, mo, pd):
 @app.cell
 def _(family_A_proxy, mo):
     if family_A_proxy is None:
-        _out = mo.callout(mo.md("`[PENDING: emulator]` no proxy or emulator fidelity file found."), kind="warn")
+        _out = mo.callout(mo.md("`results/family_A_proxy_h22e.csv` not found."), kind="warn")
     else:
         _tab = family_A_proxy.pivot_table(index="n", columns="pipeline", values="F_H", aggfunc="mean").round(4)
         _out = mo.vstack([
             mo.md("**Table A4.** Local density-matrix noise proxy with the published H2-2E "
                   "default parameters (`results/family_A_proxy_h22e.csv`), mean Hellinger "
-                  "fidelity by n and pipeline. To be replaced by H2-2E emulator results. "
-                  "`[PENDING: emulator]`"),
+                  "fidelity by n and pipeline. Tables E1 and E2 below cover a subset of "
+                  "circuits and this proxy stays the primary noise data for family A."),
             mo.ui.table(_tab.reset_index(), selection=None)])
     _out
+    return
+
+
+@app.cell
+def _(emulator_E1, emulator_E2, emulator_jobs, mo):
+    # Tables E1 and E2: emulator rows read from the CSVs. Nothing is submitted here.
+    _cols = ["file", "pipeline", "n_qubits", "n_2q", "n_1q", "support_size",
+             "F_H", "TVD", "shots", "job_id"]
+    _items = []
+    for _name, _df, _src in [("E1", emulator_E1, "emulator_nexus_H2-Emulator.csv"),
+                             ("E2", emulator_E2, "emulator_nexus_H2-2E.csv")]:
+        if _df is None:
+            _items.append(mo.callout(mo.md(f"`results/{_src}` not found."), kind="warn"))
+            continue
+        _tab = _df[[c for c in _cols if c in _df.columns]].copy()
+        _tab[["F_H", "TVD"]] = _tab[["F_H", "TVD"]].round(4)
+        _items.append(mo.md(f"**Table {_name}.** `results/{_src}`, {len(_df)} rows from "
+                            f"{_df['job_id'].nunique()} jobs, F_H and TVD of the counts "
+                            f"against the ideal distribution."))
+        _items.append(mo.ui.table(_tab, selection=None))
+    if emulator_jobs is not None:
+        _j = emulator_jobs.copy()
+        _j["status"] = _j["status"].astype(str).str.split(":").str[0]
+        _led = _j.groupby(["platform", "status"]).size().rename("submissions").reset_index()
+        _items.append(mo.md(f"**Jobs ledger.** `results/emulator_jobs.csv`, {len(_j)} rows, "
+                            f"by platform and status."))
+        _items.append(mo.ui.table(_led, selection=None))
+    mo.vstack(_items)
     return
 
 
@@ -336,8 +382,8 @@ def _(cost_model_metrics, mo):
         _out = mo.vstack([
             mo.md("**Table M.** Learned cost model, y = -ln F_H from compile-time features, "
                   "fitted on the proxy CSVs. `lofo` trains on one family and tests on the other, "
-                  "`cv5g` holds out whole circuit classes. Emulator rows replace the proxy rows "
-                  "once they exist. `[PENDING: emulator]`"),
+                  "`cv5g` holds out whole circuit classes. The model was not refit on the "
+                  "emulator rows of Tables E1 and E2."),
             mo.ui.table(_tab, selection=None)])
     _out
     return
@@ -425,6 +471,10 @@ def _(mo):
     organization through `as_entity`. The `noisy_simulation` option selects the
     emulator's noise model. Press the button to submit. Nothing is sent before
     that.
+
+    `[F]` This cell was not executed for the report. The jobs of Tables E1 and
+    E2 were submitted by `submit/syntax_check.py` and `submit/run_emulator.py`
+    and are listed in `results/emulator_jobs.csv`.
     """)
     return
 
@@ -477,14 +527,14 @@ def _(job):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ## 4. Pending
+    ## 4. Status
 
-    - `[PENDING: emulator]` Hellinger fidelity and TVD of the emulator counts
-      against the ideal distribution, for every (circuit, pipeline) in the budget.
-    - The learned cost model (Table M) is fitted on proxy rows until the
-      emulator rows exist.
-    - hwb8 under P1 and P2 is in `results/family_B1_hwb8_long_counts.csv` and
-      not yet merged into `results/family_B1_counts.csv` (Table B1).
+    - `[F]` Hellinger fidelity and TVD of the emulator counts against the ideal
+      distribution are in Tables E1 and E2 above for the 22 H2-Emulator rows
+      and the six H2-2E rows.
+    - `[F]` The learned cost model (Table M) is fitted on proxy rows only.
+    - `[F]` hwb8 under P1 and P2 from `results/family_B1_hwb8_long_counts.csv`
+      is merged into `results/family_B1_counts.csv` (Table B1).
 
     ### Picking a job back up
 
