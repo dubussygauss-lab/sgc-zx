@@ -387,6 +387,44 @@ Family B2 by configuration, 5 circuits each.
 
 `[O]` The B1 floors are loose because these circuits are hand-written Toffoli networks, not synthesised ring elements. The theorem bounds the T-count of every exact rewrite from below by the denominator exponent of the channel, and on a gridsynth word the exponent grows by one at all but 0.5 to 2.5 % of the T gates (the per-instance `collapse_rate` in the CSV), so the bound is tight there. In a Toffoli network most T gates cancel in the channel and the exponent stays small, so the bound stays well below what any known rewrite reaches. The gap between 2 and 8 on mod5_4 is either headroom for a better rewrite or slack in the bound, and the certificate does not say which. The manuscript's percentages are stated for synthesised circuits only and the B1 rows are not covered by them.
 
+`[F]` Table C2 places the smallest published T-count of each B1 and B1x circuit beside our T-count after the ZX stage and the certified floor of Table C1. The published values were copied from the tables of six papers fetched from arXiv on 8 October 2026 and are listed per source in `results/literature_tcounts.csv`. A published value enters the ancilla-free column only if the paper's circuit has our qubit count and our written T-count. Values from methods that add Hadamard ancillas sit in a separate column because the floor bounds circuits on the n circuit qubits only. grover_5 has no entry because the published Grover5 starts from 140 T gates and ours from 336.
+
+<!-- TABLE:C2_literature -->
+`[F]` Per circuit of families B1 and B1x. T after ZX is the P2 T-count. best ancilla-free is the smallest published T-count on the same n qubits, taken over the columns of `results/literature_tcounts.csv` with ancilla_free = yes, same_circuit = yes and reported_error = no. best with ancillas is the smallest published T-count of a method that adds Hadamard ancillas (TODD, or AlphaTensor-Quantum where its compiled qubit count exceeds n). The floor is the certified lde floor of Table C1 and exists for the four n = 5 circuits only. T after ZX - best is the part of the ZX output that a published ancilla-free method is known to remove. best - floor is the part that neither a published method nor the certificate has closed. Source keys: AMM2014 arXiv:1303.2042 Table 1, AM2016 arXiv:1601.07363 Table II, Nam2018 arXiv:1710.07345 Table 4, TODD2018 and TODDpart2018 arXiv:1712.01557 Tables I and II, KvdW2020 arXiv:1903.10477 Table 1, AQ2024 arXiv:2402.14396 Table 2. grover_5 has no same-circuit published value.
+
+| family | circuit | n | T written | T after ZX | best ancilla-free | source | best with ancillas | source (ancillas) | floor | T after ZX - best | best - floor |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| B1 | barenco_tof_3 | 5 | 28 | 16 | 16 | AM2016_RMmaj, AM2016_RMrec, AM2016_Tpar, AMM2014_Tpar, KvdW2020_PyZX, KvdW2020_PyZXTODD, Nam2018_H, Nam2018_L | 13 | AQ2024 | 4 | 0 | 12 |
+| B1 | mod5_4 | 5 | 28 | 8 | 7 | AQ2024, KvdW2020_PyZXTODD | 16 | TODD2018 | 2 | 1 | 5 |
+| B1 | qft_4 | 5 | 69 | 67 | 67 | AM2016_RMmaj, AM2016_RMrec, AM2016_Tpar, TODDpart2018 | 53 | AQ2024 | 37 | 0 | 30 |
+| B1 | tof_3 | 5 | 21 | 15 | 15 | AM2016_RMmaj, AM2016_RMrec, AM2016_Tpar, AMM2014_Tpar, KvdW2020_PyZX, KvdW2020_PyZXTODD, Nam2018_L, TODDpart2018 | 13 | AQ2024, TODD2018 | 4 | 0 | 11 |
+| B1 | barenco_tof_4 | 7 | 56 | 28 | 28 | AM2016_RMmaj, AM2016_RMrec, AM2016_Tpar, AMM2014_Tpar, KvdW2020_PyZX, KvdW2020_PyZXTODD, Nam2018_H, Nam2018_L | 23 | AQ2024 |  | 0 |  |
+| B1 | hwb6 | 7 | 105 | 75 | 71 | AM2016_Tpar | 51 | AQ2024, TODD2018 |  | 4 |  |
+| B1 | tof_4 | 7 | 35 | 23 | 23 | AM2016_RMmaj, AM2016_RMrec, AM2016_Tpar, AMM2014_Tpar, KvdW2020_PyZX, KvdW2020_PyZXTODD, Nam2018_L, TODDpart2018 | 19 | AQ2024, TODD2018 |  | 0 |  |
+| B1 | barenco_tof_5 | 9 | 84 | 40 | 40 | AM2016_RMmaj, AM2016_RMrec, AM2016_Tpar, AMM2014_Tpar, KvdW2020_PyZX, KvdW2020_PyZXTODD, Nam2018_H, Nam2018_L | 33 | AQ2024 |  | 0 |  |
+| B1 | grover_5 | 9 | 336 | 166 |  |  |  |  |  |  |  |
+| B1 | mod_mult_55 | 9 | 49 | 35 | 20 | KvdW2020_PyZXTODD | 17 | AQ2024, TODD2018 |  | 15 |  |
+| B1 | tof_5 | 9 | 49 | 31 | 31 | AM2016_RMmaj, AM2016_RMrec, AM2016_Tpar, AMM2014_Tpar, KvdW2020_PyZX, KvdW2020_PyZXTODD, Nam2018_L, TODDpart2018 | 25 | AQ2024, TODD2018 |  | 0 |  |
+| B1 | vbe_adder_3 | 10 | 70 | 24 | 24 | AM2016_RMmaj, AM2016_RMrec, AM2016_Tpar, AMM2014_Tpar, KvdW2020_PyZX, KvdW2020_PyZXTODD, Nam2018_L | 19 | AQ2024 |  | 0 |  |
+| B1 | mod_red_21 | 11 | 119 | 73 | 73 | AM2016_RMmaj, AM2016_RMrec, AM2016_Tpar, AMM2014_Tpar, KvdW2020_PyZX, KvdW2020_PyZXTODD, Nam2018_H, Nam2018_L | 51 | AQ2024 |  | 0 |  |
+| B1 | gf2_pow_4_mult | 12 | 112 | 68 | 39 | AQ2024 | 54 | TODD2018 |  | 29 |  |
+| B1 | hwb8 | 12 | 5887 | 3517 | 3501 | KvdW2020_PyZXTODD |  |  |  | 16 |  |
+| B1x | rc_adder_6 | 14 | 77 | 47 | 47 | AM2016_RMmaj, AM2016_RMrec, KvdW2020_PyZX, KvdW2020_PyZXTODD, Nam2018_H, Nam2018_L | 37 | AQ2024, TODD2018 |  | 0 |  |
+| B1x | csla_mux_3 | 15 | 70 | 62 | 45 | KvdW2020_PyZXTODD | 39 | AQ2024 |  | 17 |  |
+| B1x | gf2_pow_5_mult | 15 | 175 | 115 | 59 | AQ2024 | 87 | TODD2018 |  | 56 |  |
+| B1x | ham15-low | 17 | 161 | 97 | 97 | AM2016_RMmaj, AM2016_RMrec, AM2016_Tpar, KvdW2020_PyZX, KvdW2020_PyZXTODD | 73 | AQ2024 |  | 0 |  |
+| B1x | ham15-med | 17 | 574 | 212 | 212 | KvdW2020_PyZX, KvdW2020_PyZXTODD | 162 | TODD2018 |  | 0 |  |
+| B1x | gf2_pow_6_mult | 18 | 252 | 150 | 77 | AQ2024 | 126 | TODD2018 |  | 73 |  |
+| B1x | barenco_tof_10 | 19 | 224 | 100 | 100 | AM2016_RMmaj, AM2016_RMrec, AM2016_Tpar, AMM2014_Tpar, KvdW2020_PyZX, KvdW2020_PyZXTODD, Nam2018_H, Nam2018_L | 83 | AQ2024 |  | 0 |  |
+| B1x | tof_10 | 19 | 119 | 71 | 71 | AM2016_RMmaj, AM2016_RMrec, AM2016_Tpar, AMM2014_Tpar, KvdW2020_PyZX, KvdW2020_PyZXTODD, Nam2018_L, TODDpart2018 | 55 | AQ2024, TODD2018 |  | 0 |  |
+
+On the 4 circuits with a floor: T after ZX 106, best ancilla-free 105, floor 47. T after ZX - best = 1, best - floor = 58, sum 59. Best with ancillas on the same circuits: 95.
+<!-- /TABLE:C2_literature -->
+
+`[F]` On the four certified circuits the ZX stage leaves 106 T gates and the floor is 47. The best published ancilla-free T-counts sum to 105. Published optimisers therefore close 1 of the 59 gates between our count and the floor. That gate is on mod5_4, where PyZX with TODD and AlphaTensor-Quantum both reach 7 against our 8. On barenco_tof_3, tof_3 and qft_4 no published ancilla-free method goes below our count. The remaining 58 gates lie between the best published count and the floor and are closed by neither side.
+
+`[O]` Our ZX stage matches the best published ancilla-free count on 14 of the 22 comparable circuits. On four of the other eight the better value comes from TODD applied after PyZX. On the three Galois-field multipliers it comes from AlphaTensor-Quantum. The hwb6 value of 71 comes from a single T-par entry that conflicts with the same paper's text and with the 75 listed for T-par in arXiv:1903.10477. The certificate cannot tell whether the 58 open gates are headroom or slack in the bound. Published optimisation from 2013 to 2024 has moved the four certified circuits toward the floor by one gate in total.
+
 ### 3.5 Noise proxy with H2-2E parameters
 
 `[F]` Table A4. Local density-matrix proxy on family A at n <= 8 with 36 circuits per (n, pipeline) cell and 540 rows in `results/family_A_proxy_h22e.csv`. The simulator is `noise/dm_sim.py` with the published H2-2E emulator parameters from `noise/h2_params.py` (p1 = 7.3e-5, p2 = 1.29e-3, readout flips 9e-4 and 1.8e-3, p_init = 4e-5). The ideal distribution is the family reference `bench/family_A/<stem>.npy`.
@@ -914,3 +952,4 @@ Changelog, part 2 (Section 3), 7 October 2026.
 - [F] Section 5 test table gains `submit/test_h22e_stats.py` with 7 of 7 passed, `value/test_value_ledger.py` with 5 of 5 and `value/test_value_by_application.py` with 5 of 5, each run once under pytest on 8 October 2026.
 - [F] `README.md` points to `report/report_v5.md` and lists the `value/` scripts, the `submit/` scripts and the five pytest files. It gives the status of the certificates, the Selene runs, the H2-Emulator runs of Table E1 and the H2-2E runs of Table E2. It names `results/family_A_proxy_h22e.csv` as the source of Table A4.
 - [O] The title "A certified resource ledger" is unchanged. The certificate covers 24 circuits and the title wording is left to Kam.
+- [F] Section 3.4: Table C2 and two paragraphs from `report/sec34_c2_v5.md` added after Table C1. They compare the T-count after ZX with published T-counts in `results/literature_tcounts.csv` and with the certified floor.
