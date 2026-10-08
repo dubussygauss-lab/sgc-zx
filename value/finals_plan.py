@@ -90,6 +90,7 @@ def compute() -> dict:
     prim["z_expected"] = prim["dF"] / prim["sd_planned"]
     prim["power"] = power(prim["dF"], prim["sd_planned"])
     prim["shots_80_raw"] = shots_for(prim["sd"], n_ref, prim["dF"], Z_CRIT + stats.norm.isf(1 - POWER_TARGET))
+    prim["shots_80"] = int(math.ceil(prim["shots_80_raw"]))  # shots must reach power 0.80, so take the ceiling
     prim["mde"] = Z_CRIT * prim["sd_planned"]        # smallest difference that confirms
 
     s = pairs.loc[SECONDARY]
@@ -155,7 +156,7 @@ def render(r: dict) -> str:
              f"because P2 has {P['dN_2q']} fewer ZZPhase gates. The critical z is {Z_CRIT:.3f}.")
     L.append(f"- [F] Power at the measured gain is {P['power']:.2f}. The smallest difference that "
              f"confirms is {P['mde']:.4f}. Power {POWER_TARGET:.2f} would need "
-             f"{P['shots_80_raw']:.0f} shots per pipeline.")
+             f"{P['shots_80']} shots per pipeline.")
     L.append(f"- [O] Confirms: z >= {Z_CRIT:.3f}. Refutes: z <= -{Z_CRIT:.3f}. Any other z is reported "
              "as not resolved and no hardware claim is made.")
     L.append("")

@@ -43,10 +43,10 @@ def _(mo):
     mo.md(r"""
     ### What this notebook shows and what is open
 
-    The scoring map of `report/report_v5.md` assigns the technical-performance
+    `[F]` The scoring map of `report/report_v5.md` assigns the technical-performance
     evidence to the count tables A1 to B2, the count-only table B1x, the proxy
-    tables A4 and A5, the Selene tables S1 and S2, the emulator tables E1 and E2
-    and this notebook.
+    tables A4 and A5, the Selene tables S1 and S2, the emulator tables E1 to E3,
+    the H2 hardware plan of Section 6 and this notebook.
 
     **Shown here, read from `results/*.csv`**
 
@@ -76,7 +76,8 @@ def _(mo):
     - `[F]` The submission cell of Section 3 submits only to the free H2-2SC
       syntax checker and refuses any platform whose name does not end in `SC`.
       `report/notebook_executed.html` is an export of this notebook with that
-      gate open.
+      gate open. That export was executed on 9 October 2026 at 01:15 CEST and
+      predates the text change of this cell to tables E1 to E3 and Section 6.
     - `[F]` Tables E1 and E2 below are read from the emulator CSVs. Nothing is
       submitted to show them.
 
