@@ -1,6 +1,6 @@
 # A pass selector keeps ZX rewriting only where it lowers the cost of a circuit on Quantinuum H2
 
-Team Learned ZX Rewriting. Quantinuum Singapore Grand Challenge, submission 1, draft v5 (8 October 2026).
+Team Learned ZX Rewriting. Quantinuum Singapore Grand Challenge, submission 1, report version 5 (9 October 2026).
 
 Tags: `[F]` marks a statement verifiable from an artifact in the repository or from the cited source. `[O]` marks a judgement or a plan. Every number in a results table of Section 3 is produced by `report/make_tables.py` from `results/*.csv`. The emulator runs are reported in Sections 3.7 and 3.7.1.
 
