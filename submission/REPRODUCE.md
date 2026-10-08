@@ -1,6 +1,6 @@
 # Reproduction record
 
-Team Learned ZX Rewriting. Recorded 8 October 2026 in the development container. `code.zip` is `git archive` of commit `3c6fe01ffce73e1a24d8defc48adce5b54a4cfba`. Run every command from the repository root. This page follows `README.md` and report Section 5. A clean-clone run of these steps is recorded in `results/repro_2026-10-08/repro_log.md`.
+Team Learned ZX Rewriting. Recorded 8 October 2026 in the development container. `code.zip` is `git archive` of commit `140c84223703eb82902a2e44ee1fda8f068c4e3c`. Run every command from the repository root. This page follows `README.md` and report Section 5. A clean-clone run of these steps is recorded in `results/repro_2026-10-08/repro_log.md`.
 
 ## Environment
 
@@ -78,6 +78,7 @@ Rerun all eleven with `bash submission/run_tests.sh`. Six run as scripts and fiv
 | `selene/test_selene.py` | proxy variables cleared, `python -m pytest selene/test_selene.py -q` | 6 passed | 10 s |
 | `submit/test_submit.py` | `python -m pytest submit/test_submit.py -q` | 11 passed (offline, no credentials) | 5 s |
 | `submit/test_h22e_stats.py` | `python -m pytest submit/test_h22e_stats.py -q` | 7 passed | 4 s |
+| `submit/test_h22e_pooled.py` | `python -m pytest submit/test_h22e_pooled.py -q` | 10 passed | 9 s |
 | `value/test_value_ledger.py` | `python -m pytest value/test_value_ledger.py -q` | 5 passed | 4 s |
 | `value/test_value_by_application.py` | `python -m pytest value/test_value_by_application.py -q` | 5 passed | 2 s |
 
