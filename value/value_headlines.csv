@@ -1,0 +1,28 @@
+,value
+B1 total HQC saved at 1000 shots (P2 vs P0),743.2000000000004
+B1 total HQC P0,15516.0
+B1 total HQC P2,14772.8
+"B1 total HQC saved, percent of P0 total",4.789894302655326
+B1 total HQC saved excluding hwb8,114.6
+B1 median per-circuit HQC saved percent,3.937007874015748
+B1 circuits with HQC saved > 0 / total,14 / 15
+B1 largest single HQC saving,"628.6 HQC (hwb8.qasm, 4.7%)"
+B1 largest single HQC saving in percent,21.5% (vbe_adder_3.qasm)
+B1x total HQC saved at 1000 shots (unchecked),147.79999999999995
+B1x median per-circuit HQC saved percent (unchecked),2.398437397799668
+A (control) total HQC saved at 1000 shots,-1030.3999999999999
+A (control) median per-circuit HQC saved percent,-0.8048322321544283
+A (control) circuits with HQC saved > 0 / < 0 / = 0,57 / 108 / 15
+"B1 median per-circuit model fidelity gain percent, fit a [O]",0.23629874645798576
+B1 circuits outside the fit range (n_2q P0 > fit max),"grover_5.qasm, hwb8.qasm"
+B1 T / magic states saved,2862
+B1 T saved percent of written,40.60726447219069
+B1x T / magic states saved (unchecked),798
+B1x T saved percent of written (unchecked),48.30508474576271
+B2 T / magic states saved,862
+B2 T saved percent of written,2.033210680252854
+B2 certified-incompressible fraction of remaining T (pooled),0.9971108007897145
+"B2 certified-incompressible fraction, per-circuit median",0.9980497855904626
+"B2 certified-incompressible fraction, per-circuit min",0.9927884615384616
+B2 T gates above certified floor after ZX (pooled),120.0
+B1 (4 certified circuits) certified-incompressible fraction (pooled),0.44339622641509435
