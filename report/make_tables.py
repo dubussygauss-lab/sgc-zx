@@ -33,6 +33,9 @@ Inputs (all under results/)
   emulator_nexus_H2-2E.csv  Nexus H2-2E runs, 1000 shots, counts in
                         emulator/nexus_H2-2E/<pipeline>/<file>.json, statistics
                         from submit/h22e_stats.py (table E2 of Section 3.7.1)
+  emulator/nexus_H2-2E_r*/  repeat H2-2E runs of vbe_adder_3 and grover_5, pooled
+                        with the original run by submit/h22e_pooled.py (table E3
+                        of Section 3.7.1, injected only where its marker exists)
   cost_model_metrics.csv, cost_model_coefficients.csv, fig_cost_model.png
                         written by model/cost_model.py (tables M1, M2 and the
                         cost-model figure of Section 4)
@@ -857,6 +860,42 @@ def emulator_h22e(e1=None):
 
 
 
+def emulator_h22e_pooled():
+    """Table E3: pooled H2-2E runs of vbe_adder_3 and grover_5 (original run of Table E2
+    plus the repeats in results/emulator/nexus_H2-2E_r*/).  The statistics come from
+    submit/h22e_pooled.py:compute.  The table goes only into a report that carries the
+    TABLE:E3_h22e_pooled marker pair (inject() replaces existing pairs only)."""
+    if not glob.glob(os.path.join(RESULTS, "emulator", "nexus_H2-2E_r*")):
+        return None
+    import sys
+    sys.path.insert(0, os.path.join(ROOT, "submit"))
+    import h22e_pooled
+    r = h22e_pooled.compute()
+    c = r["cells"]
+    t = pd.DataFrame({"file": c.file.str.replace(".qasm", "", regex=False), "pipeline": c.pipeline,
+                      "runs": c.runs.astype(int), "shots": c.shots.astype(int), "n_2q": c.n_2q.astype(int),
+                      "pooled F_H": c.F_H, "sd": c.sd,
+                      "per-run F_H range": [f"{a:.4f} to {b:.4f}" for a, b in zip(c.F_min, c.F_max)]})
+    status = ("" if r["final"] else
+              f"[PENDING: H2-2E repeats] not all cells hold {h22e_pooled.EXPECTED_RUNS} runs. ")
+    text = (f"`[F]` {status}Nexus H2-2E, noisy_simulation = True, 1000 shots per run, one job per run. "
+            "runs counts the original run of Table E2 and the completed repeats. pooled F_H is the Hellinger "
+            "fidelity of the summed counts to the ideal distribution. sd is binomial on vbe_adder_3 and the sd "
+            f"over {h22e_pooled.BOOT} multinomial bootstrap resamples of the pooled counts on grover_5 "
+            f"(seed {h22e_pooled.SEED}). The per-run F_H range is the smallest and largest F_H of single runs.\n\n"
+            + md_table(t, "{:.4f}", fmt={"shots": "{:.0f}"}))
+    lines = []
+    for x in r["pairs"].itertuples():
+        lines.append(f"{x.file[:-5]} F_H(P2) - F_H(P0) {x.dF:+.4f}, sd {x.sd:.4f}, z {x.z:+.2f}, p {x.p:.2g}, "
+                     f"predicted {x.dF_pred:.4f}, measured - predicted {x.z_vs_pred:+.2f} sd")
+    hom = ", ".join(f"{a.file[:-5]} {a.pipeline} {a.p_hom:.2f}" for a in c.itertuples())
+    text += (f"\n`[F]` " + ". ".join(lines) + f". Homogeneity p: {hom}. H2-2E HQC estimate of the "
+             f"{r['jobs_completed']} completed jobs {r['hqc_completed']:.1f}, {r['hqc_pct']:.1f} % of "
+             f"{h22e_pooled.QUOTA_HQC:.0f}.\n")
+    write("E3_h22e_pooled", text)
+    return r
+
+
 def literature_c2():
     """Table C2: best published T-count beside our T after ZX and the certified floor.
     Reads results/literature_tcounts.csv (one row per circuit and published column) and
@@ -959,6 +998,7 @@ def main():
     fsd = selene_depol_full()
     fe = emulator_h2e()
     fe2 = emulator_h22e(fe)
+    fe3 = emulator_h22e_pooled()
     fl2 = literature_c2()
     print("family A: circuits", fa["n_circuits"], "| P0 at ZZ term count:",
           fa["p0_at_floor"], "| circuits with any pipeline below it:", fa["any_below_floor"],
@@ -993,11 +1033,13 @@ def main():
         for x in fe2["cross"].itertuples():
             print("H2-2E vs H2-Emulator, %s %s: sd %.4f (E1) and %.4f (E2), z %.2f"
                   % (x.file, x.pipeline, x.sd_h2emulator, x.sd_h22e, x.z))
+    if fe3 is not None:
+        print("H2-2E pooled: runs per cell %s, final %s" % (list(fe3["cells"].runs), fe3["final"]))
     if fl2 is not None:
         print("C2 literature: totals on certified circuits", fl2["tot"], "| best with ancillas", fl2["anc_cert"])
     for name in ["A1_zz_by_n", "A2_vs_P0", "A3_floor", "A4_proxy", "B1_per_circuit", "B1x_per_circuit", "B2_summary",
                  "M1_cost_metrics", "M2_cost_coefficients", "A5_proxy_b1", "C1_certificates", "S1_selene", "S2_selene_depol",
-                 "E1_h2emulator", "E2_h22e", "C2_literature"]:
+                 "E1_h2emulator", "E2_h22e", "E3_h22e_pooled", "C2_literature"]:
         if os.path.exists(os.path.join(TABLES, name + ".md")):
             print(f"\n### {name}\n" + open(os.path.join(TABLES, name + ".md")).read())
     if not args.no_inject:

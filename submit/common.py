@@ -294,7 +294,12 @@ def update_ledger(key: dict, path=LEDGER, **fields) -> int:
 # ------------------------------------------------------------------ results
 
 def platform_dir(platform: str) -> str:
-    return platform.replace(":", "_").replace("/", "_")
+    """Directory and CSV stem for a platform. A repeat run sets EMU_RUN_TAG
+    (e.g. r2) so its counts and rows go to <platform>_<tag> and do not
+    overwrite the first run."""
+    d = platform.replace(":", "_").replace("/", "_")
+    tag = os.environ.get("EMU_RUN_TAG", "").strip()
+    return d + "_" + tag if tag else d
 
 
 def result_path(platform: str, pipeline: str, file: str) -> Path:
