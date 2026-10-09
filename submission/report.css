@@ -1,7 +1,9 @@
 body { font-family: "DejaVu Serif", serif; font-size: 10pt; line-height: 1.35; max-width: none; margin: 0; }
 h1 { font-size: 17pt; } h2 { font-size: 14pt; margin-top: 1.2em; } h3 { font-size: 12pt; } h4 { font-size: 11pt; }
-table { border-collapse: collapse; font-size: 7.5pt; margin: 0.6em 0; width: 100%; page-break-inside: auto; }
-tr { page-break-inside: avoid; }
+table { border-collapse: collapse; font-size: 7.5pt; margin: 0.6em 0; width: 100%; page-break-inside: avoid; break-inside: avoid; }
+tr { page-break-inside: avoid; break-inside: avoid; }
+thead { display: table-header-group; }
+h1, h2, h3, h4 { page-break-after: avoid; break-after: avoid; }
 th, td { border: 0.5px solid #888; padding: 2px 4px; text-align: left; vertical-align: top; }
 th { background: #eee; }
 code { font-family: "DejaVu Sans Mono", monospace; font-size: 8.5pt; word-break: break-all; }
