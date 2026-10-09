@@ -10,6 +10,7 @@ scipy==1.18.1
 scikit-learn==1.9.1
 sympy==1.14.0
 networkx==3.6.1
+mqt-qcec==3.10.2
 matplotlib==3.11.2
 pytest==9.1.1
 marimo==0.25.1

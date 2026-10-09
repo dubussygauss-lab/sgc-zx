@@ -1,0 +1,94 @@
+job 1: 10 circuits, HQC estimate 459.60
+   P0    ladder_n4_r1_uniform_s1.qasm             n=4   hqc=22.60
+   P1    ladder_n4_r1_uniform_s1.qasm             n=4   hqc=37.80
+   P2    ladder_n4_r1_uniform_s1.qasm             n=4   hqc=22.60
+   P0    ladder_n4_r2_uniform_s1.qasm             n=4   hqc=32.20
+   P1    ladder_n4_r2_uniform_s1.qasm             n=4   hqc=68.80
+   P2    ladder_n4_r2_uniform_s1.qasm             n=4   hqc=31.80
+   P0    ladder_n4_r4_uniform_s1.qasm             n=4   hqc=51.40
+   P1    ladder_n4_r4_uniform_s1.qasm             n=4   hqc=108.60
+   P2    ladder_n4_r4_uniform_s1.qasm             n=4   hqc=50.20
+   P0    ladder_n6_r1_uniform_s1.qasm             n=6   hqc=33.60
+job 2: 10 circuits, HQC estimate 931.80
+   P1    ladder_n6_r1_uniform_s1.qasm             n=6   hqc=77.60
+   P2    ladder_n6_r1_uniform_s1.qasm             n=6   hqc=33.60
+   P0    ladder_n6_r2_uniform_s1.qasm             n=6   hqc=49.60
+   P1    ladder_n6_r2_uniform_s1.qasm             n=6   hqc=131.40
+   P2    ladder_n6_r2_uniform_s1.qasm             n=6   hqc=50.00
+   P0    ladder_n6_r4_uniform_s1.qasm             n=6   hqc=81.60
+   P1    ladder_n6_r4_uniform_s1.qasm             n=6   hqc=263.20
+   P2    ladder_n6_r4_uniform_s1.qasm             n=6   hqc=81.60
+   P0    ladder_n8_r1_uniform_s1.qasm             n=8   hqc=45.00
+   P1    ladder_n8_r1_uniform_s1.qasm             n=8   hqc=118.20
+job 3: 10 circuits, HQC estimate 1085.00
+   P2    ladder_n8_r1_uniform_s1.qasm             n=8   hqc=44.60
+   P0    ladder_n8_r2_uniform_s1.qasm             n=8   hqc=68.00
+   P1    ladder_n8_r2_uniform_s1.qasm             n=8   hqc=248.60
+   P2    ladder_n8_r2_uniform_s1.qasm             n=8   hqc=67.60
+   P0    ladder_n8_r4_uniform_s1.qasm             n=8   hqc=114.80
+   P1    ladder_n8_r4_uniform_s1.qasm             n=8   hqc=359.20
+   P2    ladder_n8_r4_uniform_s1.qasm             n=8   hqc=114.20
+   P0    tfim_n4_r1_uniform_s1.qasm               n=4   hqc=20.40
+   P1    tfim_n4_r1_uniform_s1.qasm               n=4   hqc=27.20
+   P2    tfim_n4_r1_uniform_s1.qasm               n=4   hqc=20.40
+job 4: 10 circuits, HQC estimate 454.40
+   P0    tfim_n4_r2_uniform_s1.qasm               n=4   hqc=27.60
+   P1    tfim_n4_r2_uniform_s1.qasm               n=4   hqc=51.40
+   P2    tfim_n4_r2_uniform_s1.qasm               n=4   hqc=27.40
+   P0    tfim_n4_r4_uniform_s1.qasm               n=4   hqc=42.00
+   P1    tfim_n4_r4_uniform_s1.qasm               n=4   hqc=104.40
+   P2    tfim_n4_r4_uniform_s1.qasm               n=4   hqc=41.40
+   P0    tfim_n6_r1_uniform_s1.qasm               n=6   hqc=29.00
+   P1    tfim_n6_r1_uniform_s1.qasm               n=6   hqc=60.80
+   P2    tfim_n6_r1_uniform_s1.qasm               n=6   hqc=29.40
+   P0    tfim_n6_r2_uniform_s1.qasm               n=6   hqc=41.00
+job 5: 10 circuits, HQC estimate 934.00
+   P1    tfim_n6_r2_uniform_s1.qasm               n=6   hqc=99.00
+   P2    tfim_n6_r2_uniform_s1.qasm               n=6   hqc=40.60
+   P0    tfim_n6_r4_uniform_s1.qasm               n=6   hqc=65.00
+   P1    tfim_n6_r4_uniform_s1.qasm               n=6   hqc=244.20
+   P2    tfim_n6_r4_uniform_s1.qasm               n=6   hqc=63.80
+   P0    tfim_n8_r1_uniform_s1.qasm               n=8   hqc=37.60
+   P1    tfim_n8_r1_uniform_s1.qasm               n=8   hqc=88.60
+   P2    tfim_n8_r1_uniform_s1.qasm               n=8   hqc=38.40
+   P0    tfim_n8_r2_uniform_s1.qasm               n=8   hqc=54.40
+   P1    tfim_n8_r2_uniform_s1.qasm               n=8   hqc=202.40
+job 6: 10 circuits, HQC estimate 974.40
+   P2    tfim_n8_r2_uniform_s1.qasm               n=8   hqc=54.00
+   P0    tfim_n8_r4_uniform_s1.qasm               n=8   hqc=88.00
+   P1    tfim_n8_r4_uniform_s1.qasm               n=8   hqc=433.60
+   P2    tfim_n8_r4_uniform_s1.qasm               n=8   hqc=86.00
+   P0    xxz_n4_r1_uniform_s1.qasm                n=4   hqc=34.60
+   P1    xxz_n4_r1_uniform_s1.qasm                n=4   hqc=51.60
+   P2    xxz_n4_r1_uniform_s1.qasm                n=4   hqc=35.00
+   P0    xxz_n4_r2_uniform_s1.qasm                n=4   hqc=56.20
+   P1    xxz_n4_r2_uniform_s1.qasm                n=4   hqc=76.80
+   P2    xxz_n4_r2_uniform_s1.qasm                n=4   hqc=58.60
+job 7: 10 circuits, HQC estimate 1045.00
+   P0    xxz_n4_r4_uniform_s1.qasm                n=4   hqc=99.40
+   P1    xxz_n4_r4_uniform_s1.qasm                n=4   hqc=117.40
+   P2    xxz_n4_r4_uniform_s1.qasm                n=4   hqc=105.80
+   P0    xxz_n6_r1_uniform_s1.qasm                n=6   hqc=53.00
+   P1    xxz_n6_r1_uniform_s1.qasm                n=6   hqc=109.40
+   P2    xxz_n6_r1_uniform_s1.qasm                n=6   hqc=56.00
+   P0    xxz_n6_r2_uniform_s1.qasm                n=6   hqc=89.00
+   P1    xxz_n6_r2_uniform_s1.qasm                n=6   hqc=155.20
+   P2    xxz_n6_r2_uniform_s1.qasm                n=6   hqc=98.80
+   P0    xxz_n6_r4_uniform_s1.qasm                n=6   hqc=161.00
+job 8: 10 circuits, HQC estimate 1894.40
+   P1    xxz_n6_r4_uniform_s1.qasm                n=6   hqc=242.40
+   P2    xxz_n6_r4_uniform_s1.qasm                n=6   hqc=184.40
+   P0    xxz_n8_r1_uniform_s1.qasm                n=8   hqc=71.40
+   P1    xxz_n8_r1_uniform_s1.qasm                n=8   hqc=158.80
+   P2    xxz_n8_r1_uniform_s1.qasm                n=8   hqc=77.00
+   P0    xxz_n8_r2_uniform_s1.qasm                n=8   hqc=121.80
+   P1    xxz_n8_r2_uniform_s1.qasm                n=8   hqc=294.60
+   P2    xxz_n8_r2_uniform_s1.qasm                n=8   hqc=136.60
+   P0    xxz_n8_r4_uniform_s1.qasm                n=8   hqc=222.60
+   P1    xxz_n8_r4_uniform_s1.qasm                n=8   hqc=384.80
+job 9: 1 circuits, HQC estimate 260.60
+   P2    xxz_n8_r4_uniform_s1.qasm                n=8   hqc=260.60
+
+platform nexus:H2-Emulator family A shots 1000 options {"noisy_simulation": true}
+jobs: 9  circuits: 81  total HQC estimate: 8039.20  (platform costed in seconds, HQC is the H2-2E-equivalent)
+submitted job AFByb3ZpZGVySm9iAaEcfSA2eCCAm4oHj_0khA with 10 circuits

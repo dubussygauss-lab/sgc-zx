@@ -3,3 +3,5 @@ third_party/
 papers/
 *.log
 !results/proxy_h22e_fits.log
+!results/emu_*.log
+!results/fetch_*.log

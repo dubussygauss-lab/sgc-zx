@@ -1,0 +1,31 @@
+job 1: 10 circuits, HQC estimate 2429.60
+   P1    grover_5.qasm                            n=9   hqc=610.00
+   P2    grover_5.qasm                            n=9   hqc=528.20
+   P0    hwb6.qasm                                n=7   hqc=243.00
+   P1    hwb6.qasm                                n=7   hqc=312.40
+   P2    hwb6.qasm                                n=7   hqc=232.60
+   P0    mod5_4.qasm                              n=5   hqc=68.40
+   P1    mod5_4.qasm                              n=5   hqc=71.20
+   P2    mod5_4.qasm                              n=5   hqc=64.00
+   P0    mod_mult_55.qasm                         n=9   hqc=116.60
+   P1    mod_mult_55.qasm                         n=9   hqc=183.20
+job 2: 10 circuits, HQC estimate 965.40
+   P2    mod_mult_55.qasm                         n=9   hqc=111.80
+   P0    qft_4.qasm                               n=5   hqc=98.40
+   P1    qft_4.qasm                               n=5   hqc=114.00
+   P2    qft_4.qasm                               n=5   hqc=98.80
+   P1    tof_3.qasm                               n=5   hqc=66.00
+   P0    tof_4.qasm                               n=7   hqc=75.20
+   P1    tof_4.qasm                               n=7   hqc=91.40
+   P2    tof_4.qasm                               n=7   hqc=72.60
+   P0    tof_5.qasm                               n=9   hqc=101.60
+   P1    tof_5.qasm                               n=9   hqc=135.60
+job 3: 4 circuits, HQC estimate 518.80
+   P2    tof_5.qasm                               n=9   hqc=97.60
+   P0    vbe_adder_3.qasm                         n=10  hqc=151.60
+   P1    vbe_adder_3.qasm                         n=10  hqc=150.60
+   P2    vbe_adder_3.qasm                         n=10  hqc=119.00
+
+platform nexus:H2-Emulator family B1 shots 1000 options {"noisy_simulation": true}
+jobs: 3  circuits: 24  total HQC estimate: 3913.80  (platform costed in seconds, HQC is the H2-2E-equivalent)
+submitted job AFByb3ZpZGVySm9iAaEck1J5cKCxXJRRv_BIzw with 10 circuits

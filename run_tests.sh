@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Runs every test file once from the repository root and writes one log per file
-# plus a summary to submission/build_logs/. Rerunnable.
-cd "$(dirname "$0")/.."
+# plus a summary to submission/build_logs/ (or $TEST_LOG_DIR). Rerunnable from the repository root or from an unzipped code.zip.
+cd "$(dirname "$0")"
 # 21 test files: 7 run as scripts, 14 under pytest. See REPRODUCE.md (Tests).
-LOG=submission/build_logs
+LOG="${TEST_LOG_DIR:-submission/build_logs}"
 mkdir -p "$LOG"
 : > "$LOG/tests_summary.txt"
 run() {

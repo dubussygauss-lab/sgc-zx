@@ -104,7 +104,7 @@
 
 `[F]` The exactness-barrier manuscript gives a per-instance floor (Kam et al., arXiv:2608.22801). The least denominator exponent of the exact Pauli channel of a Clifford+T circuit over Z[sqrt 2] is a lower bound on the T-count of every semantics-exact rewrite. The statements are Theorem B, Corollary cert and Theorem C of arXiv:2608.22801.
 
-`[F]` On the 20 synthesised Haar circuits of family B2 the ZX stage removes 862 of 42,396 T gates or 2.0 %. The certified floor is 41,414 against 41,534 T gates after ZX. The certified-incompressible fraction is 0.997. Further exact T optimisation of these instances can gain at most 0.3 % of the remaining T-count. On the worst single instance the bound is 0.7 %.
+`[F]` On the 20 synthesised Haar circuits of family B2 the ZX stage removes 862 of 42,396 T gates or 2.0 %. The certified floor is 41,414 against 41,534 T gates after ZX. The certified-incompressible fraction is 0.997. Further exact T optimisation of these instances can gain at most 0.3 % of the remaining T-count. On the worst single instance the bound is 0.72 %.
 
 `[F]` On the four certified B1 circuits the floor is 47 against 106 T gates after ZX. The fraction is 0.443. `[O]` The certificate does not say whether this gap is headroom for a better rewrite or slack in the bound (Section 3.4).
 
@@ -156,6 +156,6 @@ Do-no-harm guard for pytket users.
 
 Where not to spend fault-tolerant compiler effort.
 
-- `[F]` The 20 circuits of family B2 carry rotations synthesised by gridsynth at n = 2 and 3. The ZX stage removes 862 of 42,396 T gates there or 2.0 %. The certified floor is 41,414 of the 41,534 T gates left after ZX. Every semantics-exact rewrite therefore keeps at least 99.7 % of the pooled remaining T-count and at least 99.28 % on every single circuit. Further exact T optimisation can gain at most 0.3 % of the pooled count and at most 0.7 % on the worst single instance.
+- `[F]` The 20 circuits of family B2 carry rotations synthesised by gridsynth at n = 2 and 3. The ZX stage removes 862 of 42,396 T gates there or 2.0 %. The certified floor is 41,414 of the 41,534 T gates left after ZX. Every semantics-exact rewrite therefore keeps at least 99.7 % of the pooled remaining T-count and on the worst single circuit, haar_n3_eps1e-03_s5, at least 2478 of its 2496 T gates. Further exact T optimisation can gain at most 0.3 % of the pooled count and at most 0.72 % on the worst single instance.
 - `[F]` Scope. The certificate covers 24 circuits, all with n at most 5. On the four certified B1 circuits the fraction is 0.443 and the 99.7 % does not hold there.
 - `[F]` Reiher et al. write of the single-qubit rotations in their FeMoco simulation that "These rotations dominate the cost of the quantum simulation" (arXiv:1605.03590). Beverland et al. call non-Clifford rotations "among the most resource intensive operations" (arXiv:2211.07629). Ross and Selinger approximate a z-rotation with T-count 3 log2(1/eps) plus lower-order terms in the typical case (arXiv:1403.2975). `[O]` A team that plans fault-tolerant chemistry or phase-estimation workloads learns from the certificate per instance how much exact T optimisation of its synthesised rotations can still gain. On these 20 instances further exact rewriting is not worth the compiler effort.

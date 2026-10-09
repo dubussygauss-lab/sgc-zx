@@ -1,0 +1,19 @@
+job 1: 1 circuits, HQC estimate 151.60
+   P0    vbe_adder_3.qasm                         n=10  hqc=151.60
+job 2: 1 circuits, HQC estimate 119.00
+   P2    vbe_adder_3.qasm                         n=10  hqc=119.00
+
+platform nexus:H2-2E family B1 shots 1000 options {"noisy_simulation": true}
+jobs: 2  circuits: 2  total HQC estimate: 270.60
+submitted job AFByb3ZpZGVySm9iAaEcwoXVdfGm_ordi_7h5w with 1 circuits
+job AFByb3ZpZGVySm9iAaEcwoXVdfGm_ordi_7h5w COMPLETED cost {'duration': 2} rows 1
+submitted job AFByb3ZpZGVySm9iAaEcyAXPe_KMnSd2cLrgKg with 1 circuits
+job AFByb3ZpZGVySm9iAaEcyAXPe_KMnSd2cLrgKg COMPLETED cost {'duration': 2} rows 1
+job 1: 1 circuits, HQC estimate 243.00
+   P0    hwb6.qasm                                n=7   hqc=243.00
+job 2: 1 circuits, HQC estimate 232.60
+   P2    hwb6.qasm                                n=7   hqc=232.60
+
+platform nexus:H2-2E family B1 shots 1000 options {"noisy_simulation": true}
+jobs: 2  circuits: 2  total HQC estimate: 475.60
+submitted job AFByb3ZpZGVySm9iAaEczGiEcIO6R60fhgRfMw with 1 circuits
