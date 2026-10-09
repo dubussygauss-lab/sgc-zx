@@ -1,0 +1,69 @@
+file,n,comparison,pipeline,method,verdict,seconds,notes
+draper_adder_10.qasm,20,P0,P0,pyzx,proven,3.2,grid 2^-14; max snap 4.35e-14 half-turns
+draper_adder_10.qasm,20,P2,P2,pyzx,proven,5.09,grid 2^-14; max snap 7.11e-15 half-turns
+draper_adder_10.qasm,20,P2vsP0,P2 vs P0,pyzx,proven,5.13,grid 2^-14; max snap 4.35e-14 half-turns
+cdkm_adder_10.qasm,22,P0,P0,pyzx,proven,1.62,grid 2^-4; max snap 0 half-turns
+cdkm_adder_10.qasm,22,P2,P2,pyzx,proven,1.79,grid 2^-4; max snap 0 half-turns
+cdkm_adder_10.qasm,22,P2vsP0,P2 vs P0,pyzx,proven,1.88,grid 2^-4; max snap 0 half-turns
+draper_adder_10.qasm,20,P0,P0,qcec_zx,inconclusive,0.2,qcec zx: probably_not_equivalent
+draper_adder_10.qasm,20,P2,P2,qcec_zx,inconclusive,0.29,qcec zx: probably_not_equivalent
+draper_adder_10.qasm,20,P2vsP0,P2 vs P0,qcec_zx,inconclusive,0.28,qcec zx: probably_not_equivalent
+cdkm_adder_10.qasm,22,P0,P0,qcec_zx,inconclusive,0.15,qcec zx: probably_not_equivalent
+cdkm_adder_10.qasm,22,P2,P2,qcec_zx,proven,0.16,qcec zx: equivalent_up_to_global_phase
+cdkm_adder_10.qasm,22,P2vsP0,P2 vs P0,qcec_zx,inconclusive,0.19,qcec zx: probably_not_equivalent
+draper_adder_10.qasm,20,P0,P0,qcec_alt,proven,7.21,qcec alternating DD: equivalent (numerical tolerance)
+draper_adder_10.qasm,20,P2,P2,qcec_alt,proven,39.3,qcec alternating DD: equivalent_up_to_global_phase (numerical tolerance)
+draper_adder_10.qasm,20,P2vsP0,P2 vs P0,qcec_alt,timeout,300.12,killed after 300 s
+cdkm_adder_10.qasm,22,P0,P0,qcec_alt,proven,0.22,qcec alternating DD: equivalent_up_to_global_phase (numerical tolerance)
+cdkm_adder_10.qasm,22,P2,P2,qcec_alt,proven,1.32,qcec alternating DD: equivalent_up_to_global_phase (numerical tolerance)
+cdkm_adder_10.qasm,22,P2vsP0,P2 vs P0,qcec_alt,proven,1.7,qcec alternating DD: equivalent_up_to_global_phase (numerical tolerance)
+modadd_2n_10.qasm,20,P0,P0,pyzx,proven,2.59,grid 2^-4; max snap 0 half-turns
+modadd_2n_10.qasm,20,P2,P2,pyzx,proven,2.59,grid 2^-4; max snap 0 half-turns
+modadd_2n_10.qasm,20,P2vsP0,P2 vs P0,pyzx,proven,3.0,grid 2^-4; max snap 0 half-turns
+hrs_mult_5.qasm,21,P0,P0,pyzx,inconclusive,2.8,"off-grid angles: max distance to 2^-7 grid 0.00385 half-turns (KAK resynthesis); PyZX needs exact phases, not run"
+hrs_mult_5.qasm,21,P2,P2,pyzx,inconclusive,2.53,"off-grid angles: max distance to 2^-7 grid 0.00391 half-turns (KAK resynthesis); PyZX needs exact phases, not run"
+hrs_mult_5.qasm,21,P2vsP0,P2 vs P0,pyzx,inconclusive,2.78,"off-grid angles: max distance to 2^-7 grid 0.00391 half-turns (KAK resynthesis); PyZX needs exact phases, not run"
+mcx_clean_11.qasm,21,P0,P0,pyzx,proven,0.74,grid 2^-4; max snap 0 half-turns
+mcx_clean_11.qasm,21,P2,P2,pyzx,proven,0.72,grid 2^-4; max snap 0 half-turns
+mcx_clean_11.qasm,21,P2vsP0,P2 vs P0,pyzx,proven,0.84,grid 2^-4; max snap 0 half-turns
+mcx_b95_20.qasm,22,P0,P0,pyzx,proven,20.92,grid 2^-4; max snap 0 half-turns
+mcx_b95_20.qasm,22,P2,P2,pyzx,proven,22.11,grid 2^-4; max snap 0 half-turns
+mcx_b95_20.qasm,22,P2vsP0,P2 vs P0,pyzx,proven,17.12,grid 2^-4; max snap 0 half-turns
+vbe_adder_7.qasm,22,P0,P0,pyzx,proven,1.63,grid 2^-4; max snap 0 half-turns
+vbe_adder_7.qasm,22,P2,P2,pyzx,proven,1.37,grid 2^-4; max snap 0 half-turns
+vbe_adder_7.qasm,22,P2vsP0,P2 vs P0,pyzx,proven,1.77,grid 2^-4; max snap 0 half-turns
+rgqft_mult_6.qasm,24,P0,P0,pyzx,proven,169.67,grid 2^-17; max snap 7.43e-13 half-turns
+rgqft_mult_6.qasm,24,P2,P2,pyzx,proven,173.84,grid 2^-17; max snap 8.88e-16 half-turns
+rgqft_mult_6.qasm,24,P2vsP0,P2 vs P0,pyzx,proven,268.82,grid 2^-17; max snap 7.43e-13 half-turns
+cdkm_adder_15.qasm,32,P0,P0,pyzx,proven,3.23,grid 2^-4; max snap 0 half-turns
+cdkm_adder_15.qasm,32,P2,P2,pyzx,proven,3.15,grid 2^-4; max snap 0 half-turns
+cdkm_adder_15.qasm,32,P2vsP0,P2 vs P0,pyzx,proven,3.59,grid 2^-4; max snap 0 half-turns
+draper_adder_16.qasm,32,P0,P0,pyzx,proven,27.58,grid 2^-20; max snap 5.27e-12 half-turns
+draper_adder_16.qasm,32,P2,P2,pyzx,proven,26.74,grid 2^-20; max snap 2.73e-12 half-turns
+draper_adder_16.qasm,32,P2vsP0,P2 vs P0,pyzx,proven,36.2,grid 2^-20; max snap 5.27e-12 half-turns
+vbe_adder_11.qasm,34,P0,P0,pyzx,proven,2.92,grid 2^-4; max snap 0 half-turns
+vbe_adder_11.qasm,34,P2,P2,pyzx,proven,2.87,grid 2^-4; max snap 0 half-turns
+vbe_adder_11.qasm,34,P2vsP0,P2 vs P0,pyzx,proven,3.28,grid 2^-4; max snap 0 half-turns
+mcx_clean_20.qasm,39,P0,P0,pyzx,proven,2.15,grid 2^-4; max snap 0 half-turns
+mcx_clean_20.qasm,39,P2,P2,pyzx,proven,2.3,grid 2^-4; max snap 0 half-turns
+mcx_clean_20.qasm,39,P2vsP0,P2 vs P0,pyzx,proven,2.49,grid 2^-4; max snap 0 half-turns
+modadd_2n_20.qasm,40,P0,P0,pyzx,proven,12.78,grid 2^-4; max snap 0 half-turns
+modadd_2n_20.qasm,40,P2,P2,pyzx,proven,11.06,grid 2^-4; max snap 0 half-turns
+modadd_2n_20.qasm,40,P2vsP0,P2 vs P0,pyzx,proven,12.62,grid 2^-4; max snap 0 half-turns
+cdkm_adder_20.qasm,42,P0,P0,pyzx,proven,4.59,grid 2^-4; max snap 0 half-turns
+cdkm_adder_20.qasm,42,P2,P2,pyzx,proven,4.64,grid 2^-4; max snap 0 half-turns
+cdkm_adder_20.qasm,42,P2vsP0,P2 vs P0,pyzx,proven,6.5,grid 2^-4; max snap 0 half-turns
+mcx_clean_28.qasm,55,P0,P0,pyzx,proven,3.76,grid 2^-4; max snap 0 half-turns
+mcx_clean_28.qasm,55,P2,P2,pyzx,proven,3.91,grid 2^-4; max snap 0 half-turns
+mcx_clean_28.qasm,55,P2vsP0,P2 vs P0,pyzx,proven,4.61,grid 2^-4; max snap 0 half-turns
+mcx_dirty_28.qasm,55,P0,P0,pyzx,proven,6.02,grid 2^-4; max snap 0 half-turns
+mcx_dirty_28.qasm,55,P2,P2,pyzx,proven,6.63,grid 2^-4; max snap 0 half-turns
+mcx_dirty_28.qasm,55,P2vsP0,P2 vs P0,pyzx,proven,8.14,grid 2^-4; max snap 0 half-turns
+vbe_adder_18.qasm,55,P0,P0,pyzx,proven,7.57,grid 2^-4; max snap 0 half-turns
+vbe_adder_18.qasm,55,P2,P2,pyzx,proven,6.25,grid 2^-4; max snap 0 half-turns
+vbe_adder_18.qasm,55,P2vsP0,P2 vs P0,pyzx,proven,8.16,grid 2^-4; max snap 0 half-turns
+cdkm_adder_27.qasm,56,P0,P0,pyzx,proven,8.38,grid 2^-4; max snap 0 half-turns
+cdkm_adder_27.qasm,56,P2,P2,pyzx,proven,8.15,grid 2^-4; max snap 0 half-turns
+cdkm_adder_27.qasm,56,P2vsP0,P2 vs P0,pyzx,proven,11.08,grid 2^-4; max snap 0 half-turns
+draper_adder_28.qasm,56,P0,P0,pyzx,timeout,300.13,killed after 300 s
+draper_adder_28.qasm,56,P2,P2,pyzx,timeout,300.12,killed after 300 s
