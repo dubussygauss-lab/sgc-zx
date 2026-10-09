@@ -1,6 +1,6 @@
 # PSEL keeps ZX rewriting only where it lowers the cost of a circuit on Quantinuum H2
 
-**PSEL is a drop-in pytket pass selector. It never costs more HQC than pytket's default pass when that pass passes its checks. It saves up to 50.4 % HQC against that pass on arithmetic circuits.**
+**PSEL is a drop-in pytket pass selector. It never costs more HQC than pytket's default pass when that pass passes its checks. Against that default it saves 7.47 % on 15 arithmetic and oracle circuits. On top of pytket level 3 the ZX stage saves 2.34 % on family C.**
 
 Team Learned ZX Rewriting: C.-F. Kam, A. Mahasinghe, D. De Silva, N. Karunarathne, F. Cadet, M. Bessafi, K. De Silva. Quantinuum Singapore Grand Challenge, submission 1. Main report `report.pdf`, technical appendix `report_full.pdf` (cited as "App."), source `code.zip` with `README.md`, emulator evidence `EVIDENCE.md`.
 
@@ -23,10 +23,10 @@ PSEL (`pipelines/pass_select.py`) compiles each circuit twice. P0 is pytket-quan
 - **Benchmarks.** On 15 Clifford+T circuits of family B1 PSEL saves 743.6 HQC or 4.79 %. hwb8 alone gives 84.5 % of that saving.
 - **Use case.** On Grover search with 7 and 9 qubits PSEL saves 5.42 % and 4.96 % of the HQC. That buys 791 and 322 more shots within a 10,000 HQC budget.
 - **Magic states.** The ZX stage removes 40.6 % of the written T-count on B1. On 20 synthesised Haar circuits of 2 and 3 qubits the channel bound of Gosset et al. (2014), evaluated exactly by the team, caps any further exact T saving at 0.3 % pooled.
-- **Stronger baselines.** pytket's default is optimisation level 2. Against level 3 PSEL costs 8.37 % more on family C. Running teleport_reduce before level 3 and keeping the cheaper result still saves 2.34 % (App. 3.8.1).
+- **Stronger baselines.** pytket's default is optimisation level 2. Against level 3 PSEL costs 9.92 % more on B1 and 8.37 % more on family C. Level 3 alone is cheaper than PSEL on rgqft_mult_6, vbe_adder_18 and vbe_adder_7. Running teleport_reduce before level 3 and keeping the cheaper result still saves 2.34 % (App. 3.8.1).
 - **Emulator.** 20 H2-2E jobs (6598.0 HQC by the cost formula) and 3 H2-Emulator jobs ran, with job IDs in `EVIDENCE.md`. vbe_adder_7 ran under P0 and P2 with Hellinger fidelity 0.886 and 0.897.
 
-**Limits.** No user interview. Family C is count-only apart from one emulator run. No hardware run. On the emulator P2 beats P0 on vbe_adder_3 in the repeats run after the circuit was chosen (Holm p = 0.030 over two circuits), not in the pooled test over three (0.052). Inputs are all-zero.
+**Limits.** No user interview. Family C is count-only apart from one emulator run. No hardware run. On the emulator P2 beats P0 on vbe_adder_3 in the repeats run after the circuit was chosen (Holm p = 0.030 over two circuits, a check chosen after the pooled result), not in the pooled primary test over three (0.052). Inputs are all-zero.
 
 ## Relevance to quantum computing
 
