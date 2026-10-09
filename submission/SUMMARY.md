@@ -4,11 +4,25 @@ Team Learned ZX Rewriting. Report title: "A pass selector keeps ZX rewriting onl
 
 `[F]` marks a statement copied from the report or from the `value/` outputs. `[O]` marks a judgement. The script `check_summary_numbers.py` finds every number of this page in `report/report_v5.md` or in `value/`.
 
+## HQC saved on application-scale circuits
+
+`[F]` Family C holds 20 application-scale circuits of 20 to 56 qubits built by qiskit from published constructions (report Section 3.8). The pass selector PSEL saves 4,104.4 HQC or 16.7 % against P0 at 1000 shots. Per application it saves 12.9 % on the 9 adders and 34.5 % on the 2 multipliers. It saves 0.1 % on the 6 multi-controlled X oracles and 0 % on the 3 QFT adders, where it keeps P0. The two multipliers carry 81.8 % of the family C saving. On the QFT adders P2 is dearer and PSEL avoids 1,057.2 HQC against always running P2.
+
+`[F]` Family C is count-only. The compiled outputs of 14 circuits agree with the input on 64 random basis inputs up to a global phase. This covers 64 of 2^n inputs and is not a proof of equivalence. The other 6 circuits are unchecked and carry 41.6 HQC of the saving. The multipliers and the QFT adders carry rotation angles outside the pi/4 grid. Their T-counts leave out these rotations.
+
+## Worked use case
+
+`[F]` Two Grover search instances of 7 and 9 qubits pass the exactness check under P0 and P2 (report Section 3.9). PSEL picks P2 on both. It saves 39.8 HQC or 5.42 % and 80.8 HQC or 4.96 % at 1000 shots. Within the 10,000 HQC budget with at most 10,000 shots per job PSEL affords 791 and 322 more shots. At the ideal success probability the expected hits rise from 13687.8 to 14478.2 and from 6132.0 to 6452.9. The T-count falls from 448 to 210 and from 1008 to 436.
+
+`[O]` This T-count drop comes from Toffolis that the Barenco construction repeats on the same qubits. It is not a general ZX gain.
+
 ## User and decision
 
 `[O]` The user runs Clifford+T subroutines on Quantinuum H2 under a fixed HQC budget. The same team will later price these subroutines in T gates on a fault-tolerant Helios. The decision is made per circuit. Should the circuit go through PyZX teleport_reduce (pipeline P2) before pytket's Quantinuum pass at level 2 (pipeline P0)? `[F]` The delivered tool is the pass selector PSEL in `pipelines/pass_select.py`. It decides per circuit whether to run PyZX teleport_reduce before pytket's Quantinuum pass. It compiles each circuit with P0 and with P2 and keeps the compiled circuit with the lower HQC. `[O]` The ledger explains the choice in HQC and in magic states.
 
-## HQC saved on H2
+## HQC saved on the B1 benchmarks and Trotter circuits
+
+`[F]` Our reproduced P0 matches the official pytket-quantinuum 0.59.3 pass on every compiled row. The official P0 and P2 equal our P0 and P2 in n_2q, n_1q, two-qubit depth and HQC on all 445 compiled rows of families A, B1, B1x and B2 (report Section 2.2). hwb8 under the official P2 timed out.
 
 `[F]` PSEL cannot cost more HQC than P0 on a circuit where P0 passes the exactness check. This holds by construction because P0 is always one of its two candidates. It is not a measured result. PSEL picks P2 on 14 of the 15 checked B1 circuits. HQC is computed with the organisers' formula `estimate_cost` from the gate counts of the compiled circuit (report Section 1.2). At 1000 shots it costs 14,772.4 HQC against 15,516.0 for P0 on the 15 checked B1 circuits. The saving is 743.6 HQC or 4.79 %. It comes from the ZX stage P2. P2 alone costs 14,772.8 HQC there and PSEL matches it within 0.4 HQC. The median per-circuit saving is 3.94 %. On the 180 Trotter circuits of family A PSEL picks P2 on 57 and saves 46.0 HQC or 0.28 %. It never raises the ZZ gate count against P0 on any of the 223 circuits.
 

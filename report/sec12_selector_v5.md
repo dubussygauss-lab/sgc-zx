@@ -1,5 +1,21 @@
 ### 1.2 What the pipeline saves on H2 today
 
+`[F]` Headline. PSEL saves HQC on two sets of circuits. On the 15 checked B1 circuits it saves 743.6 HQC or 4.79 % against P0. This saving comes from the ZX stage P2 and PSEL matches it within 0.4 HQC. On the 20 application-scale circuits of family C it saves 4,104.4 HQC or 16.7 % against P0 (Table 1.1b). Per application it saves 12.9 % on the adders and 34.5 % on the multipliers. It saves 0.1 % on the multi-controlled X oracles and 0 % on the QFT adders, where it keeps P0. On family C PSEL also avoids 1,057.2 HQC against always running P2, because P2 is dearer on all three QFT adders. The two multipliers carry 3,356.0 HQC or 81.8 % of the family C saving. On the other 18 circuits PSEL saves 748.4 HQC or 5.06 %.
+
+`[F]` Family C status. Family C is count-only. The P0 and P2 outputs of 14 circuits agree with the input on 64 random basis inputs up to a global phase. A pass covers 64 of 2^n inputs and is not a proof of equivalence. The other 6 circuits are unchecked because the sparse simulation exceeded 2^20 amplitudes. They are mcx_dirty_28, mcx_b95_54, draper_adder_16, draper_adder_28, modadd_2n_10 and modadd_2n_20. Their PSEL saving is 41.6 HQC. Both multipliers are checked. The two multipliers and the three QFT adders carry rotation angles outside the pi/4 grid. After the ZX stage 600 such rotations remain in hrs_mult_5 and 507 in rgqft_mult_6. The T-count does not count them. PyZX rounds the P2 input of draper_adder_28 by at most 1.50e-06 rad per angle. PSEL keeps P0 on that circuit.
+
+`[F]` Table 1.1b. Family C, HQC at 1000 shots of PSEL against P0 and P2 per application. Count-only. Checked counts the circuits whose P0 and P2 outputs both pass the 64-input basis check. Saved % is computed on the application sums. Source: `value/family_C_selector.md`, computed from `results/family_C_counts.csv`. Section 3.8 gives the per-circuit rows.
+
+| Application | Circuits | Qubits | PSEL picks P2 | HQC P0 | HQC P2 | HQC PSEL | Saved vs P0 | Saved vs P0 % | Saved vs P2 | Checked |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Adders | 9 | 20-56 | 9 | 5,777.0 | 5,031.4 | 5,031.4 | 745.6 | 12.9 | 0.0 | 7 |
+| Multipliers | 2 | 21-24 | 2 | 9,737.0 | 6,381.0 | 6,381.0 | 3,356.0 | 34.5 | 0.0 | 2 |
+| Multi-controlled X oracles (Grover) | 6 | 21-56 | 3 | 4,242.6 | 4,239.8 | 4,239.8 | 2.8 | 0.1 | 0.0 | 4 |
+| QFT adders (Draper) | 3 | 20-56 | 0 | 4,778.4 | 5,835.6 | 4,778.4 | 0.0 | 0.0 | 1,057.2 | 1 |
+| All family C | 20 | 20-56 | 14 | 24,535.0 | 21,487.8 | 20,430.6 | 4,104.4 | 16.7 | 1,057.2 | 14 |
+
+`[F]` Worked use case. Two Grover search instances find one marked item among 2^5 and 2^6 entries on 7 and 9 qubits (Section 3.9). Both pass the exactness check under P0 and P2. PSEL picks P2 on both. It saves 39.8 HQC or 5.42 % on the 7-qubit instance and 80.8 HQC or 4.96 % on the 9-qubit instance. Within the 10,000 HQC budget and a limit of 10,000 shots per job PSEL affords 791 and 322 more shots. At the ideal success probability the expected hits rise from 13687.8 to 14478.2 and from 6132.0 to 6452.9. The T-count falls from 448 to 210 and from 1008 to 436. `[O]` This T-count drop comes from Toffolis that the Barenco construction repeats on the same qubits, whose T phases partly cancel under the ZX stage. It is not a general ZX gain.
+
 `[F]` The organisers' sample code prices an H2 program as HQC = 5 + N_shots (N_1q + 10 N_2q + 5 N_M) / 5000. N_1q counts PhasedX gates. N_2q counts ZZPhase and ZZMax gates. N_M counts initialisations, measurements and resets. Rz gates are free. The source is `estimate_cost` in `src/python/pytket_cost_estimation.py` of `Quantinuum/sg_grand_challenge`. `pipelines/compile.py:hqc` reproduces that function. `[O]` We take this as the H2 price. `[F]` The Helios costing page gives the same form with maxima over 10 shots in its equation (1). See Reference 6 and `docs/platform_notes.md` section 3.4.
 
 `[F]` p2 = 1.29e-3 is the largest gate fault rate of the H2-2E emulator. The H2-2E emulator parameters are p2 = 1.29e-3 and p1 = 7.3e-5 per gate, readout flips 9e-4 and 1.8e-3 for states 0 and 1 and p_init = 4e-5 (`docs/platform_notes.md` section 3.3).

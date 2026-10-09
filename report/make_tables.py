@@ -961,6 +961,106 @@ def literature_c2():
     return {"t": t, "tot": tot, "anc_cert": t_anc_cert}
 
 
+# ------------------------------------------------- family C and the use case
+
+def family_c():
+    """Table C3: family C, 20 application-scale circuits of 20 to 56 qubits, count-only.
+    Reads value/family_C_selector.csv and value/family_C_selector_apps.csv (written by
+    value/family_C_selector.py from results/family_C_counts.csv) and
+    bench/family_C/manifest.csv.  The PSEL HQC of every circuit is recomputed here from
+    the P0 and P2 rows of results/family_C_counts.csv.  Injected only where the
+    TABLE:C3_familyC marker pair exists (report v5)."""
+    p_sel = os.path.join(ROOT, "value", "family_C_selector.csv")
+    p_app = os.path.join(ROOT, "value", "family_C_selector_apps.csv")
+    if not (os.path.exists(p_sel) and os.path.exists(p_app)):
+        return None
+    r = pd.read_csv(p_sel)
+    a = pd.read_csv(p_app)
+    man = pd.read_csv(os.path.join(ROOT, "bench", "family_C", "manifest.csv"))
+    cnt = pd.read_csv(os.path.join(RESULTS, "family_C_counts.csv"))
+    # recompute PSEL from the raw counts: lower HQC, tie to lower n_2q, then P0
+    for x in r.itertuples():
+        p0 = cnt[(cnt.file == x.file) & (cnt.pipeline == "P0")].iloc[0]
+        p2 = cnt[(cnt.file == x.file) & (cnt.pipeline == "P2")].iloc[0]
+        pick = "P2" if (p2.hqc, p2.n_2q) < (p0.hqc, p0.n_2q) else "P0"
+        assert pick == x.pick, (x.file, pick, x.pick)
+        assert abs(min(p0.hqc, p2.hqc) - x.hqc_PSEL) < 1e-9, x.file
+    assert abs(a[a.application == "all"].saved_hqc.iloc[0] - r.saved_hqc.sum()) < 1e-6
+    cont = dict(zip(man.file, man.continuous_angles))
+    checked = (r.check_P0 == "pass") & (r.check_P2 == "pass")
+    apps = pd.DataFrame({"application": a.application, "circuits": a.n_circuits.astype(int),
+                         "qubits": a.qubits, "PSEL picks P2": a.p2_picks.astype(int),
+                         "HQC P0": a.hqc_P0, "HQC P2": a.hqc_P2, "HQC PSEL": a.hqc_PSEL,
+                         "saved vs P0": a.saved_hqc, "saved %": a.saved_pct,
+                         "saved vs P2": a.hqc_P2 - a.hqc_PSEL,
+                         "n_2q P0": a.n2q_P0.astype(int), "n_2q PSEL": a.n2q_PSEL.astype(int),
+                         "T written": a.t_written.astype(int), "T saved": a.t_saved_PSEL.astype(int),
+                         "checked": a.n_checked_both.astype(int)})
+    per = pd.DataFrame({"file": r.file.str.replace(".qasm", "", regex=False), "n": r.n_qubits.astype(int),
+                        "application": r.application, "pick": r.pick,
+                        "HQC P0": r.hqc_P0, "HQC P2": r.hqc_P2, "HQC PSEL": r.hqc_PSEL,
+                        "saved %": r.saved_pct, "n_2q P0": r.n2q_P0.astype(int),
+                        "n_2q PSEL": r.n2q_PSEL.astype(int), "T written": r.t_written.astype(int),
+                        "T after ZX P2": r.t_zx_P2.astype(int),
+                        "continuous angles": ["yes" if cont[f] else "no" for f in r.file],
+                        "check": ["pass" if c else "unchecked" for c in checked]})
+    fmt = {c: "{:,.1f}" for c in ["HQC P0", "HQC P2", "HQC PSEL", "saved vs P0", "saved vs P2"]}
+    fmt.update({"saved %": "{:.1f}", "n_2q P0": "{:d}", "n_2q PSEL": "{:d}", "T saved": "{:d}",
+                "PSEL picks P2": "{:d}", "checked": "{:d}", "T after ZX P2": "{:d}"})
+    for c in ["n_2q P0", "n_2q PSEL", "T written", "T saved", "PSEL picks P2", "checked", "T after ZX P2",
+              "circuits", "n"]:
+        for t in (apps, per):
+            if c in t:
+                t[c] = t[c].astype(int).astype(str)
+    sv = a[a.application == "all"].iloc[0]
+    n_unc = int((~checked).sum())
+    text = ("`[F]` Family C, count-only. HQC at 1000 shots with every qubit measured (`compile.hqc`). PSEL keeps the "
+            "lower HQC of P0 and P2, an HQC tie goes to the lower n_2q and a further tie to P0. saved % is "
+            "computed on the sums against P0. T saved is the T-count removed by the ZX stage on the circuits "
+            "where PSEL picks P2. checked counts circuits whose P0 and P2 outputs both agree with the input on "
+            "64 random basis inputs up to a global phase (`pipelines/run_family_C.py --check`). unchecked means "
+            "the sparse simulation exceeded 2^20 amplitudes. A pass covers 64 of 2^n inputs and is not a proof "
+            "of equivalence. continuous angles marks inputs with rotations outside the pi/4 grid "
+            "(`bench/family_C/manifest.csv`). Source: `value/family_C_selector.csv`.\n\n"
+            + md_table(apps, "{:.1f}", fmt=fmt)
+            + "\n" + md_table(per, "{:.1f}", fmt=fmt)
+            + f"\n`[F]` {len(r)} circuits, {int(checked.sum())} checked and {n_unc} unchecked. PSEL saves "
+              f"{sv.saved_hqc:,.1f} HQC or {sv.saved_pct:.1f} % against P0 and {sv.hqc_P2 - sv.hqc_PSEL:,.1f} HQC "
+              f"against P2. Saving on the checked circuits {r[checked].saved_hqc.sum():,.1f} HQC, on the unchecked "
+              f"circuits {r[~checked].saved_hqc.sum():,.1f} HQC.\n")
+    write("C3_familyC", text)
+    return {"r": r, "a": a, "checked": int(checked.sum()), "unchecked": n_unc}
+
+
+def usecase_table():
+    """Table U1: the two Grover use-case instances of value/usecase.py, read from
+    value/usecase.csv.  Injected only where the TABLE:U1_usecase marker pair exists."""
+    path = os.path.join(ROOT, "value", "usecase.csv")
+    if not os.path.exists(path):
+        return None
+    u = pd.read_csv(path)
+    assert (u.hqc_PSEL == u[["hqc_P0", "hqc_P2"]].min(axis=1)).all()
+    t = pd.DataFrame({"file": u.file.str.replace(".qasm", "", regex=False),
+                      "qubits": u.n_qubits.astype(int).astype(str), "k": u.iterations.astype(int).astype(str),
+                      "P_succ ideal": u.p_success_ideal_sv, "check": u.check_kind,
+                      "T written": u.t_count_written.astype(int).astype(str),
+                      "T after ZX": u.t_count_after_zx_P2.astype(int).astype(str),
+                      "n_2q P0": u.n2q_P0.astype(int).astype(str), "n_2q PSEL": u.n2q_PSEL.astype(int).astype(str),
+                      "pick": u.chosen, "HQC P0": u.hqc_P0, "HQC PSEL": u.hqc_PSEL,
+                      "saved %": u.hqc_saving_pct,
+                      "shots P0": u.shots_capped_P0.astype(int).astype(str),
+                      "shots PSEL": u.shots_capped_PSEL.astype(int).astype(str),
+                      "hits P0": u.hits_ideal_P0, "hits PSEL": u.hits_ideal_PSEL})
+    text = ("`[F]` Grover use case. k is the number of Grover iterations. P_succ ideal is the noise-free success "
+            "probability from the statevector. check is the exactness check of `pipelines/compile.py:check` "
+            "on P0 and P2. HQC at 1000 shots with every qubit measured. Shots are those affordable within "
+            "10,000 HQC with at most 10,000 shots per job and 5 HQC per job. Hits are the expected marked-item "
+            "hits within that budget at the ideal success probability. Source: `value/usecase.csv`.\n\n"
+            + md_table(t, "{:.1f}", fmt={"P_succ ideal": "{:.6f}", "saved %": "{:.2f}"}))
+    write("U1_usecase", text)
+    return u
+
+
 # --------------------------------------------------------------- injection
 
 def inject(report_path: str):
@@ -1000,6 +1100,8 @@ def main():
     fe2 = emulator_h22e(fe)
     fe3 = emulator_h22e_pooled()
     fl2 = literature_c2()
+    fc3 = family_c()
+    fu1 = usecase_table()
     print("family A: circuits", fa["n_circuits"], "| P0 at ZZ term count:",
           fa["p0_at_floor"], "| circuits with any pipeline below it:", fa["any_below_floor"],
           "| P2 ties P0:", fa["p2_ties"], "worse:", fa["p2_worse"])
@@ -1037,9 +1139,13 @@ def main():
         print("H2-2E pooled: runs per cell %s, final %s" % (list(fe3["cells"].runs), fe3["final"]))
     if fl2 is not None:
         print("C2 literature: totals on certified circuits", fl2["tot"], "| best with ancillas", fl2["anc_cert"])
+    if fc3 is not None:
+        print("family C (count-only): checked", fc3["checked"], "| unchecked", fc3["unchecked"])
+    if fu1 is not None:
+        print("use case: PSEL picks", list(fu1.chosen))
     for name in ["A1_zz_by_n", "A2_vs_P0", "A3_floor", "A4_proxy", "B1_per_circuit", "B1x_per_circuit", "B2_summary",
                  "M1_cost_metrics", "M2_cost_coefficients", "A5_proxy_b1", "C1_certificates", "S1_selene", "S2_selene_depol",
-                 "E1_h2emulator", "E2_h22e", "E3_h22e_pooled", "C2_literature"]:
+                 "E1_h2emulator", "E2_h22e", "E3_h22e_pooled", "C2_literature", "C3_familyC", "U1_usecase"]:
         if os.path.exists(os.path.join(TABLES, name + ".md")):
             print(f"\n### {name}\n" + open(os.path.join(TABLES, name + ".md")).read())
     if not args.no_inject:
