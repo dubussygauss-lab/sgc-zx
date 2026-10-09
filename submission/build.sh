@@ -51,6 +51,12 @@ build_pdf() {
 import re, sys
 p = sys.argv[1]; s = open(p, encoding="utf-8").read()
 s = re.sub(r'<header id="title-block-header">.*?</header>', '', s, flags=re.S)
+# keep each table caption paragraph, and a heading directly above it, on the same page as its table (see .keep in report.css)
+s = re.sub(r'((?:<h[234][^>]*>(?:(?!</h[234]>).)*</h[234]>\s*)?<p>(?:(?!<p>|</p>).)*</p>\s*<table.*?</table>)', r'<div class="keep">\1</div>', s, flags=re.S)
+# a section heading directly above a kept block moves into it
+s = re.sub(r'(<h[234][^>]*>(?:(?!</h[234]>).)*</h[234]>\s*)<div class="keep">', r'<div class="keep">\1', s, flags=re.S)
+# any other heading stays with the paragraph below it
+s = re.sub(r'(<h[234][^>]*>(?:(?!</h[234]>).)*</h[234]>\s*<p>(?:(?!</p>).)*</p>)', r'<div class="keep">\1</div>', s, flags=re.S)
 open(p, "w", encoding="utf-8").write(s)
 PY
   wkhtmltopdf --quiet --enable-local-file-access --page-size A4 \
