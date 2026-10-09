@@ -21,7 +21,7 @@ Tags: `[F]` marks a statement verifiable from an artifact in the repository or f
 
 - `[F]` Tool. The delivered tool is the pass selector PSEL in `pipelines/pass_select.py`. It compiles each circuit with P0 and with P2 and keeps the compiled circuit with the lower HQC.
 - `[F]` H2 cost. PSEL costs no more HQC than P0 whenever P0 passes PSEL's checks, because P0 is always one of its two candidates. This holds by construction and is not a measured result. PSEL runs no exactness check above 20 qubits. A separate PyZX miter check proves the family C pick equal to its input on 18 of the 20 circuits (Section 3.8). On the 15 checked B1 circuits the saving of 743.6 HQC or 4.79 % against P0 comes from the ZX stage P2. P2 alone saves 743.2 HQC there and PSEL matches it within 0.4 HQC. PSEL's own contribution is on family A. There P2 alone would cost 1,030.4 HQC or 6.27 % more than P0. PSEL picks P2 on 57 of the 180 circuits and saves 46.0 HQC or 0.28 % against P0. It thus avoids 1,076.4 HQC against always running P2 and keeps the B1 gain. It never raises n_2q against P0 on any of the 223 circuits of the four families.
-- `[F]` Stronger baseline. P0 is pytket-quantinuum's default level 2. Against level 3 PSEL costs 9.92 % more on 14 B1 circuits and 8.37 % more on family C. Running teleport_reduce before level 3 and keeping the cheaper result saves 3.49 % and 2.34 % against level 3 (Section 3.8.1).
+- `[F]` Stronger baseline. P0 is pytket-quantinuum's default level 2. Against level 3 PSEL costs 9.92 % more on 14 B1 circuits and 8.37 % more on family C. Running teleport_reduce before level 3 and keeping the cheaper result saves 3.49 % and 2.34 % against level 3 (Section 3.8.1). The level-3-aware selector PSEL4 keeps the lowest HQC of P0, P2, L3 and P2L3. It saves 3.50 % against level 3 and 25.85 % against level 2 on family C (Table P4).
 - `[F]` Arithmetic and oracle circuits. Family C has 20 arithmetic and oracle circuits of 20 to 56 qubits. On its 15 circuits without continuous rotation angles PSEL saves 748.4 of 10,019.6 HQC or 7.47 % against P0. These are 9 adders and 6 multi-controlled X oracles. PSEL saves 12.9 % on the adders and 0.1 % on the oracles. As a secondary figure over all 20 circuits it saves 4,104.4 HQC or 16.7 %. Two multipliers with continuous rotation angles save 34.5 % and carry 81.8 % of that saving. On the three QFT adders PSEL keeps P0 and saves nothing. Family C is count-only apart from one H2-2E run of vbe_adder_7 (Section 3.7.2). A PyZX miter reduction proves the PSEL output of every one of the 15 circuits without continuous angles equal to its input as a full unitary up to global phase. Over all 20 circuits it proves 18. hrs_mult_5 is only spot-checked on 64 random basis inputs and the miter of the P0 pick of draper_adder_28 timed out.
 - `[F]` Use case. Two Grover search instances of 7 and 9 qubits pass the exactness check under P0 and P2. PSEL picks P2 on both and saves 5.42 % and 4.96 % HQC. Within the 10,000 HQC budget this buys 791 and 322 more shots. `[O]` The large T-count drop of these instances comes from Toffolis that the Barenco construction repeats on the same qubits. It is not a general ZX gain.
 - `[O]` User. A team that runs Clifford+T subroutines on Quantinuum H2 under a fixed HQC budget and will later price them on a fault-tolerant Helios.
@@ -823,6 +823,19 @@ Nexus H2-Emulator, noisy_simulation = True, 1000 shots per row. F_H is the Helli
 
 `[O]` The HQC savings stated elsewhere in this report are against L2. Against L3 the PSEL saving does not hold. The ZX stage still pays on top of L3, by 3.49 % and 2.34 %.
 
+`[F]` Table P4. HQC at 1000 shots of the level-3-aware selector PSEL4 (`value/psel4_ledger.md`). Totals are over the circuits where L2 and L3 both passed.
+
+| Family | Circuits | HQC L2 | HQC L3 | HQC PSEL4 | PSEL4 saved vs L2 (%) | PSEL4 saved vs L3 (%) | Picks P0 / L3 / P2 / P2L3 |
+|---|---|---|---|---|---|---|---|
+| A, Trotter | 180 | 16422.6 | 16231.2 | 15949.0 | 2.88 | 1.74 | 35 / 145 / 0 / 0 |
+| B1 | 15 | 15516.0 | 13965.8 | 13863.4 | 10.65 | 0.73 | 0 / 10 / 2 / 3 |
+| B1 without hwb8 | 14 | 2235.0 | 1928.6 | 1826.2 | 18.29 | 5.31 | 0 / 9 / 2 / 3 |
+| C | 20 | 24535.0 | 18853.2 | 18193.2 | 25.85 | 3.50 | 5 / 8 / 4 / 3 |
+| C without continuous angles | 15 | 10019.6 | 8922.4 | 8865.0 | 11.52 | 0.64 | 3 / 7 / 3 / 2 |
+| Grover use case | 2 | 2363.6 | 1582.0 | 1575.0 | 33.36 | 0.44 | 0 / 0 / 0 / 2 |
+
+`[F]` PSEL4 adds L3 and P2L3 (teleport_reduce followed by L3) to the candidates of PSEL and keeps the lowest HQC of P0, P2, L3 and P2L3 (`pipelines/pass_select.py --psel4`, `value/psel4_ledger.md`). It costs no more than the cheaper of level 2 and level 3 on all 217 circuits where both passed. Against level 3 it saves 3.50 % on family C, 0.73 % on B1, 1.74 % on the Trotter circuits of family A and 0.44 % on the two Grover instances. Against the default level 2 it saves 25.85 %, 10.65 %, 2.88 % and 33.36 %. On family A PSEL4 never picks a ZX candidate, so its gain there comes from the choice between the two levels. A PyZX miter proves the PSEL4 output equal to its input on 17 of the 20 family C circuits (`results/family_C_equivalence_psel4.md`). hrs_mult_5 has off-grid angles and the miters of rgqft_mult_6 and draper_adder_28 timed out. `[O]` Most of the saving against level 2 comes from level 3 itself. The ZX stage supplies the part against level 3.
+
 ### 3.9 Use case, Grover search
 
 `[F]` Table U1. The two Grover instances of `value/usecase.md` under P0 and PSEL.
@@ -1022,7 +1035,7 @@ Figure 4. Learned cost model on the proxy data. Left, predicted F_H = exp(-y_hat
 
 `[F]` The Selene command clears every proxy variable because Selene streams its results over a local TCP socket that the container proxy intercepts (`results/selene.md`, section 1).
 
-`[F]` Tests. Each file was run once with the versions above, on 7 October 2026 unless the table gives 8 or 9 October. Seven files run as scripts. Seventeen files run under pytest, all listed in `run_tests.sh`; `report/test_notebook_submit.py`, `submit/test_evidence_index.py`, `submit/test_famC_h22e.py`, `submit/test_h22e_confirmatory.py` and `pipelines/test_strong_baselines.py` are recorded in `submission/REPRODUCE.md`. These are `selene/test_selene.py`, `submit/test_submit.py`, `submit/test_h22e_stats.py`, `submit/test_h22e_pooled.py`, `value/test_value_ledger.py`, `value/test_value_by_application.py`, `value/test_selector_ledger.py`, `value/test_finals_plan.py`, `pipelines/test_official_baseline.py`, `value/test_family_C_selector.py`, `value/test_usecase.py` and `pipelines/test_equiv_family_C.py`.
+`[F]` Tests. Each file was run once with the versions above, on 7 October 2026 unless the table gives 8 or 9 October. Eight files run as scripts. Eighteen files run under pytest, all listed in `run_tests.sh`; `report/test_notebook_submit.py`, `submit/test_evidence_index.py`, `submit/test_famC_h22e.py`, `submit/test_h22e_confirmatory.py`, `pipelines/test_strong_baselines.py`, `pipelines/test_psel4.py` and `pipelines/test_equiv_psel4_C.py` are recorded in `submission/REPRODUCE.md`. These are `selene/test_selene.py`, `submit/test_submit.py`, `submit/test_h22e_stats.py`, `submit/test_h22e_pooled.py`, `value/test_value_ledger.py`, `value/test_value_by_application.py`, `value/test_selector_ledger.py`, `value/test_finals_plan.py`, `pipelines/test_official_baseline.py`, `value/test_family_C_selector.py`, `value/test_usecase.py` and `pipelines/test_equiv_family_C.py`.
 
 | File | Command | Result | Wall time |
 |---|---|---|---|
@@ -1093,7 +1106,7 @@ Figure 4. Learned cost model on the proxy data. Left, predicted F_H = exp(-y_hat
 
 ## 7. Limitations
 
-`[F]` The HQC savings of this report are against pytket-quantinuum at optimisation level 2, the default. Against level 3 PSEL costs 9.92 % more on B1 and 8.37 % more on family C. The ZX stage on top of level 3 (PSEL3) saves 3.49 % and 2.34 % (Section 3.8.1).
+`[F]` The HQC savings of this report are against pytket-quantinuum at optimisation level 2, the default. Against level 3 PSEL costs 9.92 % more on B1 and 8.37 % more on family C. The ZX stage on top of level 3 (PSEL3) saves 3.49 % and 2.34 % (Section 3.8.1). PSEL4 costs no more than either level on all 217 circuits where both passed (Table P4).
 
 `[F]` ZX extraction worsens the ZZPhase count. On family A the pipelines P1, P3 and P4 are above P0 on 180 of 180 circuits, with ZZ ratios from 1.28 to 10.32 (P1), 1.31 to 7.91 (P3) and 1.44 to 10.36 (P4). On family B1 (`results/family_B1_counts.csv`) P1 is above P0 on 14 of 15, P3 on 14 of 15 and P4 on 15 of 15. Only teleport reduction, which does not extract, helps on H2.
 
