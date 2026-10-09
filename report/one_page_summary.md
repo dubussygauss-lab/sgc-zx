@@ -21,7 +21,7 @@ Team Learned ZX Rewriting: C.-F. Kam, A. Mahasinghe, D. De Silva, N. Karunarathn
 
 ## Relevance to quantum computing
 
-`[F]` On family C PSEL saves most on arithmetic subroutines, which the cited literature places, with the oracles, in integer factoring, elliptic-curve discrete log, Grover search and derivative pricing (App. 1.3, 1.4; Chakrabarti et al., arXiv:2012.03819). On a surface-code machine each T gate consumes one magic state (Litinski, arXiv:1808.02892). `[O]` PSEL lowers the cost of these subroutines on H2 today. The certificate tells a fault-tolerant compiler team per instance that exact rewriting of synthesised rotations is not where its effort pays.
+`[F]` On family C PSEL saves most on adders and multipliers. The cited literature places adders in the modular arithmetic of Shor factoring (App. 1.4) and arithmetic in the path loading and payoff of derivative pricing (App. 1.5; Chakrabarti et al., arXiv:2012.03819). On a surface-code machine each T gate consumes one magic state (Litinski, arXiv:1808.02892). `[O]` PSEL lowers the cost of these subroutines on H2 today. The certificate tells a fault-tolerant compiler team per instance that exact rewriting of synthesised rotations is not where its effort pays.
 
 ## Potential impact
 
