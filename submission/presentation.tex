@@ -45,7 +45,7 @@
   \vfill
   {\color{accent}\LARGE\bfseries PSEL keeps ZX rewriting only where it lowers the cost of a circuit on Quantinuum H2\par}
   \vspace{0.5cm}
-  {\large PSEL is a drop-in pytket pass selector. It never costs more HQC than pytket's default pass when that pass passes its checks. It saves up to 50.4\,\% HQC on arithmetic circuits.\par}
+  {\large PSEL is a drop-in pytket pass selector. It never costs more HQC than pytket's default pass when that pass passes its checks. Against that default it saves 7.47\,\% on 15 arithmetic and oracle circuits. On top of pytket level 3 the ZX stage saves 2.34\,\% on family C.\par}
   \vspace{0.7cm}
   {\large Team Learned ZX Rewriting\par}
   \vspace{0.2cm}
@@ -220,7 +220,7 @@
 \end{frame}
 
 % ---------------------------------------------------------------- 9
-\begin{frame}{H2-2E resolves a gain on vbe\_adder\_3 in the repeats and none on grover\_5}
+\begin{frame}{The vbe\_adder\_3 gain misses 0.05 after correction}
   \centering\footnotesize
   \begin{tabular}{@{}llrrrl@{}}
     \toprule
@@ -245,7 +245,7 @@
     \item vbe\_adder\_7 of family C runs on H2-2E. Its difference of +0.0110 ($z = 0.79$) is not resolved at 1000 shots.
     \item 20 H2-2E jobs used 6598.0 HQC by the cost formula. Nothing has run on hardware.
   \end{itemize}
-  \assess{The repeats-only test was chosen after the pooled result was known. The pooled test over three circuits misses 0.05.}
+  \assess{The pooled test is primary. The repeats-only check reaches 0.030 but was chosen after the pooled result was known.}
 \end{frame}
 
 % ---------------------------------------------------------------- 10
