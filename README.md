@@ -7,7 +7,7 @@ Team Learned ZX Rewriting, Quantinuum Singapore Grand Challenge. A resource-cert
 ```
 pip install -r requirements.txt                                   # Python 3.13, pinned versions
 python3 pipelines/pass_select.py bench/family_B1/vbe_adder_3.qasm # PSEL on one circuit: P0, P2 and the pick with HQC
-bash run_tests.sh                                                 # all 21 test files, about 3 min, logs in submission/build_logs/
+bash run_tests.sh                                                 # all 22 test files, about 4 min, logs in submission/build_logs/
 marimo edit report/notebook_skeleton.py                           # notebook: tables, figures, live compilation
 python3 submit/evidence_index.py                                  # rebuilds results/EVIDENCE.md from the stored job payloads
 ```
@@ -84,7 +84,7 @@ Status on 9 October 2026:
 - Certificates done. `python barrier/run_certificates.py` writes `results/certificates.csv` with 24 rows (20 family B2 circuits at n = 2 and 3, four family B1 circuits at n = 5). Report Table C1.
 - Selene done. 468 noiseless and 468 full depolarising runs plus a 68-run comparison. Report Tables S1 and S2 and `results/selene.md`.
 - H2-Emulator done. Three jobs with 22 circuit rows. Report Table E1, `results/emulator_nexus_H2-Emulator.csv`.
-- H2-2E done. 18 jobs with an HQC estimate of 5933.2 in total. Six single runs are in Report Table E2 and `results/emulator_nexus_H2-2E.csv`. Three repeat runs of vbe_adder_3 and grover_5 under P0 and P2 are in `results/emulator_nexus_H2-2E_r2.csv` to `_r4.csv`, pooled by `submit/h22e_pooled.py` into Table E3. Repeat runs set `EMU_RUN_TAG` so they do not overwrite the first run.
+- H2-2E done. 20 jobs with an HQC estimate of 6598.0 in total. The two jobs of 9 October ran the 22-qubit family C adder vbe_adder_7 (`results/h22e_famC.md`, Table E4, `submit/h22e_famC.py`). The first 18 jobs total 5933.2. Six single runs are in Report Table E2 and `results/emulator_nexus_H2-2E.csv`. Three repeat runs of vbe_adder_3 and grover_5 under P0 and P2 are in `results/emulator_nexus_H2-2E_r2.csv` to `_r4.csv`, pooled by `submit/h22e_pooled.py` into Table E3. Repeat runs set `EMU_RUN_TAG` so they do not overwrite the first run.
 - The submission cell of `report/notebook_skeleton.py` was executed once on the free H2-2SC syntax checker (job `AFByb3ZpZGVySm9iAaEdzTywfrOWhGbnlXxd-w`, export `report/notebook_executed.html`). It refuses any platform whose name does not end in SC. The emulator jobs were submitted by the `submit/` scripts.
 
 Value ledger, run after the compilation steps:
@@ -94,7 +94,7 @@ python value/value_ledger.py
 python value/value_by_application.py
 ```
 
-Tests. `bash run_tests.sh` runs all 21 test files: seven as scripts and fourteen under pytest, with the Selene tests run with the proxy variables cleared (see the proxy note below). One log per file and `tests_summary.txt` go to `submission/build_logs/` or to `$TEST_LOG_DIR`. The list of files and the results of the last run are in `submission/REPRODUCE.md`.
+Tests. `bash run_tests.sh` runs all 22 test files: seven as scripts and fifteen under pytest, with the Selene tests run with the proxy variables cleared (see the proxy note below). One log per file and `tests_summary.txt` go to `submission/build_logs/` or to `$TEST_LOG_DIR`. The list of files and the results of the last run are in `submission/REPRODUCE.md`.
 
 ## Notebook
 

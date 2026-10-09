@@ -13,7 +13,7 @@ Team Learned ZX Rewriting: C.-F. Kam, A. Mahasinghe, D. De Silva, N. Karunarathn
 
 ## Summary
 
-`[F]` On 15 arithmetic and oracle circuits of 20 to 56 qubits without continuous rotation angles our pass selector PSEL saves 748.4 of 10,019.6 HQC or 7.47 % against P0. These are 9 adders and 6 multi-controlled X oracles. The saving is 12.9 % on the adders and 0.1 % on the oracles. As a secondary figure PSEL saves 4104.4 HQC or 16.7 % over all 20 circuits of family C. Two multipliers with continuous rotation angles drive this figure and save 34.5 %. On the 3 QFT adders PSEL keeps P0 and saves 0. These 20 circuits are count-only. A PyZX miter reduction proves the PSEL output of all 15 circuits without continuous angles equal to its input as a full unitary up to global phase. PSEL is in `pipelines/pass_select.py`. For each circuit it compiles once with P0 and once with P2 and keeps the result with the lower H2 cost in HQC. P0 is the Quantinuum default pass of pytket at optimisation level 2. P2 runs PyZX teleport_reduce before P0. Our P0 and P2 give the same counts as the official pytket-quantinuum pass on all 445 compiled rows of families A, B1, B1x and B2. Family C was not compiled with the official pass. PSEL costs no more HQC than P0 whenever P0 passes PSEL's checks. PSEL runs no exactness check above 20 qubits. A separate PyZX miter check proves the family C pick equal to its input on 18 of the 20 circuits (Appendix Section 3.8). On two exact Grover search instances PSEL saves 5.42 % and 4.96 % of the HQC. On the H2-2E emulator at 4000 shots per pipeline the pooled Hellinger fidelity difference of P2 minus P0 on vbe_adder_3 is +0.0108 with z = +2.38 and a two-sided p of 0.017. The Holm-adjusted p is 0.035 over the two repeated circuits and 0.052 over all three H2-2E circuits. The repeated circuits were chosen after the single runs of Appendix Table E2. grover_5 shows no gain. `[O]` The vbe_adder_3 gain is not established at 0.05 after correction over all three circuits. `[F]` A certified T-count floor from the team's exactness-barrier theorem bounds what any exact rewrite can still remove on 24 circuits with at most 5 qubits. `[O]` PSEL tells an H2 user per circuit whether ZX rewriting lowers the HQC. `[F]` It does not predict fidelity: on hwb6 P2 is cheaper and its H2-2E fidelity at 1000 shots is lower by 0.0150 (z = -1.21).
+`[F]` On 15 arithmetic and oracle circuits of 20 to 56 qubits without continuous rotation angles our pass selector PSEL saves 748.4 of 10,019.6 HQC or 7.47 % against P0. These are 9 adders and 6 multi-controlled X oracles. The saving is 12.9 % on the adders and 0.1 % on the oracles. As a secondary figure PSEL saves 4104.4 HQC or 16.7 % over all 20 circuits of family C. Two multipliers with continuous rotation angles drive this figure and save 34.5 %. On the 3 QFT adders PSEL keeps P0 and saves 0. These 20 circuits are count-only apart from one H2-2E run of vbe_adder_7. A PyZX miter reduction proves the PSEL output of all 15 circuits without continuous angles equal to its input as a full unitary up to global phase. PSEL is in `pipelines/pass_select.py`. For each circuit it compiles once with P0 and once with P2 and keeps the result with the lower H2 cost in HQC. P0 is the Quantinuum default pass of pytket at optimisation level 2. P2 runs PyZX teleport_reduce before P0. Our P0 and P2 give the same counts as the official pytket-quantinuum pass on all 445 compiled rows of families A, B1, B1x and B2. Family C was not compiled with the official pass. PSEL costs no more HQC than P0 whenever P0 passes PSEL's checks. PSEL runs no exactness check above 20 qubits. A separate PyZX miter check proves the family C pick equal to its input on 18 of the 20 circuits (Appendix Section 3.8). On two exact Grover search instances PSEL saves 5.42 % and 4.96 % of the HQC. On the H2-2E emulator at 4000 shots per pipeline the pooled Hellinger fidelity difference of P2 minus P0 on vbe_adder_3 is +0.0108 with z = +2.38 and a two-sided p of 0.017. The Holm-adjusted p is 0.035 over the two repeated circuits and 0.052 over all three H2-2E circuits. The repeated circuits were chosen after the single runs of Appendix Table E2. grover_5 shows no gain. `[O]` The vbe_adder_3 gain is not established at 0.05 after correction over all three circuits. `[F]` A certified T-count floor from the team's exactness-barrier theorem bounds what any exact rewrite can still remove on 24 circuits with at most 5 qubits. `[O]` PSEL tells an H2 user per circuit whether ZX rewriting lowers the HQC. `[F]` It does not predict fidelity: on hwb6 P2 is cheaper and its H2-2E fidelity at 1000 shots is lower by 0.0150 (z = -1.21).
 
 ## 1. Problem and value
 
@@ -28,7 +28,7 @@ Team Learned ZX Rewriting: C.-F. Kam, A. Mahasinghe, D. De Silva, N. Karunarathn
 
 ### 1.2 Savings by application on H2
 
-`[F]` Table 1. HQC at 1000 shots of P0 and PSEL. Family C is count-only above 20 qubits and is reported per application (`value/family_C_selector.md`, Appendix Table 1.1b). B1 is the checked Clifford+T benchmark set with n <= 12 (`value/selector_ledger.md`, Appendix Table 1.1a). The two multipliers and the three QFT adders carry continuous rotation angles. The row without continuous angles holds the 9 adders and the 6 MCX oracles.
+`[F]` Table 1. HQC at 1000 shots of P0 and PSEL. Family C is count-only above 20 qubits, apart from one H2-2E run of vbe_adder_7 (Table 3c), and is reported per application (`value/family_C_selector.md`, Appendix Table 1.1b). B1 is the checked Clifford+T benchmark set with n <= 12 (`value/selector_ledger.md`, Appendix Table 1.1a). The two multipliers and the three QFT adders carry continuous rotation angles. The row without continuous angles holds the 9 adders and the 6 MCX oracles.
 
 | Application | Family | Circuits | Qubits | PSEL picks P2 | HQC P0 | HQC PSEL | Saved | Saved % |
 |---|---|---|---|---|---|---|---|---|
@@ -150,7 +150,7 @@ Team Learned ZX Rewriting: C.-F. Kam, A. Mahasinghe, D. De Silva, N. Karunarathn
 
 ## 3. Results on Quantinuum platforms
 
-`[F]` The Quantinuum tools used are Nexus through `aqora` on the H2-Emulator (3 jobs, 22 rows) and on H2-2E (18 jobs, 5933.2 HQC), the free H2-2SC syntax checker (2 completed jobs), Selene with circuits loaded by guppy `load_pytket` (468 noiseless, 68 depolarising and 468 full depolarising runs) and the official pytket-quantinuum pass (445 compiled rows, Appendix 2.2).
+`[F]` The Quantinuum tools used are Nexus through `aqora` on the H2-Emulator (3 jobs, 22 rows) and on H2-2E (20 jobs, 6598.0 HQC), the free H2-2SC syntax checker (2 completed jobs), Selene with circuits loaded by guppy `load_pytket` (468 noiseless, 68 depolarising and 468 full depolarising runs) and the official pytket-quantinuum pass (445 compiled rows, Appendix 2.2).
 
 ### 3.1 Count results by family
 
@@ -205,7 +205,7 @@ Team Learned ZX Rewriting: C.-F. Kam, A. Mahasinghe, D. De Silva, N. Karunarathn
 `[F]` Access. The team reached the platforms on 8 October 2026 through `aqora` 0.35.1 as team `learned_zx_rewriting`. Every job is a row of `results/emulator_jobs.csv` with its job id (Appendix 3.7).
 
 - `[F]` H2-Emulator. Three jobs with 22 circuit rows completed at 1000 shots with noise. At this shot count no P2 against P0 difference is resolved on a single circuit. A fourth job was rejected by the platform quota.
-- `[F]` H2-2E. 18 jobs completed. Six ran vbe_adder_3, hwb6 and grover_5 under P0 and P2 at 1000 shots. Twelve repeated vbe_adder_3 and grover_5 three more times. Their HQC estimates sum to 5933.2 of the 10,000 HQC team quota, or 59.3 %.
+- `[F]` H2-2E. 18 jobs completed on 8 and 9 October for Tables 3a and 3b. Six ran vbe_adder_3, hwb6 and grover_5 under P0 and P2 at 1000 shots. Twelve repeated vbe_adder_3 and grover_5 three more times. Their HQC estimates sum to 5933.2 of the 10,000 HQC team quota, or 59.3 %. Two more jobs ran the 22-qubit family C adder vbe_adder_7 for Table 3c. All 20 jobs total 6598.0 HQC.
 
 `[F]` Table 3a. Single H2-2E runs at 1000 shots, one job per row (Appendix Table E2). The HQC estimate is the formula value stored with each job.
 
@@ -233,6 +233,14 @@ Team Learned ZX Rewriting: C.-F. Kam, A. Mahasinghe, D. De Silva, N. Karunarathn
 - `[F]` Multiplicity. The two repeated circuits were chosen after the single runs. The Holm-adjusted p is 0.035 over the two repeated circuits and 0.052 over all three H2-2E circuits. `[O]` The gain is significant before correction and after correction over two circuits. It is not significant at 0.05 after correction over all three.
 - `[F]` grover_5. The difference is +0.0007 with sd 0.0075 and z = +0.10 and is not resolved. It lies 2.94 sd below the gain of 0.0229 predicted by the slope model.
 - `[F]` No cell rejects homogeneity of its four runs at the 0.05 level.
+`[F]` Table 3c. One family C circuit on H2-2E at 1000 shots per job, all-zero input (Appendix Section 3.7.2, Table E4). The ideal output is one basis state, so the sd of F_H is binomial.
+
+| Circuit | Qubits | Pipeline | n_2q | HQC estimate | F_H | sd F_H |
+|---|---|---|---|---|---|---|
+| vbe_adder_7 | 22 | P0 | 142 | 370.4 | 0.886 | 0.0101 |
+| vbe_adder_7 | 22 | P2 | 107 | 294.4 | 0.897 | 0.0096 |
+
+- `[F]` The difference F_H(P2) minus F_H(P0) is +0.0110 with sd 0.0139 and z = 0.79. It is not resolved at 1000 shots. `[O]` The run shows that a 22-qubit PSEL output executes on a Quantinuum emulator.
 - `[O]` The H2-2E runs confirm execution and HQC accounting on a Quantinuum emulator. They give one fidelity gain and one unmet prediction, and this report states both.
 
 ### 3.3 Selene

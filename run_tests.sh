@@ -2,7 +2,7 @@
 # Runs every test file once from the repository root and writes one log per file
 # plus a summary to submission/build_logs/ (or $TEST_LOG_DIR). Rerunnable from the repository root or from an unzipped code.zip.
 cd "$(dirname "$0")"
-# 21 test files: 7 run as scripts, 14 under pytest. See REPRODUCE.md (Tests).
+# 22 test files: 7 run as scripts, 15 under pytest. See REPRODUCE.md (Tests).
 LOG="${TEST_LOG_DIR:-submission/build_logs}"
 mkdir -p "$LOG"
 : > "$LOG/tests_summary.txt"
@@ -35,4 +35,5 @@ run family_C_selector python -m pytest value/test_family_C_selector.py -q
 run usecase       python -m pytest value/test_usecase.py -q
 run equiv_family_C python -m pytest pipelines/test_equiv_family_C.py -q
 run evidence_index python -m pytest submit/test_evidence_index.py -q
+run famC_h22e   python -m pytest submit/test_famC_h22e.py -q
 echo done >> "$LOG/tests_summary.txt"
