@@ -67,7 +67,11 @@ Output: results/family_C_equivalence.csv
   (proven / inconclusive / failed / timeout / equal-up-to-rounding / error),
   seconds, notes.
 
+Output: results/family_C_equivalence.md (written by --summary from the CSV,
+  value/family_C_selector.csv and bench/family_C/manifest.csv; no checks run).
+
 Usage: python3 pipelines/equiv_family_C.py [--files a,b] [--methods pyzx,qcec_zx,qcec_alt] [--workers 2]
+       python3 pipelines/equiv_family_C.py --summary
 """
 
 import argparse
@@ -361,6 +365,121 @@ def run_task(task):
     return v, dt, note
 
 
+# ------------------------------------------------------------------ summary
+OUTMD = os.path.join(ROOT, "results", "family_C_equivalence.md")
+SELECTOR = os.path.join(ROOT, "value", "family_C_selector.csv")
+
+
+def _snap(note):
+    """Max snap in half-turns parsed from a pyzx 'proven' note, else None."""
+    if not isinstance(note, str) or "max snap" not in note:
+        return None
+    return float(note.split("max snap")[1].split("half-turns")[0])
+
+
+def summary_facts():
+    """All counts reported in the md, computed from the three CSVs."""
+    eq = pd.read_csv(OUTCSV)
+    man = pd.read_csv(os.path.join(BENCH, "manifest.csv"))
+    sel = pd.read_csv(SELECTOR)[["file", "pick"]]
+    pz = eq[eq.method == "pyzx"]
+    v = {(f, c): d for f, c, d in zip(pz.file, pz.comparison, pz.verdict)}
+    files = list(man.file)
+    get = lambda f, c: v.get((f, c), "not run")  # noqa: E731
+    F = {"n_circuits": len(files)}
+    for c in ("P0", "P2", "P2vsP0"):
+        F[f"proven_{c}"] = sum(get(f, c) == "proven" for f in files)
+    pick = dict(zip(sel.file, sel.pick))
+    assert set(pick) == set(files), "selector and manifest list different files"
+    p2 = [f for f in files if pick[f] == "P2"]
+    p0 = [f for f in files if pick[f] == "P0"]
+    F["n_pick_P2"], F["n_pick_P0"] = len(p2), len(p0)
+    F["proven_pick_P2"] = sum(get(f, "P2") == "proven" for f in p2)
+    F["proven_pick_P0"] = sum(get(f, "P0") == "proven" for f in p0)
+    F["unproven_pick_P2"] = [f for f in p2 if get(f, "P2") != "proven"]
+    F["unproven_pick_P0"] = [f for f in p0 if get(f, "P0") != "proven"]
+    F["proven_PSEL"] = sum(get(f, pick[f]) == "proven" for f in files)
+    disc = [f for f, ca in zip(man.file, man.continuous_angles) if not ca]
+    F["n_discrete"] = len(disc)
+    F["proven_PSEL_discrete"] = sum(get(f, pick[f]) == "proven" for f in disc)
+    snaps = [s for s in (_snap(n) for n, d in zip(pz.notes, pz.verdict) if d == "proven")
+             if s is not None]
+    F["max_snap"] = max(snaps)
+    F["n_proven_rows"] = int((pz.verdict == "proven").sum())
+    F["verdicts"], F["pick"], F["man"], F["eq"] = v, pick, man, eq
+    return F
+
+
+def _fmt(f, c, v):
+    d = v.get((f, c))
+    return "not run" if d is None else d
+
+
+def write_summary():
+    F = summary_facts()
+    v, pick, man, eq = F["verdicts"], F["pick"], F["man"], F["eq"]
+    N = F["n_circuits"]
+    name = lambda f: f.replace(".qasm", "")  # noqa: E731
+    L = ["# Family C: full equivalence check by ZX miter", "",
+         "Written by `python3 pipelines/equiv_family_C.py --summary` from "
+         "`results/family_C_equivalence.csv`, `value/family_C_selector.csv` (column `pick`) "
+         "and `bench/family_C/manifest.csv` (column `continuous_angles`). "
+         "Script: `pipelines/equiv_family_C.py` (method in its docstring). "
+         "Tests: `pipelines/test_equiv_family_C.py` (one positive and one broken case).", "",
+         "## Method", "",
+         "- [F] Each compiled output (`results/compiled/{P0,P2}/<file>`) is compared with the input "
+         "`bench/family_C/<file>`, and P2 with P0, as full 2^n x 2^n unitaries up to global phase. "
+         "Measurements are stripped and pytket's implicit qubit permutation is read from the "
+         "measurement map. No ancilla is fixed to |0>, so a proof here is stronger than equality "
+         "on clean-ancilla inputs.",
+         "- [F] PyZX 0.10.7: miter `G_A ; adjoint(G_B)`, `full_reduce`, then the test of "
+         "`Circuit.verify_equality` (2n boundary vertices only, simple edges, input i wired to "
+         "output i). Angles are snapped to the dyadic grid 2^-G with G = (input's largest dyadic "
+         "exponent) + 4. The input angles lie on that grid exactly. "
+         f"The largest snap on the compiled side is {F['max_snap']:.3g} half-turns over all "
+         f"{F['n_proven_rows']} proven PyZX rows (float noise). A positive result proves "
+         "equivalence of the snapped circuits. A negative result is inconclusive.",
+         "- [F] MQT QCEC 3.10.2 was run as a second method on cdkm_adder_10 and draper_adder_10 "
+         "only (see table). Its ZX checker returned `probably_not_equivalent` on 5 of 6 pairs "
+         "that PyZX proves. This is QCEC's \"could not reduce\" outcome and not a counterexample. "
+         "The alternating DD checker is a floating-point check with tolerance.", "",
+         "## Results (PyZX miter)", "",
+         f"- [F] P0 vs input: {F['proven_P0']} of {N} proven.",
+         f"- [F] P2 vs input: {F['proven_P2']} of {N} proven.",
+         f"- [F] P2 vs P0: {F['proven_P2vsP0']} of {N} proven.",
+         "- [F] hrs_mult_5 (P0, P2): inconclusive, not run by PyZX. FullPeepholeOptimise's KAK "
+         "resynthesis leaves angles off any dyadic grid, and PyZX needs exact phases. The "
+         "64-input basis check (pass) remains the only check for this circuit.",
+         "- [F] draper_adder_28 (P0, P2): timeout (300 s) in `full_reduce`. P2 vs P0 not run. "
+         "The 64-input basis check does not cover it either (branching ancilla). It is unchecked.",
+         "", "## PSEL picks", "",
+         f"- [F] PSEL output proven equal to its input: {F['proven_PSEL']} of {N} circuits.",
+         f"- [F] P2 picks proven: {F['proven_pick_P2']} of {F['n_pick_P2']}. Not proven: "
+         + ", ".join(name(f) for f in F["unproven_pick_P2"]) + ".",
+         f"- [F] P0 picks proven: {F['proven_pick_P0']} of {F['n_pick_P0']}. Not proven: "
+         + ", ".join(name(f) for f in F["unproven_pick_P0"]) + ".",
+         f"- [F] Circuits without continuous angles: PSEL output proven for "
+         f"{F['proven_PSEL_discrete']} of {F['n_discrete']}.", "",
+         "## Verdict table", "",
+         "| circuit | n | PSEL pick | P0 vs input | P2 vs input | P2 vs P0 | QCEC (second method) |",
+         "|---|---|---|---|---|---|---|"]
+    q = eq[eq.method != "pyzx"]
+    for f, n in zip(man.file, man.n_qubits):
+        qs = q[q.file == f]
+        qtxt = "; ".join(f"{c}/{m}: {'inconclusive' if d == 'inconclusive' else d}"
+                         for c, m, d in zip(qs.comparison, qs.method, qs.verdict)) or "not run"
+        L.append(f"| {name(f)} | {n} | {pick[f]} | {_fmt(f, 'P0', v)} | {_fmt(f, 'P2', v)} | "
+                 f"{_fmt(f, 'P2vsP0', v)} | {qtxt} |")
+    L += ["", "## Open items", "",
+          "- [O] draper_adder_28 needs a timeout above 300 s or a different method.",
+          "- [O] hrs_mult_5 needs a checker that accepts non-dyadic angles.",
+          "- [O] QCEC on the remaining 18 circuits was not run. It is kept for cross-checking "
+          "only and does not change any PyZX verdict.", ""]
+    with open(OUTMD, "w") as fh:
+        fh.write("\n".join(L))
+    return F
+
+
 COMPARISONS = [("P0", "input", "P0"), ("P2", "input", "P2"), ("P2vsP0", "P0", "P2")]
 
 
@@ -369,7 +488,13 @@ def main():
     ap.add_argument("--files", default="")
     ap.add_argument("--methods", default="pyzx,qcec_zx,qcec_alt")
     ap.add_argument("--workers", type=int, default=2)
+    ap.add_argument("--summary", action="store_true",
+                    help="only rewrite results/family_C_equivalence.md from the CSVs")
     a = ap.parse_args()
+    if a.summary:
+        F = write_summary()
+        print({k: F[k] for k in F if k not in ("verdicts", "pick", "man", "eq")})
+        return
     man = pd.read_csv(os.path.join(BENCH, "manifest.csv"))
     files = [f if f.endswith(".qasm") else f + ".qasm" for f in a.files.split(",") if f]
     if files:

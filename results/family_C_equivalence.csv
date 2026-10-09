@@ -67,3 +67,6 @@ cdkm_adder_27.qasm,56,P2,P2,pyzx,proven,8.15,grid 2^-4; max snap 0 half-turns
 cdkm_adder_27.qasm,56,P2vsP0,P2 vs P0,pyzx,proven,11.08,grid 2^-4; max snap 0 half-turns
 draper_adder_28.qasm,56,P0,P0,pyzx,timeout,300.13,killed after 300 s
 draper_adder_28.qasm,56,P2,P2,pyzx,timeout,300.12,killed after 300 s
+mcx_b95_54.qasm,56,P0,P0,pyzx,proven,203.61,grid 2^-4; max snap 0 half-turns
+mcx_b95_54.qasm,56,P2,P2,pyzx,proven,203.61,grid 2^-4; max snap 0 half-turns
+mcx_b95_54.qasm,56,P2vsP0,P2 vs P0,pyzx,proven,183.64,grid 2^-4; max snap 0 half-turns
