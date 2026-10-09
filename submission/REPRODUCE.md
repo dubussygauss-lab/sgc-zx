@@ -1,6 +1,6 @@
 # Reproduction record
 
-Team Learned ZX Rewriting. Recorded 8 October 2026 in the development container and updated 9 October 2026. `code.zip` is `git archive` of commit `5fca12c7bf9cb57b4d305366e70978d465cefa55` with `submission/` excluded. The main report is `report.pdf`, built from `report/report_short.md`. The technical appendix is `report_full.pdf`, built from `report/report_v5.md` without its changelog sections. Run every command from the repository root. This page follows `README.md` and report Section 5. A clean-clone run of these steps is recorded in `results/repro_2026-10-08/repro_log.md`.
+Team Learned ZX Rewriting. Recorded 8 October 2026 in the development container and updated 9 October 2026. `code.zip` is `git archive` of commit `fa77982a3712cc230e220d608c894da897c29b6e` with `submission/` excluded. The main report is `report.pdf`, built from `report/report_short.md`. The technical appendix is `report_full.pdf`, built from `report/report_v5.md` without its changelog sections. Run every command from the repository root. This page follows `README.md` and report Section 5. A clean-clone run of these steps is recorded in `results/repro_2026-10-08/repro_log.md`.
 
 ## Environment
 
