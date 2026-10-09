@@ -114,6 +114,13 @@ def compute() -> dict:
     out["hqc_primary"] = sum(j["hqc"] for j in jobs if j["file"] == PRIMARY)
     out["hqc_secondary"] = sum(j["hqc"] for j in jobs if j["file"] == SECONDARY)
     out["hqc_total"] = out["hqc_primary"] + out["hqc_secondary"]
+    # Power-0.80 variant of the primary test: same circuit and rule at shots_80 shots per pipeline.
+    jobs_80 = [job_hqc(pipe, PRIMARY, prim["shots_80"]) for pipe in ("P0", "P2")]
+    for j in jobs_80:
+        assert j["shots"] <= MAX_SHOTS_PER_JOB and j["hqc_per_shot"] <= MAX_HQC_PER_SHOT
+    out["jobs_80"] = jobs_80
+    out["hqc_primary_80"] = sum(j["hqc"] for j in jobs_80)
+    out["hqc_total_80"] = out["hqc_primary_80"] + out["hqc_secondary"]
     # The stored H2-2E estimates at 1000 shots (Table E2) must equal the formula on the same files.
     e2 = {("vbe_adder_3.qasm", "P0"): 151.6, ("vbe_adder_3.qasm", "P2"): 119.0,
           ("grover_5.qasm", "P0"): 565.6, ("grover_5.qasm", "P2"): 528.2}
@@ -188,6 +195,11 @@ def render(r: dict) -> str:
              f"total {r['hqc_total']:.1f} HQC in four jobs.")
     L.append(f"- [F] Each job stays under the H2 limits of {MAX_SHOTS_PER_JOB} shots per job and "
              f"{MAX_HQC_PER_SHOT:.0f} HQC per shot.")
+    J80 = {j["pipeline"]: j["hqc"] for j in r["jobs_80"]}
+    L.append(f"- [F] Power {POWER_TARGET:.2f} variant of the primary test: {_name(PRIMARY)} at "
+             f"{P['shots_80']} shots per pipeline costs {J80['P0']:.1f} HQC under P0 and "
+             f"{J80['P2']:.1f} HQC under P2. The primary total is {r['hqc_primary_80']:.1f} HQC. "
+             f"With the secondary test the total is {r['hqc_total_80']:.1f} HQC in four jobs.")
     L.append("- [O] The HQC values assume that H2 hardware charges by the formula of "
              "`docs/platform_notes.md` section 3.4.")
     L.append("")

@@ -6,9 +6,9 @@ Team Learned ZX Rewriting. Report title: "A pass selector keeps ZX rewriting onl
 
 `[F]` marks a statement copied from the report or from the `value/` outputs. `[O]` marks a judgement. The script `check_summary_numbers.py` finds every number of this page in `report/report_v5.md` or in `value/`.
 
-## HQC saved on application-scale circuits
+## HQC saved on arithmetic and oracle circuits of 20 to 56 qubits
 
-`[F]` Family C holds 20 application-scale circuits of 20 to 56 qubits built by qiskit from published constructions (appendix Section 3.8). On the 15 circuits without continuous rotation angles the pass selector PSEL saves 748.4 of 10,019.6 HQC or 7.47 % against P0 at 1000 shots. These are the 9 adders and the 6 multi-controlled X oracles. PSEL saves 12.9 % on the adders and 0.1 % on the oracles. Over all 20 circuits it saves 4,104.4 HQC or 16.7 %. The 2 multipliers save 34.5 % and carry 81.8 % of that saving. This 34.5 % comes from two circuits with continuous rotation angles. On the 3 QFT adders PSEL keeps P0 and saves 0 %. On the QFT adders P2 is dearer and PSEL avoids 1,057.2 HQC against always running P2.
+`[F]` On the 15 arithmetic and oracle circuits of 20 to 56 qubits without continuous rotation angles the pass selector PSEL saves 748.4 of 10,019.6 HQC or 7.47 % against P0 at 1000 shots. These are the 9 adders and the 6 multi-controlled X oracles of family C. Family C was built by qiskit from published constructions (appendix Section 3.8). PSEL saves 12.9 % on the adders and 0.1 % on the oracles. As a secondary figure PSEL saves 4,104.4 HQC or 16.7 % over all 20 circuits of family C. Two spot-checked multipliers with continuous rotation angles drive this figure. They save 34.5 % and carry 81.8 % of that saving. On the 3 QFT adders PSEL keeps P0 and saves 0 %. On the QFT adders P2 is dearer and PSEL avoids 1,057.2 HQC against always running P2.
 
 `[F]` Family C is count-only. The compiled outputs of 14 circuits are spot-checked on 64 random basis inputs and agree with the input up to a global phase. This covers 64 of 2^n inputs and is not a proof of equivalence. The other 6 circuits are unchecked and carry 41.6 HQC of the saving. Four of them are P2 picks, namely modadd_2n_10, modadd_2n_20, mcx_dirty_28 and mcx_b95_54. The multipliers and the QFT adders carry rotation angles outside the pi/4 grid. Their T-counts leave out these rotations.
 
@@ -21,6 +21,14 @@ Team Learned ZX Rewriting. Report title: "A pass selector keeps ZX rewriting onl
 ## User and decision
 
 `[O]` The user runs Clifford+T subroutines on Quantinuum H2 under a fixed HQC budget. The same team will later price these subroutines in T gates on a fault-tolerant Helios. The decision is made per circuit. Should the circuit go through PyZX teleport_reduce (pipeline P2) before pytket's Quantinuum pass at level 2 (pipeline P0)? `[F]` The delivered tool is the pass selector PSEL in `pipelines/pass_select.py`. It decides per circuit whether to run PyZX teleport_reduce before pytket's Quantinuum pass. It compiles each circuit with P0 and with P2 and keeps the compiled circuit with the lower HQC. `[O]` The ledger explains the choice in HQC and in magic states.
+
+## Do-no-harm guard for pytket users
+
+`[O]` A pytket user can add a ZX stage in front of the Quantinuum pass without knowing whether it pays. `[F]` pytket ships one such pass, `pytket.passes.ZXGraphlikeOptimisation`. We measured the PyZX stage of P2 and not that pass. Added blindly, the P2 stage costs 1,030.4 HQC or 6.27 % more than P0 on the 180 Trotter circuits of family A. It costs 1,057.2 HQC or 22.1 % more on the 3 QFT adders of family C. On draper_adder_16 it costs 1,385.0 HQC against 906.8 for P0 or 52.7 % more. This circuit is unchecked. PSEL removes this risk by construction and still keeps the 4.79 % saving on B1 and the 7.47 % saving on the 15 family C circuits without continuous angles. `[O]` PSEL lets a pytket user try ZX rewriting on every circuit for the price of a second compilation.
+
+## Where not to spend fault-tolerant compiler effort
+
+`[O]` A team that plans fault-tolerant chemistry or phase-estimation workloads needs to know where exact T optimisation still pays. Such workloads spend most of their T budget on synthesised rotations [source to be added]. `[F]` On the 20 B2 circuits with gridsynth-synthesised rotations the ZX stage removes 862 of 42,396 T gates or 2.0 %. The certified floor is 41,414 of the 41,534 T gates left after ZX. Every exact rewrite therefore keeps at least 99.7 % of the remaining T-count. Further exact T optimisation can gain at most 0.3 % of the pooled count and 0.7 % on the worst instance. The certificate covers 24 circuits, all with n at most 5. `[O]` The certificate tells such a team per instance that exact rewriting of synthesised rotations is not where its compiler effort pays.
 
 ## HQC saved on the B1 benchmarks and Trotter circuits
 

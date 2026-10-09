@@ -13,7 +13,7 @@ Team Learned ZX Rewriting: C.-F. Kam, A. Mahasinghe, D. De Silva, N. Karunarathn
 
 ## Summary
 
-`[F]` We deliver PSEL, a pass selector in `pipelines/pass_select.py`. For each circuit it compiles once with P0 and once with P2 and keeps the result with the lower H2 cost in HQC. P0 is the Quantinuum default pass of pytket at optimisation level 2. P2 runs PyZX teleport_reduce before P0. Our P0 and P2 give the same counts as the official pytket-quantinuum pass on all 445 compiled rows of families A, B1, B1x and B2. Family C was not compiled with the official pass. PSEL cannot cost more than P0 where P0 passes the exactness check. On 15 application-scale circuits of 20 to 56 qubits without continuous rotation angles it saves 748.4 of 10,019.6 HQC or 7.47 % against P0. Over all 20 application-scale circuits it saves 4104.4 HQC or 16.7 %. The saving is 12.9 % on adders and 34.5 % on multipliers. The 34.5 % comes from two multipliers with continuous rotation angles. It is 0.1 % on multi-controlled Toffolis and 0 on QFT adders. These 20 circuits are count-only and 14 of them are spot-checked on 64 random basis inputs. On two exact Grover search instances PSEL saves 5.42 % and 4.96 % of the HQC. On the H2-2E emulator P2 raises the Hellinger fidelity of vbe_adder_3 by 0.0108 at 4000 shots per pipeline with z = +2.38. The Holm-adjusted p over the three H2-2E circuits is 0.052 and grover_5 shows no gain. A certified T-count floor from the team's exactness-barrier theorem bounds what any exact rewrite can still remove on 24 circuits with at most 5 qubits. `[O]` PSEL tells an H2 user per circuit whether ZX rewriting pays, and it never answers at a loss against P0.
+`[F]` On 15 arithmetic and oracle circuits of 20 to 56 qubits without continuous rotation angles our pass selector PSEL saves 748.4 of 10,019.6 HQC or 7.47 % against P0. These are 9 adders and 6 multi-controlled X oracles. The saving is 12.9 % on the adders and 0.1 % on the oracles. As a secondary figure PSEL saves 4104.4 HQC or 16.7 % over all 20 circuits of family C. Two spot-checked multipliers with continuous rotation angles drive this figure and save 34.5 %. On the 3 QFT adders PSEL keeps P0 and saves 0. These 20 circuits are count-only and 14 of them are spot-checked on 64 random basis inputs. PSEL is in `pipelines/pass_select.py`. For each circuit it compiles once with P0 and once with P2 and keeps the result with the lower H2 cost in HQC. P0 is the Quantinuum default pass of pytket at optimisation level 2. P2 runs PyZX teleport_reduce before P0. Our P0 and P2 give the same counts as the official pytket-quantinuum pass on all 445 compiled rows of families A, B1, B1x and B2. Family C was not compiled with the official pass. PSEL cannot cost more than P0 where P0 passes the exactness check. On two exact Grover search instances PSEL saves 5.42 % and 4.96 % of the HQC. On the H2-2E emulator P2 raises the Hellinger fidelity of vbe_adder_3 by 0.0108 at 4000 shots per pipeline with z = +2.38. The Holm-adjusted p over the three H2-2E circuits is 0.052 and grover_5 shows no gain. A certified T-count floor from the team's exactness-barrier theorem bounds what any exact rewrite can still remove on 24 circuits with at most 5 qubits. `[O]` PSEL tells an H2 user per circuit whether ZX rewriting pays, and it never answers at a loss against P0.
 
 ## 1. Problem and value
 
@@ -88,6 +88,13 @@ Team Learned ZX Rewriting: C.-F. Kam, A. Mahasinghe, D. De Silva, N. Karunarathn
 - `[F]` These savings are against the written circuits. Against six published optimisers our T-count after ZX equals the best ancilla-free value on 14 of 22 comparable circuits (Section 4).
 - `[F]` Scope of the certificate. The certified floor covers only the 24 circuits of `results/certificates.csv`, all with n at most 5. It covers no circuit of family C and no Grover instance.
 - `[F]` No conversion of magic states into Helios time or cost is made. Quantinuum has not published the factory and logical-cycle figures in any source we found.
+
+### 1.5 Do-no-harm guard and fault-tolerant effort map
+
+- `[O]` Do-no-harm guard for pytket users. A pytket user can add a ZX stage in front of the Quantinuum pass without knowing whether it pays. `[F]` pytket 2.18.4 ships one such pass, `ZXGraphlikeOptimisation`. We measured the PyZX stage of P2 and not that pass. Added blindly, the P2 stage costs 6.27 % more HQC than P0 on the 180 Trotter circuits of family A and 22.1 % more on the three QFT adders of family C. On draper_adder_16 it costs 1,385.0 HQC against 906.8 or 52.7 % more. This circuit is unchecked.
+- `[F]` PSEL removes this risk by construction and still keeps the 4.79 % saving on B1 and the 7.47 % saving on family C without continuous angles. `[O]` A pytket user can try ZX rewriting on every circuit for the price of a second compilation.
+- `[O]` Where not to spend fault-tolerant compiler effort. `[F]` On the 20 B2 circuits with gridsynth-synthesised rotations the ZX stage removes 2.0 % of the T gates. The certified floor shows that every exact rewrite keeps at least 99.7 % of the remaining T-count. Further exact T optimisation can gain at most 0.3 % of the pooled count and 0.7 % on the worst instance. The certificate covers 24 circuits with n at most 5.
+- `[O]` Fault-tolerant chemistry and phase-estimation workloads spend most of their T budget on synthesised rotations [source to be added]. The certificate tells a team that plans such workloads per instance how much exact T optimisation of these rotations can still gain.
 
 ## 2. Method
 
@@ -287,13 +294,16 @@ Team Learned ZX Rewriting: C.-F. Kam, A. Mahasinghe, D. De Silva, N. Karunarathn
 
 | Test | Circuit | Shots per pipeline | Power | HQC |
 |---|---|---|---|---|
-| Primary | vbe_adder_3, P0 and P2 | 2900 | 0.65 | 765.7 |
+| Primary, recommended | vbe_adder_3, P0 and P2 | 4364 | 0.80 | 1147.3 |
+| Primary, minimum | vbe_adder_3, P0 and P2 | 2900 | 0.65 | 765.7 |
 | Secondary | grover_5, P0 and P2 | 1900 | 0.65 | 2069.2 |
-| Total | four jobs | | | 2835.0 |
+| Total, recommended | four jobs | | | 3216.5 |
+| Total, minimum | four jobs | | | 2835.0 |
 
 - `[O]` Primary rule, fixed before any hardware data. The test is one-sided at alpha 0.05. A z of 1.645 or more confirms that P2 raises F_H over P0 on H2 hardware. A z of -1.645 or less refutes it. Any other z gives no hardware claim.
 - `[O]` Secondary rule. grover_5 tests whether the shortfall against the slope model recurs on hardware. It does not enter the primary decision.
-- `[O]` If the finals budget is below 2835.0 HQC the primary test runs alone at 765.7 HQC.
+- `[O]` Recommended design. The primary test runs at 4364 shots per pipeline for power 0.80 at the measured gain. 2900 shots per pipeline is the minimum design with power 0.65.
+- `[O]` If the finals budget is below 3216.5 HQC the primary test runs alone at 4364 shots for 1147.3 HQC. Below 1147.3 HQC it runs at the minimum of 2900 shots for 765.7 HQC.
 
 ## 7. Limitations
 
