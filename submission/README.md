@@ -7,7 +7,7 @@ Team Learned ZX Rewriting, Quantinuum Singapore Grand Challenge. A resource-cert
 ```
 pip install -r requirements.txt                                   # Python 3.13, pinned versions
 python3 pipelines/pass_select.py bench/family_B1/vbe_adder_3.qasm # PSEL on one circuit: P0, P2 and the pick with HQC
-bash run_tests.sh                                                 # all 24 test files, about 4 to 6 min, logs in submission/build_logs/
+bash run_tests.sh                                                 # all 26 test files, about 5 to 7 min, logs in submission/build_logs/
 marimo edit report/notebook_skeleton.py                           # notebook: tables, figures, live compilation
 python3 submit/evidence_index.py                                  # rebuilds results/EVIDENCE.md from the stored job payloads
 ```
@@ -94,7 +94,7 @@ python value/value_ledger.py
 python value/value_by_application.py
 ```
 
-Tests. `bash run_tests.sh` runs all 24 test files: seven as scripts and seventeen under pytest, with the Selene tests run with the proxy variables cleared (see the proxy note below). One log per file and `tests_summary.txt` go to `submission/build_logs/` or to `$TEST_LOG_DIR`. The list of files and the results of the last run are in `submission/REPRODUCE.md`.
+Tests. `bash run_tests.sh` runs all 26 test files: eight as scripts and eighteen under pytest, with the Selene tests run with the proxy variables cleared (see the proxy note below). One log per file and `tests_summary.txt` go to `submission/build_logs/` or to `$TEST_LOG_DIR`. The list of files and the results of the last run are in `submission/REPRODUCE.md`.
 
 ## Notebook
 
@@ -119,4 +119,4 @@ Proxy note. In the development container outbound HTTPS goes through an agent pr
 
 ## Pass selector
 
-`pipelines/pass_select.py` compiles a circuit with P0 and P2 through `compile_pipeline` (unchanged), drops a candidate that raises, leaves the native gate set or fails `compile.check` (no check above 20 qubits, marked `ok-unchecked`), and keeps the lower HQC at 1000 shots. Ties go to the lower n_2q (ZZPhase + ZZMax), then to P0. `compile_select(circ)` returns the compiled circuit and a per-candidate record. `python3 pipelines/pass_select.py <qasm files...>` prints one row per file. Tests: `python3 pipelines/test_pass_select.py`.
+`pipelines/pass_select.py` compiles a circuit with P0 and P2 through `compile_pipeline` (unchanged), drops a candidate that raises, leaves the native gate set or fails `compile.check` (no check above 20 qubits, marked `ok-unchecked`), and keeps the lower HQC at 1000 shots. Ties go to the lower n_2q (ZZPhase + ZZMax), then to P0. `compile_select(circ)` returns the compiled circuit and a per-candidate record. `python3 pipelines/pass_select.py <qasm files...>` prints one row per file. Tests: `python3 pipelines/test_pass_select.py`. With `--psel4` (PSEL4) the candidates are P0, P2, L3 (official pass at optimisation level 3) and P2L3 (teleport_reduce then L3), tie order P0, L3, P2, P2L3 (`value/psel4_ledger.md`, `pipelines/test_psel4.py`).
