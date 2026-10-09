@@ -1,6 +1,6 @@
 # PSEL keeps ZX rewriting only where it lowers the cost of a circuit on Quantinuum H2
 
-**PSEL is a drop-in pytket pass selector. Its level-3-aware form PSEL4 never costs more HQC than pytket at level 2 or level 3 when both pass their checks. On 20 arithmetic and oracle circuits it saves 25.85 % against pytket's default level 2 and 3.50 % against level 3.**
+**PSEL is a drop-in pytket pass selector. Its level-3-aware form PSEL4 never costs more HQC than pytket at level 2 or level 3 on any circuit where both compile. On the 17 arithmetic and oracle circuits whose output is proven it saves 10.22 % against pytket's default level 2 and 0.80 % against level 3.**
 
 Team Learned ZX Rewriting: C.-F. Kam, A. Mahasinghe, D. De Silva, N. Karunarathne, F. Cadet, M. Bessafi, K. De Silva. Quantinuum Singapore Grand Challenge, submission 1. Main report `report.pdf`, technical appendix `report_full.pdf` (cited as "App."), source `code.zip` with `README.md`, emulator evidence `EVIDENCE.md`.
 
@@ -23,7 +23,7 @@ PSEL (`pipelines/pass_select.py`) compiles each circuit twice. P0 is pytket-quan
 - **Benchmarks.** On 15 Clifford+T circuits of family B1 PSEL saves 743.6 HQC or 4.79 %. hwb8 alone gives 84.5 % of that saving.
 - **Use case.** On Grover search with 7 and 9 qubits PSEL saves 5.42 % and 4.96 % of the HQC. That buys 791 and 322 more shots within a 10,000 HQC budget.
 - **Magic states.** The ZX stage removes 40.6 % of the written T-count on B1. On 20 synthesised Haar circuits of 2 and 3 qubits the channel bound of Gosset et al. (2014), evaluated exactly by the team, caps any further exact T saving at 0.3 % pooled.
-- **Stronger baselines.** pytket level 3 beats PSEL by 8.37 % on family C. PSEL4 adds level 3 and teleport_reduce before level 3 as candidates and saves 3.50 % against level 3 there, with 17 of 20 outputs proven. Most of its saving against level 2 comes from level 3 itself. [O] Running teleport_reduce before level 3 and keeping the cheaper result still saves 2.34 % (App. 3.8.1).
+- **Stronger baselines.** pytket level 3 beats PSEL by 8.37 % on family C. PSEL4 adds level 3 and teleport_reduce before level 3 as candidates. It saves 3.50 % against level 3 on all 20 circuits, but 87.6 % of that comes from 3 picks whose output is not proven. Most of its saving against level 2 comes from level 3 itself. [O]
 - **Emulator.** 20 H2-2E jobs (6598.0 HQC by the cost formula) and 3 H2-Emulator jobs ran, with job IDs in `EVIDENCE.md`. vbe_adder_7 ran under P0 and P2 with Hellinger fidelity 0.886 and 0.897.
 
 **Limits.** No user interview. Family C is count-only apart from one emulator run. No hardware run. On the emulator P2 beats P0 on vbe_adder_3 in the repeats run after the circuit was chosen (Holm p = 0.030 over two circuits, a check chosen after the pooled result), not in the pooled primary test over three (0.052). Inputs are all-zero.
