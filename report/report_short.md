@@ -89,12 +89,15 @@ Team Learned ZX Rewriting: C.-F. Kam, A. Mahasinghe, D. De Silva, N. Karunarathn
 - `[F]` Scope of the certificate. The certified floor covers only the 24 circuits of `results/certificates.csv`, all with n at most 5. It covers no circuit of family C and no Grover instance.
 - `[F]` No conversion of magic states into Helios time or cost is made. Quantinuum has not published the factory and logical-cycle figures in any source we found.
 
-### 1.5 Do-no-harm guard and fault-tolerant effort map
+### 1.5 Value in USD, finance use, guard and fault-tolerant effort map
 
-- `[O]` Do-no-harm guard for pytket users. A pytket user can add a ZX stage in front of the Quantinuum pass without knowing whether it pays. `[F]` pytket 2.18.4 ships one such pass, `ZXGraphlikeOptimisation`. We measured the PyZX stage of P2 and not that pass. Added blindly, the P2 stage costs 6.27 % more HQC than P0 on the 180 Trotter circuits of family A and 22.1 % more on the three QFT adders of family C. On draper_adder_16 it costs 1,385.0 HQC against 906.8 or 52.7 % more. This circuit is unchecked.
+- `[F]` Plan prices. Azure Quantum lists the Quantinuum H2 Standard Plan at USD 125,000 per month with 10,000 HQC and the Premium Plan at USD 175,000 per month with 17,000 HQC (Reference 10). The page was last updated on 2025-12-23. The implied plan-average price is USD 12.50 per HQC on Standard and USD 10.29 on Premium.
+- `[O]` At these averages the family C saving of 748.4 HQC on the 15 circuits without continuous angles is worth about USD 7,700 to 9,400. The family A avoided loss of 1,076.4 HQC is worth about USD 11,100 to 13,500. Both figures count 1000 shots of each circuit once. They use the plan average and not a marginal price. They ignore the bundled eHQCs and the Azure infrastructure costs.
+- `[F]` Finance users. Derivative pricing by amplitude estimation needs quantum arithmetic for path loading and payoff. Chakrabarti et al. state this in Appendix C and write that "the T-count dominates the computational requirements" (Reference 12). PSEL saves 12.9 % HQC on the 9 adders and 7.47 % on the 15 family C circuits without continuous angles. `[O]` These adders are the kind of arithmetic such circuits call. A claim that arithmetic dominates the cost of derivative pricing is Unverifiable.
+- `[O]` Do-no-harm guard for pytket users. A pytket user can add a ZX stage in front of the Quantinuum pass without knowing whether it pays. `[F]` pytket 2.18.4 ships one such pass, `ZXGraphlikeOptimisation`. Its documentation warns that it "may increase the cost of the circuit" (Reference 9). We measured the PyZX stage of P2 and not that pass. Added blindly, the P2 stage costs 6.27 % more HQC than P0 on the 180 Trotter circuits of family A and 22.1 % more on the three QFT adders of family C. On draper_adder_16 it costs 1,385.0 HQC against 906.8 or 52.7 % more. This circuit is unchecked.
 - `[F]` PSEL removes this risk by construction and still keeps the 4.79 % saving on B1 and the 7.47 % saving on family C without continuous angles. `[O]` A pytket user can try ZX rewriting on every circuit for the price of a second compilation.
 - `[O]` Where not to spend fault-tolerant compiler effort. `[F]` On the 20 B2 circuits with gridsynth-synthesised rotations the ZX stage removes 2.0 % of the T gates. The certified floor shows that every exact rewrite keeps at least 99.7 % of the remaining T-count. Further exact T optimisation can gain at most 0.3 % of the pooled count and 0.7 % on the worst instance. The certificate covers 24 circuits with n at most 5.
-- `[O]` Fault-tolerant chemistry and phase-estimation workloads spend most of their T budget on synthesised rotations [source to be added]. The certificate tells a team that plans such workloads per instance how much exact T optimisation of these rotations can still gain.
+- `[F]` Reiher et al. write of the rotations in their FeMoco simulation that "These rotations dominate the cost of the quantum simulation". Beverland et al. call non-Clifford rotations "among the most resource intensive operations". Ross and Selinger approximate a z-rotation with T-count 3 log2(1/eps) plus lower-order terms (Reference 11). `[O]` The certificate tells a team that plans fault-tolerant chemistry or phase-estimation workloads per instance how much exact T optimisation of these rotations can still gain.
 
 ## 2. Method
 
@@ -115,6 +118,8 @@ Team Learned ZX Rewriting: C.-F. Kam, A. Mahasinghe, D. De Silva, N. Karunarathn
 `[F]` Figure 1. Family A. ZZPhase count of each pipeline divided by the P0 count on the same circuit, mean over the 36 circuits at each n with the min-max band shaded. Data: Appendix Table A2 and `results/family_A_counts.csv`.
 
 `[F]` P1, P3 and P4 are above P0 in ZZPhase count on all 180 family A circuits. On B1 they are above P0 on 14, 14 and 15 of the 15 circuits. `[O]` Only teleport reduction keeps the circuit skeleton and helps on H2. PSEL therefore selects between P0 and P2 only.
+
+`[F]` pytket documents `PassSelector`, which returns "the best circuit as selected by a given metric" from a list of passes (Reference 9). `pipelines/pass_select.py` does not call it. `[O]` PSEL is this PassSelector pattern applied to P0 and P2 with HQC as the metric. The contribution is the measured ledger and the guard result and not a new selection mechanism.
 
 ### 2.2 Official baseline check
 
@@ -313,7 +318,7 @@ Team Learned ZX Rewriting: C.-F. Kam, A. Mahasinghe, D. De Silva, N. Karunarathn
 - `[F]` The 16.7 % family C saving rests on two multipliers with continuous rotation angles. Without continuous-angle circuits the saving is 7.47 %.
 - `[F]` hwb8 carries 84.5 % of the B1 saving and has no sourced algorithm role.
 - `[F]` The certificate covers 24 circuits with n at most 5. On the four B1 circuits it leaves most of the remaining T-count unaccounted for.
-- `[F]` No user interview or survey supports the need. No value is stated in currency.
+- `[F]` No user interview or survey supports the need. `[O]` The USD values of Section 1.5 rest on plan-average prices and not on a quoted marginal price.
 - `[F]` The learned component of this submission is a cost model fitted on proxy fidelities (Appendix 4). This submission contains no learned rewriting.
 
 ## References
@@ -326,3 +331,7 @@ Team Learned ZX Rewriting: C.-F. Kam, A. Mahasinghe, D. De Silva, N. Karunarathn
 6. Quantinuum, Helios costing (HQC formula), https://docs.quantinuum.com/systems/trainings/helios/getting_started/costing.html, and Singapore Grand Challenge code samples, https://github.com/Quantinuum/sg_grand_challenge.
 7. Quantinuum, H2 emulators and noise model, https://docs.quantinuum.com/systems/user_guide/emulator_user_guide/emulators/h2_emulators.html. Selene, https://github.com/quantinuum/selene.
 8. pytket-quantinuum 0.59.3 and PyZX 0.10.7.
+9. Quantinuum, pytket 2.18.5 API documentation, `PassSelector` and `ZXGraphlikeOptimisation`, https://docs.quantinuum.com/tket/api-docs/passes.html.
+10. Microsoft, Azure Quantum pricing, Quantinuum subscriptions, https://learn.microsoft.com/en-us/azure/quantum/pricing.
+11. M. Reiher et al., arXiv:1605.03590. M. E. Beverland et al., arXiv:2211.07629. N. J. Ross and P. Selinger, arXiv:1403.2975.
+12. S. Chakrabarti et al., A Threshold for Quantum Advantage in Derivative Pricing, arXiv:2012.03819.
