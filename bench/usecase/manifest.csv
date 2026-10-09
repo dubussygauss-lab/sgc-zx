@@ -1,0 +1,3 @@
+file,algorithm,n_data,n_ancilla,n_qubits,marked,marked_bits,iterations,n_toffoli,t_count_written,n_cx_written,p_success_ideal_formula
+grover_d5.qasm,grover,5,2,7,22,10110,4,64,448,384,0.999182315543
+grover_d6.qasm,grover,6,3,9,45,101101,6,144,1008,864,0.996585680787
