@@ -1,6 +1,6 @@
 # Reproduction record
 
-Team Learned ZX Rewriting. Recorded 8 October 2026 in the development container and updated 9 October 2026. `code.zip` is `git archive` of commit `05ebd46cb49e4a6bfb18c9cdd05cb575ce17cba4` with `submission/` excluded. The main report is `report.pdf`, built from `report/report_short.md`. The technical appendix is `report_full.pdf`, built from `report/report_v5.md` without its changelog sections. Run every command from the repository root. This page follows `README.md` and report Section 5. A clean-clone run of these steps is recorded in `results/repro_2026-10-08/repro_log.md`.
+Team Learned ZX Rewriting. Recorded 8 October 2026 in the development container and updated 9 October 2026. `code.zip` is `git archive` of commit `f1811ce13c2d17af1b9ad1b0825b01035744262e` with `submission/` excluded. The main report is `report.pdf`, built from `report/report_short.md`. The technical appendix is `report_full.pdf`, built from `report/report_v5.md` without its changelog sections. Run every command from the repository root. This page follows `README.md` and report Section 5. A clean-clone run of these steps is recorded in `results/repro_2026-10-08/repro_log.md`.
 
 ## Environment
 
@@ -11,7 +11,8 @@ Versions from `pip show` (report Section 5): Python 3.13.16, pytket 2.18.4, pytk
 ```
 pip install pytket==2.18.4 pytket-quantinuum==0.59.3 pyzx==0.10.7 qiskit==2.5.2 pygridsynth==2.0.0 \
   selene-sim==0.3.4 guppylang==1.1.2 numpy==2.5.3 pandas==2.3.3 scipy==1.18.1 scikit-learn==1.9.1 \
-  matplotlib==3.11.2 aqora==0.35.1 qnexus==0.51.1 marimo==0.25.1 pytest
+  matplotlib==3.11.2 aqora==0.35.1 qnexus==0.51.1 marimo==0.25.1 pytest \
+  sympy==1.14.0 networkx==3.6.1 mqt-qcec==3.10.2 hugr==0.18.8
 ```
 
 Selene runs and `selene/test_selene.py` need every proxy variable unset, because Selene streams results over a local TCP socket (report Section 5).
@@ -28,7 +29,7 @@ git -C third_party/pyzx-fork checkout e695d6d711e67b2b7223417c4714b6b1fcc09191
 ```
 
 - `papers/` holds the team's manuscripts and is not distributed. The exactness-barrier manuscript is arXiv:2608.22801. The line numbers in `barrier/NOTES.md` refer to its TeX source. The report cites the manuscript by theorem and table labels.
-- `results/proxy_h22e_fits.log` is tracked (an exception to the `*.log` rule of `.gitignore`). `value/value_ledger.py` and `submit/h22e_stats.py` read its line 77.
+- `results/proxy_h22e_fits.log` is tracked (an exception to the `*.log` rule of `.gitignore`, as are the emulator logs `results/emu_*.log` and `results/fetch_*.log`). `value/value_ledger.py` and `submit/h22e_stats.py` read its line 77.
 
 ## Seeds
 
@@ -75,7 +76,7 @@ git -C third_party/pyzx-fork checkout e695d6d711e67b2b7223417c4714b6b1fcc09191
 
 ## Tests (logs in `build_logs/`)
 
-Rerun all twenty-one with `bash run_tests.sh` (repository root, also inside an unzipped `code.zip`). Seven run as scripts and fourteen under pytest. The results below are from the run of 9 October 2026 stored in `build_logs/tests_summary.txt`.
+Rerun all twenty-one with `bash run_tests.sh` (repository root, also inside an unzipped `code.zip`). Seven run as scripts and fourteen under pytest. The results below are from the runs of 9 October 2026. Wall times vary between runs; those of the latest run are in `build_logs/tests_summary.txt`.
 
 | File | Command | Result | Wall |
 |---|---|---|---|

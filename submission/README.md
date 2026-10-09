@@ -1,6 +1,6 @@
 # sgc-zx
 
-Team Learned ZX Rewriting, Quantinuum Singapore Grand Challenge. A resource-certification benchmark for Quantinuum H2 with two cost layers: the NISQ layer (ZZPhase count, two-qubit depth, HQC, emulated fidelity) and the fault-tolerant layer of T-counts. A per-instance certified T-count floor exists for the 24 circuits of `results/certificates.csv`. The current submission report is `report/report_v5.md`. The executable companion is `report/notebook_skeleton.py`.
+Team Learned ZX Rewriting, Quantinuum Singapore Grand Challenge. A resource-certification benchmark for Quantinuum H2 with two cost layers: the NISQ layer (ZZPhase count, two-qubit depth, HQC, emulated fidelity) and the fault-tolerant layer of T-counts. A per-instance certified T-count floor exists for the 24 circuits of `results/certificates.csv`. The main submission report is `report/report_short.md` (`submission/report.pdf`); the full report `report/report_v5.md` is its technical appendix (`submission/report_full.pdf`). The executable companion is `report/notebook_skeleton.py`.
 
 ## Running the solution
 
@@ -29,7 +29,7 @@ Configuration. No configuration file is needed to compile or to rebuild tables. 
 | `noise/dm_sim.py`, `noise/h2_params.py`, `noise/run_proxy.py` | Local density-matrix noise proxy for family A (n <= 8). Writes `results/family_A_proxy.csv` and `results/fig_proxy_fidelity_vs_n2q.{pdf,png}`. Compared with the emulator runs in Sections 3.7 and 3.7.1 of the report. |
 | `barrier/certificate.py`, `barrier/NOTES.md` | Exact-arithmetic implementation of the T-count floor of the exactness-barrier manuscript (arXiv:2608.22801), with a line-by-line map to the manuscript. |
 | `report/make_tables.py` | Generates every table and figure of the report from `results/*.csv` and injects the tables into `report/report_v1.md` to `report/report_v5.md` at their `<!-- TABLE:name -->` markers. |
-| `report/report_v5.md` | Submission report, draft v5 (current). Section 1 is kept identical to `report/sec1_v5.md`. Drafts v1 to v4 are kept. |
+| `report/report_v5.md` | Full report v5, the technical appendix of the submission (`report/report_short.md` is the main report). Section 1 is kept identical to `report/sec1_v5.md`. Drafts v1 to v4 are kept. |
 | `value/value_ledger.py` | HQC and magic-state ledger, P2 against P0 at 1000 shots. Writes `value/value_ledger.csv` and `value/value_ledger.md`. |
 | `value/value_by_application.py` | Regroups the ledger by application area from `docs/applications.md`. Writes `value/value_by_application.csv` and `value/value_by_application.md`, the sources of Section 1. |
 | `submit/syntax_check.py`, `submit/run_emulator.py`, `submit/fetch_job.py` | Platform jobs through `aqora`. Every job is recorded in `results/emulator_jobs.csv`. |
@@ -66,7 +66,8 @@ python pipelines/run_bench_B.py --manifest bench/family_B1/manifest.csv --prefix
 python pipelines/run_b2.py --workers 2
 
 # 7    noise proxy (provisional, family A n <= 8)
-python noise/run_proxy.py --workers 2
+python noise/run_proxy.py --workers 2                     # results/family_A_proxy.csv (typical noise)
+python noise/run_proxy.py --workers 2 --noise h22e       # results/family_A_proxy_h22e.csv, source of Table A4
 
 # 7b   published T-counts of Table C2 (reads results/family_B1_counts.csv and results/family_B1x_counts.csv)
 python report/build_literature_tcounts.py results/literature_tcounts.csv
