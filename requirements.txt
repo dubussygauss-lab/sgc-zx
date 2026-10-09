@@ -1,0 +1,21 @@
+# Python 3.13. Versions used for every result in this repository (README.md, section Environment).
+pytket==2.18.4
+pytket-quantinuum==0.59.3
+pyzx==0.10.7
+qiskit==2.5.2
+pygridsynth==2.0.0
+numpy==2.5.3
+pandas==2.3.3
+scipy==1.18.1
+scikit-learn==1.9.1
+sympy==1.14.0
+networkx==3.6.1
+matplotlib==3.11.2
+pytest==9.1.1
+marimo==0.25.1
+# platform access and local emulation, needed only to submit jobs or rerun Selene
+aqora==0.35.1
+qnexus==0.51.1
+selene-sim==0.3.4
+guppylang==1.1.2
+hugr==0.18.8

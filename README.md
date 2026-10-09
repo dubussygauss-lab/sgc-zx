@@ -2,6 +2,18 @@
 
 Team Learned ZX Rewriting, Quantinuum Singapore Grand Challenge. A resource-certification benchmark for Quantinuum H2 with two cost layers: the NISQ layer (ZZPhase count, two-qubit depth, HQC, emulated fidelity) and the fault-tolerant layer of T-counts. A per-instance certified T-count floor exists for the 24 circuits of `results/certificates.csv`. The current submission report is `report/report_v5.md`. The executable companion is `report/notebook_skeleton.py`.
 
+## Running the solution
+
+```
+pip install -r requirements.txt                                   # Python 3.13, pinned versions
+python3 pipelines/pass_select.py bench/family_B1/vbe_adder_3.qasm # PSEL on one circuit: P0, P2 and the pick with HQC
+bash submission/run_tests.sh                                      # every test file, about 3 min
+marimo edit report/notebook_skeleton.py                           # notebook: tables, figures, live compilation
+python3 submit/evidence_index.py                                  # rebuilds results/EVIDENCE.md from the stored job payloads
+```
+
+Configuration. No configuration file is needed to compile or to rebuild tables. Submitting a job needs aqora team credentials (`aqora login`), which are not in the repository; the notebook's submission cell only sends to platforms whose name ends in `SC`. The emulator jobs behind the report are listed with their job IDs in `results/EVIDENCE.md`.
+
 ## Layout
 
 | Path | Content |
@@ -109,7 +121,7 @@ marimo edit report/notebook_skeleton.py          # interactive
 marimo export html report/notebook_skeleton.py -o notebook.html   # runs every cell up to the submission gate
 ```
 
-Before submitting, set `TEAM_ORG` in the second cell to the team's aqora organization username. The submission cell is gated behind the **Submit to QPU** button and sends nothing until it is pressed. It submits the P0 and P2 compilations of the chosen circuit to `nexus:H2-2E` with `options={"noisy_simulation": ...}`.
+Before submitting, set the environment variable `AQORA_TEAM_ORG` to the team's aqora organization username (read into `TEAM_ORG` in the second cell). The submission cell is gated behind its **Submit to the H2-2SC syntax checker** button and sends nothing until it is pressed. It submits the PSEL pick of the chosen circuit to the free syntax checker `nexus:H2-2SC` only; any platform whose name does not end in `SC` raises an error. Emulator jobs on H2-2E and H2-Emulator were submitted with `submit/run_emulator.py` and are listed in `results/EVIDENCE.md`.
 
 ## Environment
 
