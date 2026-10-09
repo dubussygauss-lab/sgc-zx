@@ -22,7 +22,6 @@ The baseline is pytket-quantinuum at optimisation level 3. On the 20 family C ci
 - **Against level 3, all of family C.** PSEL4 saves 3.50 % on all 20 circuits. 87.6 % of that saving comes from 3 picks whose output is not proven.
 - **Against level 3, other families.** PSEL4 saves 0.73 % on 15 Clifford+T benchmarks (family B1) and 0.44 % on the Grover use case. On 180 Trotter circuits (family A) it saves 1.74 % by choosing between the two levels only.
 - **Guard.** The same per-circuit choice removes the blind ZX losses of 6.27 % and 22.1 % stated above.
-- **Learned gate.** A small classifier on input-circuit features skips 123 of 245 ZX compilations for 46.6 HQC of lost saving when a whole family is held out. It does not beat the constant choices in held-out accuracy (App. 3.8.2).
 - **Emulator.** 20 H2-2E jobs and 3 H2-Emulator jobs ran, with job IDs in `EVIDENCE.md`.
 
 **Limits.** No user interview. Family C is count-only apart from one emulator run. No hardware run. On the emulator P2 beats P0 on vbe_adder_3 in the repeats-only check (Holm p = 0.030 over two circuits, a check chosen after the pooled result). The pooled primary test over three circuits gives Holm p = 0.052. Inputs are all-zero.
