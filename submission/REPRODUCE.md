@@ -1,6 +1,6 @@
 # Reproduction record
 
-Team Learned ZX Rewriting. Recorded 8 October 2026 in the development container and updated 9 October 2026. `code.zip` is `git archive` of commit `0e3d54fa48bfba1f4be1c7d83f83e991403fe8e4`. The main report is `report.pdf`, built from `report/report_short.md`. The technical appendix is `report_full.pdf`, built from `report/report_v5.md` without its changelog sections. Run every command from the repository root. This page follows `README.md` and report Section 5. A clean-clone run of these steps is recorded in `results/repro_2026-10-08/repro_log.md`.
+Team Learned ZX Rewriting. Recorded 8 October 2026 in the development container and updated 9 October 2026. `code.zip` is `git archive` of commit `05ebd46cb49e4a6bfb18c9cdd05cb575ce17cba4` with `submission/` excluded. The main report is `report.pdf`, built from `report/report_short.md`. The technical appendix is `report_full.pdf`, built from `report/report_v5.md` without its changelog sections. Run every command from the repository root. This page follows `README.md` and report Section 5. A clean-clone run of these steps is recorded in `results/repro_2026-10-08/repro_log.md`.
 
 ## Environment
 
@@ -75,7 +75,7 @@ git -C third_party/pyzx-fork checkout e695d6d711e67b2b7223417c4714b6b1fcc09191
 
 ## Tests (logs in `build_logs/`)
 
-Rerun all twenty-one with `bash submission/run_tests.sh`. Seven run as scripts and fourteen under pytest. The results below are from the run of 9 October 2026 stored in `build_logs/tests_summary.txt`.
+Rerun all twenty-one with `bash run_tests.sh` (repository root, also inside an unzipped `code.zip`). Seven run as scripts and fourteen under pytest. The results below are from the run of 9 October 2026 stored in `build_logs/tests_summary.txt`.
 
 | File | Command | Result | Wall |
 |---|---|---|---|
@@ -103,7 +103,7 @@ Rerun all twenty-one with `bash submission/run_tests.sh`. Seven run as scripts a
 
 ## Rebuilding this package
 
-`bash submission/build.sh` (add `--tests` to rerun the tests). The script first runs `report/check_short_numbers.py` on `report/report_short.md`. It copies that file to `report.md` and renders `report.pdf`. It writes `report_full.md` from `report/report_v5.md` without the changelog sections and renders `report_full.pdf`. For each PDF it checks that no `[PENDING`, `TBD` or `Changelog` remains and that the main tables render every row (`check_pdf_tables.py --set short` for Tables 1 to 4b, the official-baseline, use-case and finals-plan tables, `--set full` for Tables 1.1a, 1.1, C2, E1 and E2). It rebuilds `code.zip` with `git archive HEAD` and checks that this page names HEAD as the `code.zip` commit. It checks the archive for credential files and token strings, runs `check_summary_numbers.py`, builds `one_page_summary.pdf` from `report/one_page_summary.md` (number check, exactly one page), copies `README.md`, `requirements.txt` and `EVIDENCE.md` (job IDs, from `submit/evidence_index.py`) and writes `MANIFEST.txt`. Nothing is uploaded.
+`bash submission/build.sh` (add `--tests` to rerun the tests with `run_tests.sh`). The script first runs `report/check_short_numbers.py` on `report/report_short.md`. It copies that file to `report.md` and renders `report.pdf`. It writes `report_full.md` from `report/report_v5.md` without the changelog sections and renders `report_full.pdf`. For each PDF it checks that no `[PENDING`, `TBD` or `Changelog` remains and that the main tables render every row (`check_pdf_tables.py --set short` for Tables 1 to 4b, the official-baseline, use-case and finals-plan tables, `--set full` for Tables 1.1a, 1.1, C2, E1 and E2). It rebuilds `code.zip` with `git archive HEAD` and checks that this page names HEAD as the `code.zip` commit. It checks the archive for credential files and token strings, runs `check_summary_numbers.py`, builds `one_page_summary.pdf` from `report/one_page_summary.md` (number check, exactly one page), copies `README.md`, `requirements.txt` and `EVIDENCE.md` (job IDs, from `submit/evidence_index.py`) and writes `MANIFEST.txt`. Nothing is uploaded.
 
 ## Rubric evidence map (Engineering and Reproducibility)
 

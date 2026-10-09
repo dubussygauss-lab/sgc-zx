@@ -7,7 +7,7 @@ Team Learned ZX Rewriting, Quantinuum Singapore Grand Challenge. A resource-cert
 ```
 pip install -r requirements.txt                                   # Python 3.13, pinned versions
 python3 pipelines/pass_select.py bench/family_B1/vbe_adder_3.qasm # PSEL on one circuit: P0, P2 and the pick with HQC
-bash submission/run_tests.sh                                      # every test file, about 3 min
+bash run_tests.sh                                                 # all 21 test files, about 3 min, logs in submission/build_logs/
 marimo edit report/notebook_skeleton.py                           # notebook: tables, figures, live compilation
 python3 submit/evidence_index.py                                  # rebuilds results/EVIDENCE.md from the stored job payloads
 ```
@@ -34,7 +34,7 @@ Configuration. No configuration file is needed to compile or to rebuild tables. 
 | `value/value_by_application.py` | Regroups the ledger by application area from `docs/applications.md`. Writes `value/value_by_application.csv` and `value/value_by_application.md`, the sources of Section 1. |
 | `submit/syntax_check.py`, `submit/run_emulator.py`, `submit/fetch_job.py` | Platform jobs through `aqora`. Every job is recorded in `results/emulator_jobs.csv`. |
 | `submit/h22e_stats.py` | Recomputes the H2-2E statistics of Table E2 from the stored counts. |
-| `report/notebook_skeleton.py` | Marimo notebook: tables, figures, live compilation of one circuit through P0 and P2, gated submission to `nexus:H2-2E` through `aqora.QPU`. |
+| `report/notebook_skeleton.py` | Marimo notebook: tables, figures, live compilation of one circuit through P0 and P2, gated submission to the free syntax checker `nexus:H2-2SC` through `aqora.QPU`. |
 | `report/tables/`, `report/figures/` | Outputs of `make_tables.py`. |
 | `results/` | All CSVs, logs and compiled QASM (hqslib1 header, measure-all appended). |
 | `docs/platform_notes.md` | aqora API, emulator tiers, H2-2E noise parameters, HQC formula, with sources. |
@@ -93,26 +93,7 @@ python value/value_ledger.py
 python value/value_by_application.py
 ```
 
-Tests. Six run as scripts:
-
-```
-python bench/test_gen_trotter.py
-python pipelines/test_compile.py
-python noise/test_dm_sim.py
-python barrier/test_certificate.py
-python model/test_cost_model.py
-python report/test_c2_literature.py
-```
-
-Five run under pytest. The Selene tests need the proxy variables cleared (see the proxy note below):
-
-```
-HTTPS_PROXY= https_proxy= HTTP_PROXY= http_proxy= NO_PROXY= no_proxy= python -m pytest selene/test_selene.py -q
-python -m pytest submit/test_submit.py -q
-python -m pytest submit/test_h22e_stats.py -q
-python -m pytest value/test_value_ledger.py -q
-python -m pytest value/test_value_by_application.py -q
-```
+Tests. `bash run_tests.sh` runs all 21 test files: seven as scripts and fourteen under pytest, with the Selene tests run with the proxy variables cleared (see the proxy note below). One log per file and `tests_summary.txt` go to `submission/build_logs/` or to `$TEST_LOG_DIR`. The list of files and the results of the last run are in `submission/REPRODUCE.md`.
 
 ## Notebook
 
@@ -121,15 +102,17 @@ marimo edit report/notebook_skeleton.py          # interactive
 marimo export html report/notebook_skeleton.py -o notebook.html   # runs every cell up to the submission gate
 ```
 
-Before submitting, set the environment variable `AQORA_TEAM_ORG` to the team's aqora organization username (read into `TEAM_ORG` in the second cell). The submission cell is gated behind its **Submit to the H2-2SC syntax checker** button and sends nothing until it is pressed. It submits the PSEL pick of the chosen circuit to the free syntax checker `nexus:H2-2SC` only; any platform whose name does not end in `SC` raises an error. Emulator jobs on H2-2E and H2-Emulator were submitted with `submit/run_emulator.py` and are listed in `results/EVIDENCE.md`.
+Before submitting, set the environment variable `AQORA_TEAM_ORG` to the team's aqora organization username (read into `TEAM_ORG` in the setup cell). The submission cell is gated behind its **Submit to the H2-2SC syntax checker** button and sends nothing until it is pressed, or until the notebook is run with `SGC_NOTEBOOK_SUBMIT_SC=1`. It submits the PSEL pick of the chosen circuit to the free syntax checker `nexus:H2-2SC` only; any platform whose name does not end in `SC` raises an error. Emulator jobs on H2-2E and H2-Emulator were submitted with `submit/run_emulator.py` and are listed in `results/EVIDENCE.md`.
 
 ## Environment
 
 Python 3.13, pytket 2.18.4, pytket-quantinuum 0.59.3, pyzx 0.10.7, qiskit 2.5.2, pygridsynth 2.0.0, numpy 2.5.3, pandas 2.3.3, scipy 1.18.1, matplotlib 3.11.2, aqora 0.35.1, qnexus 0.51.1, selene-sim 0.3.4, marimo 0.25.1. Full list in `report/report_v5.md`, section 5.
 
 ```
-pip install pytket==2.18.4 pytket-quantinuum==0.59.3 pyzx==0.10.7 qiskit==2.5.2 pygridsynth==2.0.0 aqora==0.35.1 marimo==0.25.1 numpy pandas scipy matplotlib
+pip install -r requirements.txt
 ```
+
+`requirements.txt` pins every package above and also guppylang, hugr, scikit-learn, sympy, networkx, mqt-qcec and pytest.
 
 Proxy note. In the development container outbound HTTPS goes through an agent proxy. pip installs were run with the proxy variables cleared for that one command: `NO_PROXY= no_proxy= pip install --break-system-packages <package>`. Local Selene runs also need every proxy variable unset (`HTTPS_PROXY= https_proxy= HTTP_PROXY= http_proxy= python ...`). aqora job submission needs the team credentials. The jobs submitted from this container on 8 October 2026 are listed in `results/emulator_jobs.csv`.
 

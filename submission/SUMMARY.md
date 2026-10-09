@@ -36,7 +36,7 @@ Team Learned ZX Rewriting. Report title: "A pass selector keeps ZX rewriting onl
 
 ## Where not to spend fault-tolerant compiler effort
 
-`[O]` A team that plans fault-tolerant chemistry or phase-estimation workloads needs to know where exact T optimisation still pays. `[F]` Reiher et al. write of the rotations in their FeMoco simulation that "These rotations dominate the cost of the quantum simulation" (arXiv:1605.03590). Beverland et al. call non-Clifford rotations "among the most resource intensive operations" (arXiv:2211.07629). Ross and Selinger approximate a z-rotation with T-count 3 log2(1/eps) plus lower-order terms in the typical case (arXiv:1403.2975). On the 20 B2 circuits with gridsynth-synthesised rotations the ZX stage removes 862 of 42,396 T gates or 2.0 %. The certified floor is 41,414 of the 41,534 T gates left after ZX. Every exact rewrite therefore keeps at least 99.7 % of the pooled remaining T-count and at least 99.28 % on every single circuit. Further exact T optimisation can gain at most 0.3 % of the pooled count and 0.7 % on the worst instance. The certificate covers 24 circuits, all with n at most 5. `[O]` The certificate tells such a team per instance that exact rewriting of synthesised rotations is not where its compiler effort pays.
+`[O]` A team that plans fault-tolerant chemistry or phase-estimation workloads needs to know where exact T optimisation still pays. `[F]` Reiher et al. write of the rotations in their FeMoco simulation that "These rotations dominate the cost of the quantum simulation" (arXiv:1605.03590). Beverland et al. call non-Clifford rotations "among the most resource intensive operations" (arXiv:2211.07629). Ross and Selinger approximate a z-rotation with T-count 3 log2(1/eps) plus lower-order terms in the typical case (arXiv:1403.2975). On the 20 B2 circuits with gridsynth-synthesised rotations the ZX stage removes 862 of 42,396 T gates or 2.0 %. The certified floor is 41,414 of the 41,534 T gates left after ZX. Every exact rewrite therefore keeps at least 99.7 % of the pooled remaining T-count and on the worst single circuit, haar_n3_eps1e-03_s5, at least 2478 of its 2496 T gates. Further exact T optimisation can gain at most 0.3 % of the pooled count and 0.72 % on the worst instance. The certificate covers 24 circuits, all with n at most 5. `[O]` The certificate tells such a team per instance that exact rewriting of synthesised rotations is not where its compiler effort pays.
 
 ## HQC saved on the B1 benchmarks and Trotter circuits
 
@@ -90,5 +90,5 @@ Team Learned ZX Rewriting. Report title: "A pass selector keeps ZX rewriting onl
 | `REPRODUCE.md` | Environment, commands, tests and seeds |
 | `SUMMARY.md`, `check_summary_numbers.py` | This page and the script that checks its numbers |
 | `MANIFEST.txt` | Size and sha256 of every file |
-| `build.sh`, `run_tests.sh`, `strip_changelog.py`, `check_pdf_tables.py`, `report.css` | Scripts that rebuild and check this package |
+| `build.sh`, `strip_changelog.py`, `check_pdf_tables.py`, `report.css` | Scripts that rebuild and check this package |
 | `build_logs/` | Build log and test logs |

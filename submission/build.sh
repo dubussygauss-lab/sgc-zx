@@ -116,7 +116,7 @@ fi
 rm -f "$LOG/token_grep_count.txt"
 
 # 4. optional test rerun
-if [[ "${1:-}" == "--tests" ]]; then bash "$OUT/run_tests.sh"; log "tests rerun, see $LOG/tests_summary.txt"; fi
+if [[ "${1:-}" == "--tests" ]]; then bash run_tests.sh; log "tests rerun, see $LOG/tests_summary.txt"; fi
 
 # 5. SUMMARY.md number check
 RC=0; python3 "$OUT/check_summary_numbers.py" > "$LOG/summary_check.txt" || RC=$?
