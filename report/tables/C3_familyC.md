@@ -32,3 +32,5 @@
 | rgqft_mult_6 | 24 | multiplier | P2 | 4,445.6 | 2,206.6 | 2,206.6 | 50.4 | 1994 | 990 | 318 | 73 | yes | pass |
 
 `[F]` 20 circuits, 14 checked and 6 unchecked. PSEL saves 4,104.4 HQC or 16.7 % against P0 and 1,057.2 HQC against P2. Saving on the checked circuits 4,062.8 HQC, on the unchecked circuits 41.6 HQC.
+
+`[F]` On the 15 circuits without continuous angles PSEL saves 748.4 of 10,019.6 HQC (7.47 %). The 5 continuous-angle circuits save 3,356.0 of 14,515.4 HQC, all of it from the two multipliers.

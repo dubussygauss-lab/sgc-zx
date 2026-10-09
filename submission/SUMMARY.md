@@ -6,9 +6,9 @@ Team Learned ZX Rewriting. Report title: "A pass selector keeps ZX rewriting onl
 
 ## HQC saved on application-scale circuits
 
-`[F]` Family C holds 20 application-scale circuits of 20 to 56 qubits built by qiskit from published constructions (report Section 3.8). The pass selector PSEL saves 4,104.4 HQC or 16.7 % against P0 at 1000 shots. Per application it saves 12.9 % on the 9 adders and 34.5 % on the 2 multipliers. It saves 0.1 % on the 6 multi-controlled X oracles and 0 % on the 3 QFT adders, where it keeps P0. The two multipliers carry 81.8 % of the family C saving. On the QFT adders P2 is dearer and PSEL avoids 1,057.2 HQC against always running P2.
+`[F]` Family C holds 20 application-scale circuits of 20 to 56 qubits built by qiskit from published constructions (report Section 3.8). On the 15 circuits without continuous rotation angles the pass selector PSEL saves 748.4 of 10,019.6 HQC or 7.47 % against P0 at 1000 shots. These are the 9 adders and the 6 multi-controlled X oracles. PSEL saves 12.9 % on the adders and 0.1 % on the oracles. Over all 20 circuits it saves 4,104.4 HQC or 16.7 %. The 2 multipliers save 34.5 % and carry 81.8 % of that saving. This 34.5 % comes from two circuits with continuous rotation angles. On the 3 QFT adders PSEL keeps P0 and saves 0 %. On the QFT adders P2 is dearer and PSEL avoids 1,057.2 HQC against always running P2.
 
-`[F]` Family C is count-only. The compiled outputs of 14 circuits agree with the input on 64 random basis inputs up to a global phase. This covers 64 of 2^n inputs and is not a proof of equivalence. The other 6 circuits are unchecked and carry 41.6 HQC of the saving. The multipliers and the QFT adders carry rotation angles outside the pi/4 grid. Their T-counts leave out these rotations.
+`[F]` Family C is count-only. The compiled outputs of 14 circuits are spot-checked on 64 random basis inputs and agree with the input up to a global phase. This covers 64 of 2^n inputs and is not a proof of equivalence. The other 6 circuits are unchecked and carry 41.6 HQC of the saving. Four of them are P2 picks, namely modadd_2n_10, modadd_2n_20, mcx_dirty_28 and mcx_b95_54. The multipliers and the QFT adders carry rotation angles outside the pi/4 grid. Their T-counts leave out these rotations.
 
 ## Worked use case
 

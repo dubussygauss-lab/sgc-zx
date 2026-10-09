@@ -1028,6 +1028,12 @@ def family_c():
               f"{sv.saved_hqc:,.1f} HQC or {sv.saved_pct:.1f} % against P0 and {sv.hqc_P2 - sv.hqc_PSEL:,.1f} HQC "
               f"against P2. Saving on the checked circuits {r[checked].saved_hqc.sum():,.1f} HQC, on the unchecked "
               f"circuits {r[~checked].saved_hqc.sum():,.1f} HQC.\n")
+    disc = r[[not cont[f] for f in r.file]]
+    ca = r[[bool(cont[f]) for f in r.file]]
+    text += (f"\n`[F]` On the {len(disc)} circuits without continuous angles PSEL saves "
+             f"{disc.saved_hqc.sum():,.1f} of {disc.hqc_P0.sum():,.1f} HQC "
+             f"({100 * disc.saved_hqc.sum() / disc.hqc_P0.sum():.2f} %). The {len(ca)} continuous-angle circuits "
+             f"save {ca.saved_hqc.sum():,.1f} of {ca.hqc_P0.sum():,.1f} HQC, all of it from the two multipliers.\n")
     write("C3_familyC", text)
     return {"r": r, "a": a, "checked": int(checked.sum()), "unchecked": n_unc}
 
