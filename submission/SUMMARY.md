@@ -36,7 +36,7 @@ Team Learned ZX Rewriting. Report title: "A pass selector keeps ZX rewriting onl
 
 ## Where not to spend fault-tolerant compiler effort
 
-`[O]` A team that plans fault-tolerant chemistry or phase-estimation workloads needs to know where exact T optimisation still pays. `[F]` Reiher et al. write of the rotations in their FeMoco simulation that "These rotations dominate the cost of the quantum simulation" (arXiv:1605.03590). Beverland et al. call non-Clifford rotations "among the most resource intensive operations" (arXiv:2211.07629). Ross and Selinger approximate a z-rotation with T-count 3 log2(1/eps) plus lower-order terms in the typical case (arXiv:1403.2975). On the 20 B2 circuits with gridsynth-synthesised rotations the ZX stage removes 862 of 42,396 T gates or 2.0 %. The certified floor is 41,414 of the 41,534 T gates left after ZX. Every exact rewrite therefore keeps at least 99.7 % of the remaining T-count. Further exact T optimisation can gain at most 0.3 % of the pooled count and 0.7 % on the worst instance. The certificate covers 24 circuits, all with n at most 5. `[O]` The certificate tells such a team per instance that exact rewriting of synthesised rotations is not where its compiler effort pays.
+`[O]` A team that plans fault-tolerant chemistry or phase-estimation workloads needs to know where exact T optimisation still pays. `[F]` Reiher et al. write of the rotations in their FeMoco simulation that "These rotations dominate the cost of the quantum simulation" (arXiv:1605.03590). Beverland et al. call non-Clifford rotations "among the most resource intensive operations" (arXiv:2211.07629). Ross and Selinger approximate a z-rotation with T-count 3 log2(1/eps) plus lower-order terms in the typical case (arXiv:1403.2975). On the 20 B2 circuits with gridsynth-synthesised rotations the ZX stage removes 862 of 42,396 T gates or 2.0 %. The certified floor is 41,414 of the 41,534 T gates left after ZX. Every exact rewrite therefore keeps at least 99.7 % of the pooled remaining T-count and at least 99.28 % on every single circuit. Further exact T optimisation can gain at most 0.3 % of the pooled count and 0.7 % on the worst instance. The certificate covers 24 circuits, all with n at most 5. `[O]` The certificate tells such a team per instance that exact rewriting of synthesised rotations is not where its compiler effort pays.
 
 ## HQC saved on the B1 benchmarks and Trotter circuits
 
@@ -46,7 +46,7 @@ Team Learned ZX Rewriting. Report title: "A pass selector keeps ZX rewriting onl
 
 `[F]` P2 is cheaper than P0 on 14 of the 15 B1 circuits. hwb8 alone accounts for 84.5 % of the PSEL saving on B1 and serves no sourced quantum algorithm. Without hwb8 the PSEL saving on B1 is 115.0 HQC. On family A P2 alone would cost 1,030.4 HQC or 6.27 % more than P0. PSEL keeps P0 on 123 of these 180 circuits and on all 60 XXZ circuits. PSEL's own contribution is to avoid this P2 loss while it keeps the B1 gain. On family A it saves 1,076.4 HQC against always running P2.
 
-`[O]` The median of 3.94 % is the better guide for a single circuit. A user with a Trotter circuit runs PSEL and does not need to decide in advance whether the ZX stage pays.
+`[O]` The median of 3.94 % is the better guide for a single circuit. A user with a Trotter circuit runs PSEL and does not need to decide in advance whether the ZX stage lowers the HQC.
 
 ## Magic states saved
 
@@ -80,10 +80,13 @@ Team Learned ZX Rewriting. Report title: "A pass selector keeps ZX rewriting onl
 
 | File | Content |
 |---|---|
+| `one_page_summary.pdf` | One-page summary required by the submission checklist, built from `report/one_page_summary.md` |
 | `report.pdf`, `report.md` | Main report, built from `report/report_short.md` |
 | `report_full.pdf`, `report_full.md` | Technical appendix, report v5 without its changelog sections |
 | `figures/` | Images of both reports |
 | `code.zip` | `git archive` of the commit named in `MANIFEST.txt` |
+| `README.md`, `requirements.txt` | Instructions for running the solution and pinned dependencies (copies of the repository files) |
+| `EVIDENCE.md` | Execution evidence: every emulator job ID with shots, HQC estimate and result file |
 | `REPRODUCE.md` | Environment, commands, tests and seeds |
 | `SUMMARY.md`, `check_summary_numbers.py` | This page and the script that checks its numbers |
 | `MANIFEST.txt` | Size and sha256 of every file |

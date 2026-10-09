@@ -1,21 +1,22 @@
-gen_trotter | rc=0 | wall=56s | cmd: python bench/test_gen_trotter.py
-dm_sim | rc=0 | wall=4s | cmd: python noise/test_dm_sim.py
-certificate | rc=0 | wall=30s | cmd: python barrier/test_certificate.py
-compile | rc=0 | wall=2s | cmd: python pipelines/test_compile.py
-pass_select | rc=0 | wall=5s | cmd: python pipelines/test_pass_select.py
-selene | rc=0 | wall=7s | cmd: env HTTPS_PROXY= https_proxy= HTTP_PROXY= http_proxy= NO_PROXY= no_proxy= python -m pytest selene/test_selene.py -q
+gen_trotter | rc=0 | wall=64s | cmd: python bench/test_gen_trotter.py
+dm_sim | rc=0 | wall=6s | cmd: python noise/test_dm_sim.py
+certificate | rc=0 | wall=46s | cmd: python barrier/test_certificate.py
+compile | rc=0 | wall=4s | cmd: python pipelines/test_compile.py
+pass_select | rc=0 | wall=6s | cmd: python pipelines/test_pass_select.py
+selene | rc=0 | wall=30s | cmd: env HTTPS_PROXY= https_proxy= HTTP_PROXY= http_proxy= NO_PROXY= no_proxy= python -m pytest selene/test_selene.py -q
 cost_model | rc=0 | wall=1s | cmd: python model/test_cost_model.py
-submit | rc=0 | wall=3s | cmd: python -m pytest submit/test_submit.py -q
-h22e_stats | rc=0 | wall=3s | cmd: python -m pytest submit/test_h22e_stats.py -q
-h22e_pooled | rc=0 | wall=8s | cmd: python -m pytest submit/test_h22e_pooled.py -q
-value_ledger | rc=0 | wall=2s | cmd: python -m pytest value/test_value_ledger.py -q
-value_by_app | rc=0 | wall=1s | cmd: python -m pytest value/test_value_by_application.py -q
+submit | rc=0 | wall=6s | cmd: python -m pytest submit/test_submit.py -q
+h22e_stats | rc=0 | wall=5s | cmd: python -m pytest submit/test_h22e_stats.py -q
+h22e_pooled | rc=0 | wall=10s | cmd: python -m pytest submit/test_h22e_pooled.py -q
+value_ledger | rc=0 | wall=4s | cmd: python -m pytest value/test_value_ledger.py -q
+value_by_app | rc=0 | wall=2s | cmd: python -m pytest value/test_value_by_application.py -q
 selector_ledger | rc=0 | wall=1s | cmd: python -m pytest value/test_selector_ledger.py -q
-c2_literature | rc=0 | wall=0s | cmd: python report/test_c2_literature.py
-notebook_submit | rc=0 | wall=1s | cmd: python -m pytest report/test_notebook_submit.py -q
-finals_plan | rc=0 | wall=6s | cmd: python -m pytest value/test_finals_plan.py -q
-official_baseline | rc=0 | wall=12s | cmd: python -m pytest pipelines/test_official_baseline.py -q
-family_C_selector | rc=0 | wall=2s | cmd: python -m pytest value/test_family_C_selector.py -q
-usecase | rc=0 | wall=37s | cmd: python -m pytest value/test_usecase.py -q
-equiv_family_C | rc=0 | wall=2s | cmd: python -m pytest pipelines/test_equiv_family_C.py -q
+c2_literature | rc=0 | wall=1s | cmd: python report/test_c2_literature.py
+notebook_submit | rc=0 | wall=3s | cmd: python -m pytest report/test_notebook_submit.py -q
+finals_plan | rc=0 | wall=10s | cmd: python -m pytest value/test_finals_plan.py -q
+official_baseline | rc=0 | wall=19s | cmd: python -m pytest pipelines/test_official_baseline.py -q
+family_C_selector | rc=0 | wall=3s | cmd: python -m pytest value/test_family_C_selector.py -q
+usecase | rc=0 | wall=54s | cmd: python -m pytest value/test_usecase.py -q
+equiv_family_C | rc=0 | wall=3s | cmd: python -m pytest pipelines/test_equiv_family_C.py -q
+evidence_index | rc=0 | wall=2s | cmd: python -m pytest submit/test_evidence_index.py -q
 done

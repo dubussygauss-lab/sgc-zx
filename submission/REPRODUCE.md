@@ -1,10 +1,12 @@
 # Reproduction record
 
-Team Learned ZX Rewriting. Recorded 8 October 2026 in the development container and updated 9 October 2026. `code.zip` is `git archive` of commit `2cc92ced9919b7fa7027ae54aab04b2a9ac00870`. The main report is `report.pdf`, built from `report/report_short.md`. The technical appendix is `report_full.pdf`, built from `report/report_v5.md` without its changelog sections. Run every command from the repository root. This page follows `README.md` and report Section 5. A clean-clone run of these steps is recorded in `results/repro_2026-10-08/repro_log.md`.
+Team Learned ZX Rewriting. Recorded 8 October 2026 in the development container and updated 9 October 2026. `code.zip` is `git archive` of commit `0e3d54fa48bfba1f4be1c7d83f83e991403fe8e4`. The main report is `report.pdf`, built from `report/report_short.md`. The technical appendix is `report_full.pdf`, built from `report/report_v5.md` without its changelog sections. Run every command from the repository root. This page follows `README.md` and report Section 5. A clean-clone run of these steps is recorded in `results/repro_2026-10-08/repro_log.md`.
 
 ## Environment
 
 Versions from `pip show` (report Section 5): Python 3.13.16, pytket 2.18.4, pytket-quantinuum 0.59.3, pyzx 0.10.7, qiskit 2.5.2, pygridsynth 2.0.0, selene-sim 0.3.4, guppylang 1.1.2, hugr 0.18.8, numpy 2.5.3, pandas 2.3.3, scipy 1.18.1, scikit-learn 1.9.1, matplotlib 3.11.2, aqora 0.35.1, qnexus 0.51.1, marimo 0.25.1, pytest 9.1.1.
+
+`pip install -r requirements.txt` installs the same pinned versions. Equivalent explicit command:
 
 ```
 pip install pytket==2.18.4 pytket-quantinuum==0.59.3 pyzx==0.10.7 qiskit==2.5.2 pygridsynth==2.0.0 \
@@ -73,7 +75,7 @@ git -C third_party/pyzx-fork checkout e695d6d711e67b2b7223417c4714b6b1fcc09191
 
 ## Tests (logs in `build_logs/`)
 
-Rerun all twenty with `bash submission/run_tests.sh`. Seven run as scripts and thirteen under pytest. The results below are from the run of 9 October 2026 stored in `build_logs/tests_summary.txt`.
+Rerun all twenty-one with `bash submission/run_tests.sh`. Seven run as scripts and fourteen under pytest. The results below are from the run of 9 October 2026 stored in `build_logs/tests_summary.txt`.
 
 | File | Command | Result | Wall |
 |---|---|---|---|
@@ -97,10 +99,11 @@ Rerun all twenty with `bash submission/run_tests.sh`. Seven run as scripts and t
 | `value/test_family_C_selector.py` | `python -m pytest value/test_family_C_selector.py -q` | 5 passed | 2 s |
 | `value/test_usecase.py` | `python -m pytest value/test_usecase.py -q` | 7 passed | 36 s |
 | `pipelines/test_equiv_family_C.py` | `python -m pytest pipelines/test_equiv_family_C.py -q` | 2 passed | 2 s |
+| `submit/test_evidence_index.py` | `python -m pytest submit/test_evidence_index.py -q` | 3 passed | under 1 s |
 
 ## Rebuilding this package
 
-`bash submission/build.sh` (add `--tests` to rerun the tests). The script first runs `report/check_short_numbers.py` on `report/report_short.md`. It copies that file to `report.md` and renders `report.pdf`. It writes `report_full.md` from `report/report_v5.md` without the changelog sections and renders `report_full.pdf`. For each PDF it checks that no `[PENDING`, `TBD` or `Changelog` remains and that the main tables render every row (`check_pdf_tables.py --set short` for Tables 1 to 4b, the official-baseline, use-case and finals-plan tables, `--set full` for Tables 1.1a, 1.1, C2, E1 and E2). It rebuilds `code.zip` with `git archive HEAD` and checks that this page names HEAD as the `code.zip` commit. It checks the archive for credential files and token strings, runs `check_summary_numbers.py` and writes `MANIFEST.txt`. Nothing is uploaded.
+`bash submission/build.sh` (add `--tests` to rerun the tests). The script first runs `report/check_short_numbers.py` on `report/report_short.md`. It copies that file to `report.md` and renders `report.pdf`. It writes `report_full.md` from `report/report_v5.md` without the changelog sections and renders `report_full.pdf`. For each PDF it checks that no `[PENDING`, `TBD` or `Changelog` remains and that the main tables render every row (`check_pdf_tables.py --set short` for Tables 1 to 4b, the official-baseline, use-case and finals-plan tables, `--set full` for Tables 1.1a, 1.1, C2, E1 and E2). It rebuilds `code.zip` with `git archive HEAD` and checks that this page names HEAD as the `code.zip` commit. It checks the archive for credential files and token strings, runs `check_summary_numbers.py`, builds `one_page_summary.pdf` from `report/one_page_summary.md` (number check, exactly one page), copies `README.md`, `requirements.txt` and `EVIDENCE.md` (job IDs, from `submit/evidence_index.py`) and writes `MANIFEST.txt`. Nothing is uploaded.
 
 ## Rubric evidence map (Engineering and Reproducibility)
 

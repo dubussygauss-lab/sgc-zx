@@ -123,6 +123,25 @@ RC=0; python3 "$OUT/check_summary_numbers.py" > "$LOG/summary_check.txt" || RC=$
 tail -3 "$LOG/summary_check.txt" | tee -a "$LOG/build.log"; rm -f "$LOG/summary_check.txt"
 if [[ $RC -ne 0 ]]; then log "SUMMARY NUMBER CHECK FAILED"; exit 1; fi
 
+# 5b. one-page summary (submission checklist): numbers checked, exactly one A4 page
+if ! python3 report/check_short_numbers.py report/one_page_summary.md | tee -a "$LOG/build.log"; then
+  log "ONE-PAGE SUMMARY NUMBER CHECK FAILED"; exit 1
+fi
+pandoc report/one_page_summary.md -f gfm -t html5 --standalone --embed-resources --css="$OUT/summary.css" \
+  --metadata pagetitle=one_page_summary -o "$LOG/one_page_summary.html" 2>>"$LOG/build.log"
+wkhtmltopdf --quiet --page-size A4 --margin-top 10mm --margin-bottom 10mm --margin-left 12mm --margin-right 12mm \
+  "$LOG/one_page_summary.html" "$OUT/one_page_summary.pdf" 2>>"$LOG/build.log" || true
+rm -f "$LOG/one_page_summary.html"
+NP=$(pdfinfo "$OUT/one_page_summary.pdf" | awk '/^Pages:/{print $2}')
+if [[ "$NP" != "1" ]]; then log "ONE-PAGE SUMMARY HAS $NP PAGES"; exit 1; fi
+log "one_page_summary.pdf written, 1 page"
+# 5c. README, requirements and execution evidence index next to the reports
+python3 submit/evidence_index.py | tee -a "$LOG/build.log"
+if ! git diff --quiet -- results/EVIDENCE.md; then log "results/EVIDENCE.md changed on rebuild, commit it first"; exit 1; fi
+cp README.md requirements.txt "$OUT/"
+cp results/EVIDENCE.md "$OUT/EVIDENCE.md"
+log "README.md, requirements.txt and EVIDENCE.md copied"
+
 TMPM=$(mktemp)
 # 6. manifest (every file under submission/ except MANIFEST.txt itself)
 ( cd "$OUT" && find . -type f ! -name MANIFEST.txt | sed 's|^\./||' | LC_ALL=C sort | while read -r f; do
