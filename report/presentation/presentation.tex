@@ -43,9 +43,9 @@
 % ---------------------------------------------------------------- 1
 \begin{frame}[plain]
   \vfill
-  {\color{accent}\LARGE\bfseries PSEL keeps ZX rewriting only where it lowers the cost of a circuit on Quantinuum H2\par}
+  {\color{accent}\LARGE\bfseries PSEL4 keeps ZX rewriting only where it beats pytket level 3 on Quantinuum H2\par}
   \vspace{0.5cm}
-  {\large PSEL is a drop-in pytket pass selector. It never costs more HQC than pytket's default pass when that pass passes its checks. Its level-3-aware form PSEL4 never costs more than pytket level 2 or level 3 on a circuit where both compile. On 17 proven family C circuits it saves 10.22\,\% against level 2 and 0.80\,\% against level 3.\par}
+  {\large PSEL4 is a drop-in pytket pass selector. By construction it never costs more HQC than pytket level 2 or level 3 on a circuit where both pass its checks. On the 17 arithmetic and oracle circuits whose output is proven it saves 0.80\,\% against level 3.\par}
   \vspace{0.7cm}
   {\large Team Learned ZX Rewriting\par}
   \vspace{0.2cm}
@@ -62,10 +62,11 @@
   A run on Quantinuum H2 is billed in HQC.
   \[ \mathrm{HQC} = 5 + C\,\bigl(N_{1q} + 10\,N_{2q} + 5\,N_{\mathrm{SPAM}}\bigr) / 5000 \]
   {\footnotesize\color{muted} $C$ is the shot count. $N_{1q}$ counts PhasedX gates. $N_{2q}$ counts ZZPhase and ZZMax gates. $N_{\mathrm{SPAM}}$ counts initialisations, measurements and resets. Rz gates are free.\par}
-  \medskip
-  \begin{itemize}\setlength{\itemsep}{3pt}
+  \smallskip
+  \begin{itemize}\setlength{\itemsep}{1pt}
     \item ZX rewriting (PyZX teleport\_reduce) placed before pytket's Quantinuum pass can lower this cost or raise it.
-    \item Always run, it costs 6.27\,\% more HQC than pytket alone on 180 Trotter circuits and 22.1\,\% more on 3 QFT adders.
+    \item Run blindly before pytket level 2, it costs 6.27\,\% more HQC on 180 Trotter circuits and 22.1\,\% more on 3 QFT adders.
+    \item Our baseline is pytket level 3. On the 20 family C circuits level 3 alone costs 23.16\,\% less than the default level 2.
     \item On draper\_adder\_16 it costs 1,385.0 HQC against 906.8.
     \item pytket's own ZX pass \code{ZXGraphlikeOptimisation} is documented as one that ``may increase the cost of the circuit''.
     \item A team with a fixed HQC budget cannot tell in advance which circuits gain. \Otag
@@ -73,12 +74,13 @@
 \end{frame}
 
 % ---------------------------------------------------------------- 3
-\begin{frame}{PSEL answers one question per circuit for a team on a fixed HQC budget}
+\begin{frame}{PSEL4 answers one question per circuit for a team on a fixed HQC budget}
   \small
   \begin{itemize}\setlength{\itemsep}{4pt}
     \item \textbf{User.} A team that runs arithmetic and oracle subroutines on Quantinuum H2 from a fixed HQC budget. \Otag
     \item \textbf{Decision.} Should this circuit go through ZX rewriting before pytket's Quantinuum pass?
-    \item \textbf{Answer.} PSEL compiles the circuit both ways and keeps the cheaper result that passes its checks. P0 is always a candidate. PSEL therefore never costs more HQC than P0 when P0 passes its checks.
+    \item \textbf{Answer.} PSEL4 compiles the circuit at level 2 and level 3, each with and without teleport\_reduce. It keeps the cheapest result that passes its checks. Both levels are always candidates.
+    \item \textbf{Guarantee.} PSEL4 never costs more HQC than level 2 or level 3 when both pass its checks. This is a design property, not a measured result.
     \item \textbf{Why per circuit.} On the 60 XXZ circuits P2 alone raises the total HQC by 12.33\,\%. PSEL keeps P0 on all 60.
     \item \textbf{Finals roadmap.} Learned ZX rewriting is the finals goal. A model will predict which ZX rewrites lower HQC. The P0 and P2 rows of the PSEL ledger are its training data. \Otag
   \end{itemize}
@@ -241,7 +243,7 @@
   \raggedright\footnotesize
   \begin{itemize}\setlength{\itemsep}{1pt}
     \item vbe\_adder\_3. $F_H$(P2) minus $F_H$(P0) is +0.0108, $z = +2.38$, two-sided $p = 0.017$.
-    \item Pooled Holm $p$ is 0.052 over three circuits. Repeats alone give $z = +2.44$, Holm $p = 0.030$ over two. Inputs are all-zero.
+    \item Pooled Holm $p$ is 0.052 over three circuits. Repeats alone give $z = +2.44$, repeats-only Holm $p = 0.030$ over two. Inputs are all-zero.
     \item vbe\_adder\_7 of family C runs on H2-2E. Its difference of +0.0110 ($z = 0.79$) is not resolved at 1000 shots.
     \item 20 H2-2E jobs used 6598.0 HQC by the cost formula. Nothing has run on hardware.
   \end{itemize}
@@ -317,7 +319,7 @@
   \begin{itemize}\setlength{\itemsep}{3pt}
     \item \textbf{\code{code.zip}.} The source of the repository. \code{README.md} gives the run instructions.
     \item \textbf{\code{requirements.txt}.} Pins 20 packages, among them pytket 2.18.4, pytket-quantinuum 0.59.3 and pyzx 0.10.7.
-    \item \textbf{\code{run\_tests.sh}.} Runs 26 test files, eight as scripts and eighteen under pytest. All 26 return rc=0 from a fresh unzip of \code{code.zip}.
+    \item \textbf{\code{run\_tests.sh}.} Runs 27 test files, eight as scripts and nineteen under pytest. All 27 return rc=0 from a fresh unzip of \code{code.zip}.
     \item \textbf{\code{EVIDENCE.md}.} Lists every emulator job with its job ID, shots, HQC estimate and stored payload.
     \item \textbf{Generated tables.} \code{report/make\_tables.py} builds the results tables from \code{results/*.csv}. The circuit generators use seed 20261006.
     \item \textbf{Independent checks.} Verification reports by agents that did not produce the results are in \code{results/}.
