@@ -139,6 +139,7 @@ log "one_page_summary.pdf written, 1 page"
 python3 submit/evidence_index.py | tee -a "$LOG/build.log"
 if ! git diff --quiet -- results/EVIDENCE.md; then log "results/EVIDENCE.md changed on rebuild, commit it first"; exit 1; fi
 cp README.md requirements.txt "$OUT/"
+cp report/presentation/presentation.pdf report/presentation/presentation.tex "$OUT/"
 cp results/EVIDENCE.md "$OUT/EVIDENCE.md"
 log "README.md, requirements.txt and EVIDENCE.md copied"
 

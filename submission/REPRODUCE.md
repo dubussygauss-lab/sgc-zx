@@ -1,6 +1,6 @@
 # Reproduction record
 
-Team Learned ZX Rewriting. Recorded 8 October 2026 in the development container and updated 9 October 2026. `code.zip` is `git archive` of commit `f1811ce13c2d17af1b9ad1b0825b01035744262e` with `submission/` excluded. The main report is `report.pdf`, built from `report/report_short.md`. The technical appendix is `report_full.pdf`, built from `report/report_v5.md` without its changelog sections. Run every command from the repository root. This page follows `README.md` and report Section 5. A clean-clone run of these steps is recorded in `results/repro_2026-10-08/repro_log.md`.
+Team Learned ZX Rewriting. Recorded 8 October 2026 in the development container and updated 9 October 2026. `code.zip` is `git archive` of commit `a142c853f52f7b93760a23c11de2ae5678a58cd8` with `submission/` excluded. The main report is `report.pdf`, built from `report/report_short.md`. The technical appendix is `report_full.pdf`, built from `report/report_v5.md` without its changelog sections. Run every command from the repository root. This page follows `README.md` and report Section 5. A clean-clone run of these steps is recorded in `results/repro_2026-10-08/repro_log.md`.
 
 ## Environment
 
@@ -76,7 +76,7 @@ git -C third_party/pyzx-fork checkout e695d6d711e67b2b7223417c4714b6b1fcc09191
 
 ## Tests (logs in `build_logs/`)
 
-Rerun all twenty-one with `bash run_tests.sh` (repository root, also inside an unzipped `code.zip`). Seven run as scripts and fourteen under pytest. The results below are from the runs of 9 October 2026. Wall times vary between runs; those of the latest run are in `build_logs/tests_summary.txt`.
+Rerun all twenty-two with `bash run_tests.sh` (repository root, also inside an unzipped `code.zip`). Seven run as scripts and fifteen under pytest. The results below are from the runs of 9 October 2026. Wall times vary between runs; those of the latest run are in `build_logs/tests_summary.txt`.
 
 | File | Command | Result | Wall |
 |---|---|---|---|
@@ -101,6 +101,7 @@ Rerun all twenty-one with `bash run_tests.sh` (repository root, also inside an u
 | `value/test_usecase.py` | `python -m pytest value/test_usecase.py -q` | 7 passed | 36 s |
 | `pipelines/test_equiv_family_C.py` | `python -m pytest pipelines/test_equiv_family_C.py -q` | 2 passed | 2 s |
 | `submit/test_evidence_index.py` | `python -m pytest submit/test_evidence_index.py -q` | 3 passed | under 1 s |
+| `submit/test_famC_h22e.py` | `python -m pytest submit/test_famC_h22e.py -q` | 6 passed | 32 s |
 
 ## Rebuilding this package
 

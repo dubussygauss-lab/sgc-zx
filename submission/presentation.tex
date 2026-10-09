@@ -1,0 +1,316 @@
+% Submission 1 presentation, Quantinuum Singapore Grand Challenge, team Learned ZX Rewriting.
+% Content and numbers are taken only from report/one_page_summary.md, report/report_short.md,
+% report/report_v5.md, submission/EVIDENCE.md, value/*.md and results/*.md.
+% Build: pdflatex presentation.tex (twice).
+\documentclass[aspectratio=169,11pt]{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
+\graphicspath{{../figures/}{../../results/}}
+
+\usetheme{default}
+\usefonttheme{professionalfonts}
+\setbeamertemplate{navigation symbols}{}
+\definecolor{ink}{HTML}{1F2933}
+\definecolor{accent}{HTML}{1D5FA8}
+\definecolor{opinion}{HTML}{8A4B08}
+\definecolor{opbg}{HTML}{FFF4E5}
+\definecolor{muted}{HTML}{5F6B76}
+\setbeamercolor{normal text}{fg=ink,bg=white}
+\setbeamercolor{frametitle}{fg=accent,bg=white}
+\setbeamercolor{title}{fg=accent}
+\setbeamercolor{itemize item}{fg=accent}
+\setbeamercolor{itemize subitem}{fg=accent}
+\setbeamerfont{frametitle}{size=\large,series=\bfseries}
+\setbeamertemplate{itemize items}[circle]
+\setbeamertemplate{frametitle}{\vspace*{2pt}\insertframetitle\par\vspace{-3pt}{\color{accent!40}\rule{\textwidth}{0.6pt}}}
+\setbeamertemplate{footline}{%
+  \hspace{0.55cm}{\color{muted}\footnotesize Untagged statements are [F] facts. [O] marks a judgement.}%
+  \hfill{\color{muted}\footnotesize\insertframenumber}\hspace{0.55cm}\vspace{0.15cm}}
+\setlength{\leftmargini}{1.1em}
+\setbeamersize{text margin left=0.55cm,text margin right=0.55cm}
+\setlength{\tabcolsep}{4pt}
+
+% Judgement line, visually distinct from facts.
+\newcommand{\assess}[1]{%
+  \par\medskip\noindent\colorbox{opbg}{\parbox{\dimexpr\linewidth-2\fboxsep}{\small\color{opinion}\textbf{Assessment [O].} #1}}\par}
+\newcommand{\Otag}{{\color{opinion}\textbf{[O]}}}
+\newcommand{\code}[1]{\texttt{#1}}
+
+\begin{document}
+
+% ---------------------------------------------------------------- 1
+\begin{frame}[plain]
+  \vfill
+  {\color{accent}\LARGE\bfseries A pass selector keeps ZX rewriting only where it lowers the cost of a circuit on Quantinuum H2\par}
+  \vspace{0.8cm}
+  {\large Team Learned ZX Rewriting\par}
+  \vspace{0.2cm}
+  C.-F. Kam, A. Mahasinghe, D. De Silva, N. Karunarathne, F. Cadet, M. Bessafi, K. De Silva\par
+  \vspace{0.6cm}
+  {\color{muted}Quantinuum Singapore Grand Challenge, Submission 1\par
+  October 2026\par}
+  \vfill
+\end{frame}
+
+% ---------------------------------------------------------------- 2
+\begin{frame}{ZX rewriting before pytket can raise the cost of an H2 run}
+  \small
+  A run on Quantinuum H2 is billed in HQC.
+  \[ \mathrm{HQC} = 5 + C\,\bigl(N_{1q} + 10\,N_{2q} + 5\,N_{\mathrm{SPAM}}\bigr) / 5000 \]
+  {\footnotesize\color{muted} $C$ is the shot count. $N_{1q}$ counts PhasedX gates. $N_{2q}$ counts ZZPhase and ZZMax gates. $N_{\mathrm{SPAM}}$ counts initialisations, measurements and resets. Rz gates are free.\par}
+  \medskip
+  \begin{itemize}\setlength{\itemsep}{3pt}
+    \item ZX rewriting (PyZX teleport\_reduce) placed before pytket's Quantinuum pass can lower this cost or raise it.
+    \item Always run, it costs 6.27\,\% more HQC than pytket alone on 180 Trotter circuits and 22.1\,\% more on 3 QFT adders.
+    \item On draper\_adder\_16 it costs 1,385.0 HQC against 906.8.
+    \item pytket's own ZX pass \code{ZXGraphlikeOptimisation} is documented as one that ``may increase the cost of the circuit''.
+  \end{itemize}
+  \assess{A team with a fixed HQC budget cannot tell in advance, circuit by circuit, whether ZX rewriting pays.}
+\end{frame}
+
+% ---------------------------------------------------------------- 3
+\begin{frame}{The user decides per circuit whether ZX rewriting goes first}
+  \small
+  \begin{itemize}\setlength{\itemsep}{3pt}
+    \item \Otag\ \textbf{User.} A team that runs Clifford+T subroutines on Quantinuum H2 from a fixed HQC budget. It will later price the same subroutines on a fault-tolerant machine.
+    \item \Otag\ \textbf{Decision.} Should this circuit go through ZX rewriting before pytket's Quantinuum pass?
+    \item \textbf{Tool.} PSEL takes this decision per circuit from the HQC of both compilations.
+    \item \textbf{Guarantee.} P0 is always one of the two candidates. PSEL costs no more HQC than P0 whenever P0 passes PSEL's checks. This holds by construction and is not a measured result.
+    \item \textbf{Need for a selector.} On the 60 XXZ circuits P2 alone raises the total HQC by 12.33\,\%. PSEL keeps P0 on all 60.
+    \item \textbf{User validation.} No user interview or survey is part of this submission.
+  \end{itemize}
+  \assess{The need rests on the H2 cost formula and on the cited algorithm literature.}
+\end{frame}
+
+% ---------------------------------------------------------------- 4
+\begin{frame}{PSEL compiles each circuit twice and keeps the cheaper result}
+  \small
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.60\textwidth}
+      \begin{itemize}\setlength{\itemsep}{2pt}
+        \item \textbf{P0.} pytket-quantinuum 0.59.3 default pass at optimisation level 2. The baseline.
+        \item \textbf{P2.} PyZX teleport\_reduce, then P0.
+        \item \textbf{PSEL} drops a candidate that fails its exactness check and keeps the one with the lower HQC. Ties go to the lower two-qubit count, then to P0.
+        \item \textbf{Official baseline.} Our P0 and P2 give the same counts as the official pytket-quantinuum pass on all 445 compiled rows of families A, B1, B1x and B2. Family C was not compiled with the official pass.
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.37\textwidth}
+      \centering
+      \begin{tikzpicture}[
+          box/.style={draw=accent,rounded corners=2pt,fill=accent!6,minimum width=2.7cm,minimum height=0.55cm,align=center,font=\footnotesize},
+          arr/.style={-{Stealth[length=5pt]},color=accent!80}]
+        \node[box] (in) {input circuit};
+        \node[box,below left=0.45cm and -1.0cm of in,minimum width=1.7cm] (p0) {P0};
+        \node[box,below right=0.45cm and -1.0cm of in,minimum width=1.7cm] (p2) {P2};
+        \node[box,below=1.45cm of in] (chk) {exactness check};
+        \node[box,below=0.35cm of chk] (sel) {keep lower HQC};
+        \draw[arr] (in) -- (p0); \draw[arr] (in) -- (p2);
+        \draw[arr] (p0) -- (chk); \draw[arr] (p2) -- (chk);
+        \draw[arr] (chk) -- (sel);
+      \end{tikzpicture}
+      \par\vspace{2pt}{\footnotesize\color{muted}\code{pipelines/pass\_select.py}}
+    \end{column}
+  \end{columns}
+  \assess{PSEL is pytket's PassSelector pattern with HQC as the metric. The contribution is the measured cost ledger and the guard result, not a new selection mechanism.}
+\end{frame}
+
+% ---------------------------------------------------------------- 5
+\begin{frame}{PSEL saves 7.47\,\% on 15 family C circuits without continuous angles}
+  \footnotesize
+  \centering
+  \begin{tabular}{@{}lrrrrrrr@{}}
+    \toprule
+    Family C & Circuits & Qubits & Picks P2 & HQC P0 & HQC PSEL & Saved & Saved \% \\
+    \midrule
+    Adder & 9 & 20--56 & 9 & 5777.0 & 5031.4 & 745.6 & 12.9 \\
+    Grover oracle (MCX) & 6 & 21--56 & 3 & 4242.6 & 4239.8 & 2.8 & 0.1 \\
+    \textbf{No continuous angles} & \textbf{15} & \textbf{20--56} & \textbf{12} & \textbf{10019.6} & \textbf{9271.2} & \textbf{748.4} & \textbf{7.47} \\
+    \midrule
+    Multiplier, continuous angles & 2 & 21--24 & 2 & 9737.0 & 6381.0 & 3356.0 & 34.5 \\
+    QFT adder, continuous angles & 3 & 20--56 & 0 & 4778.4 & 4778.4 & 0.0 & 0.0 \\
+    All of family C & 20 & 20--56 & 14 & 24535.0 & 20430.6 & 4104.4 & 16.7 \\
+    \bottomrule
+  \end{tabular}
+  \par\smallskip
+  {\color{muted}HQC at 1000 shots. Family C is count-only apart from one H2-2E run.}
+  \par\smallskip
+  \raggedright\small
+  \begin{itemize}\setlength{\itemsep}{1pt}
+    \item A PyZX miter reduction proves the PSEL output equal to its input on 18 of the 20 circuits. All 15 without continuous angles are proven as a full unitary up to global phase.
+    \item hrs\_mult\_5 is inconclusive. The miter of the P0 pick of draper\_adder\_28 timed out. PSEL itself runs no exactness check above 20 qubits.
+    \item The two multipliers carry 81.8\,\% of the 4104.4 HQC saved on family C.
+  \end{itemize}
+\end{frame}
+
+% ---------------------------------------------------------------- 6
+\begin{frame}{The selector avoids the losses of always running ZX}
+  \small
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.48\textwidth}
+      {\color{accent}\textbf{Guard against always running P2}}
+      \begin{itemize}\setlength{\itemsep}{2pt}
+        \item 180 Trotter circuits. P2 alone would cost 1,030.4 HQC or 6.27\,\% more than P0.
+        \item PSEL avoids 1,076.4 HQC there against always running P2. It still saves 46.0 HQC against P0.
+        \item 3 QFT adders. P2 is dearer on all three. PSEL keeps P0 and avoids 1,057.2 HQC.
+        \item PSEL never raises the two-qubit count against P0 on the 223 circuits of families A, B1, B1x and B2.
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      {\color{accent}\textbf{Clifford+T benchmarks B1}}
+      \begin{itemize}\setlength{\itemsep}{2pt}
+        \item 15 circuits with $n \le 12$. PSEL picks P2 on 14.
+        \item PSEL saves 743.6 of 15,516.0 HQC or 4.79\,\%.
+        \item The median saving per circuit is 3.94\,\%.
+        \item hwb8 alone gives 84.5\,\% of the saving and serves no sourced quantum algorithm. Without hwb8 the saving is 115.0 HQC.
+      \end{itemize}
+    \end{column}
+  \end{columns}
+  \assess{The median is the better guide for a single small circuit.}
+\end{frame}
+
+% ---------------------------------------------------------------- 7
+\begin{frame}{Worked use case on Grover search with 7 and 9 qubits}
+  \small
+  Two complete Grover searches with one marked item, built from Grover 1996 and Barenco et al.\ 1995. Both pass an exact check under P0 and P2.
+  \par\medskip
+  \footnotesize\centering
+  \begin{tabular}{@{}lrrrrrrr@{}}
+    \toprule
+    Instance & Qubits & HQC P0 & HQC PSEL & Saving \% & Shots P0 & Shots PSEL & Extra shots \\
+    \midrule
+    grover\_d5 & 7 & 734.2 & 694.4 & 5.42 & 13699 & 14490 & 791 \\
+    grover\_d6 & 9 & 1629.4 & 1548.6 & 4.96 & 6153 & 6475 & 322 \\
+    \bottomrule
+  \end{tabular}
+  \par\smallskip
+  {\color{muted}Shots within a 10,000 HQC budget, at most 10,000 shots and 5 HQC per job.}
+  \par\medskip
+  \raggedright\small
+  \begin{itemize}\setlength{\itemsep}{2pt}
+    \item PSEL buys 5.77\,\% more shots on grover\_d5 and 5.23\,\% more on grover\_d6.
+    \item The T-count falls from 448 to 210 and from 1008 to 436. No platform job ran these instances.
+  \end{itemize}
+  \assess{The T-count drop comes from Toffolis that the Barenco construction repeats on the same qubits. It is not a general ZX gain.}
+\end{frame}
+
+% ---------------------------------------------------------------- 8
+\begin{frame}{A certified floor bounds what exact T optimisation can still gain}
+  \small
+  \begin{itemize}\setlength{\itemsep}{3pt}
+    \item Each T gate of a surface-code machine consumes one magic state. On H2 a T gate is a free Rz.
+    \item On B1 the ZX stage removes 2,862 of 7,048 T gates of the written circuits, or 40.6\,\%.
+    \item On 20 synthesised Haar circuits of 2 and 3 qubits the certified floor is 0.997 of the T-count after ZX, pooled. The worst instance keeps at least 2478 of its 2496 T gates.
+    \item Further exact T optimisation can gain at most 0.3\,\% pooled and 0.72\,\% on the worst instance.
+    \item On the four certified B1 circuits the six published optimisers close 1 of the 59 gates between our count and the floor.
+    \item The certificate covers 24 circuits with at most 5 qubits. It covers no circuit of family C and no Grover instance.
+  \end{itemize}
+  \assess{The certificate cannot tell whether the other 58 gates are headroom for a better rewrite or slack in the bound.}
+\end{frame}
+
+% ---------------------------------------------------------------- 9
+\begin{frame}{The emulator gain on vbe\_adder\_3 is not established after correction}
+  \centering\footnotesize
+  \begin{tabular}{@{}llrrrl@{}}
+    \toprule
+    Circuit & Pipeline & Two-qubit gates & Pooled $F_H$ & sd & Per-run $F_H$ range \\
+    \midrule
+    vbe\_adder\_3 & P0 & 56 & 0.9520 & 0.0034 & 0.9470 to 0.9560 \\
+    vbe\_adder\_3 & P2 & 41 & 0.9628 & 0.0030 & 0.9590 to 0.9680 \\
+    grover\_5 & P0 & 240 & 0.8704 & 0.0053 & 0.8482 to 0.8652 \\
+    grover\_5 & P2 & 218 & 0.8711 & 0.0053 & 0.8400 to 0.8728 \\
+    \midrule
+    vbe\_adder\_7 (22 qubits) & P0 & 142 & 0.886 & 0.0101 & 1000 shots, one run \\
+    vbe\_adder\_7 (22 qubits) & P2 & 107 & 0.897 & 0.0096 & 1000 shots, one run \\
+    \bottomrule
+  \end{tabular}
+  \par\smallskip
+  {\color{muted}H2-2E. First four rows 4000 shots per pipeline, Hellinger fidelity $F_H$ of the summed counts.}
+  \par\smallskip
+  \raggedright\footnotesize
+  \begin{itemize}\setlength{\itemsep}{1pt}
+    \item vbe\_adder\_3. $F_H$(P2) minus $F_H$(P0) is +0.0108, $z = +2.38$, two-sided $p = 0.017$.
+    \item The repeated circuits were chosen after the single runs. The Holm-adjusted $p$ is 0.035 over two circuits and 0.052 over all three. grover\_5 shows no gain ($z = +0.10$).
+    \item vbe\_adder\_7 of family C runs on H2-2E. Its difference of +0.0110 ($z = 0.79$) is not resolved at 1000 shots.
+    \item 20 H2-2E jobs used 6598.0 HQC by the cost formula. Nothing has run on hardware.
+  \end{itemize}
+  \assess{The fidelity gain is not established at 0.05 after correction over three circuits.}
+\end{frame}
+
+% ---------------------------------------------------------------- 10
+\begin{frame}{The HQC saved has a dollar value at Azure plan averages}
+  \small
+  \begin{itemize}\setlength{\itemsep}{2pt}
+    \item Azure Quantum lists the H2 Standard Plan at USD 125,000 per month with 10,000 HQC and the Premium Plan at USD 175,000 with 17,000 HQC.
+    \item The plan-average price is USD 12.50 per HQC on Standard and USD 10.29 on Premium.
+  \end{itemize}
+  \medskip
+  \centering\footnotesize
+  \begin{tabular}{@{}lrr@{}}
+    \toprule
+    \Otag\ Saving & HQC & USD at plan averages \\
+    \midrule
+    Family C, 15 circuits without continuous angles & 748.4 & about 7,700 to 9,400 \\
+    Family A, avoided loss against always running P2 & 1,076.4 & about 11,100 to 13,500 \\
+    \bottomrule
+  \end{tabular}
+  \par\medskip
+  \raggedright\small
+  \begin{itemize}\setlength{\itemsep}{2pt}
+    \item Both figures count 1000 shots of each circuit once.
+    \item They use the plan average and not a marginal price. They ignore the bundled eHQCs and the Azure infrastructure costs.
+  \end{itemize}
+  \assess{The USD values rest on plan-average prices and not on a quoted marginal price.}
+\end{frame}
+
+% ---------------------------------------------------------------- 11
+\begin{frame}{Limitations and the plan for H2 hardware in the finals}
+  \small
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.43\textwidth}
+      {\color{accent}\textbf{Limitations}}
+      \begin{itemize}\setlength{\itemsep}{2pt}
+        \item No user interview or survey is part of this submission.
+        \item Family C is count-only apart from one H2-2E run. Its PSEL output is proven on 18 of 20 circuits.
+        \item Nothing has run on H2 hardware. All platform results are emulator runs.
+        \item This submission contains no learned rewriting.
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.54\textwidth}
+      {\color{accent}\textbf{Finals plan}}
+      \par\smallskip\footnotesize
+      \begin{tabular}{@{}lrrr@{}}
+        \toprule
+        Test & Shots & Power & HQC \\
+        \midrule
+        vbe\_adder\_3, recommended & 4364 & 0.80 & 1147.3 \\
+        vbe\_adder\_3, minimum & 2900 & 0.65 & 765.7 \\
+        grover\_5, secondary & 1900 & 0.65 & 2069.2 \\
+        \bottomrule
+      \end{tabular}
+      \par\smallskip
+      Shots per pipeline, P0 and P2.
+      \par\smallskip\small
+      \begin{itemize}\setlength{\itemsep}{2pt}
+        \item \Otag\ Power 0.80 holds if the emulator gain holds on hardware.
+        \item \Otag\ A one-sided $z$ of 1.645 or more confirms the gain.
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------- 12
+\begin{frame}{Every result can be rerun from the code package}
+  \small
+  \begin{itemize}\setlength{\itemsep}{3pt}
+    \item \textbf{\code{code.zip}.} The source of the repository. \code{README.md} gives the run instructions.
+    \item \textbf{\code{requirements.txt}.} Pins 20 packages, among them pytket 2.18.4, pytket-quantinuum 0.59.3 and pyzx 0.10.7.
+    \item \textbf{\code{run\_tests.sh}.} Runs 22 test files, seven as scripts and fifteen under pytest. All 22 return rc=0 from a fresh unzip of \code{code.zip}.
+    \item \textbf{\code{EVIDENCE.md}.} Lists every emulator job with its job ID, shots, HQC estimate and stored payload.
+    \item \textbf{Generated tables.} \code{report/make\_tables.py} builds the results tables from \code{results/*.csv}. The circuit generators use seed 20261006.
+    \item \textbf{Independent checks.} Verification reports by agents that did not produce the results are in \code{results/}.
+  \end{itemize}
+\end{frame}
+
+\end{document}
