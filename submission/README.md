@@ -7,7 +7,7 @@ Team Learned ZX Rewriting, Quantinuum Singapore Grand Challenge. A resource-cert
 ```
 pip install -r requirements.txt                                   # Python 3.13, pinned versions
 python3 pipelines/pass_select.py bench/family_B1/vbe_adder_3.qasm # PSEL on one circuit: P0, P2 and the pick with HQC
-bash run_tests.sh                                                 # all 22 test files, about 4 min, logs in submission/build_logs/
+bash run_tests.sh                                                 # all 22 test files, about 4 to 6 min, logs in submission/build_logs/
 marimo edit report/notebook_skeleton.py                           # notebook: tables, figures, live compilation
 python3 submit/evidence_index.py                                  # rebuilds results/EVIDENCE.md from the stored job payloads
 ```
