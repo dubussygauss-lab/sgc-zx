@@ -324,7 +324,7 @@ Team Learned ZX Rewriting: C.-F. Kam, A. Mahasinghe, D. De Silva, N. Karunarathn
 
 - `[F]` Nothing in this report has run on H2 hardware. All platform results are emulator runs.
 - `[F]` The vbe_adder_3 fidelity gain is not significant at 0.05 after Holm correction over all three H2-2E circuits. grover_5 shows no gain at 4000 shots.
-- `[F]` Family C is count-only. The PSEL output is proven on 18 of its 20 circuits. hrs_mult_5 is only spot-checked on 64 random basis inputs. The P0 pick of draper_adder_28 has no check. Family B1x has no check.
+- `[F]` Family C is count-only apart from one H2-2E run of vbe_adder_7 (Table 3c). The PSEL output is proven on 18 of its 20 circuits. hrs_mult_5 is only spot-checked on 64 random basis inputs. The P0 pick of draper_adder_28 has no check. Family B1x has no check.
 - `[F]` The 16.7 % family C saving rests on two multipliers with continuous rotation angles. Without continuous-angle circuits the saving is 7.47 %.
 - `[F]` hwb8 carries 84.5 % of the B1 saving and has no sourced algorithm role.
 - `[F]` The certificate covers 24 circuits with n at most 5. On the four B1 circuits it leaves most of the remaining T-count unaccounted for.
