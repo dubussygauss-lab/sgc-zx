@@ -67,7 +67,7 @@
     \item ZX rewriting (PyZX teleport\_reduce) placed before pytket's Quantinuum pass can lower this cost or raise it.
     \item Run blindly before pytket level 2, it costs 6.27\,\% more HQC on 180 Trotter circuits and 22.1\,\% more on 3 QFT adders.
     \item Our baseline is pytket level 3. On the 20 family C circuits level 3 alone costs 23.16\,\% less than the default level 2.
-    \item On draper\_adder\_16 it costs 1,385.0 HQC against 906.8.
+    \item On draper\_adder\_16 teleport\_reduce before level 2 costs 1,385.0 HQC against 906.8 for level 2.
     \item pytket's own ZX pass \code{ZXGraphlikeOptimisation} is documented as one that ``may increase the cost of the circuit''.
     \item A team with a fixed HQC budget cannot tell in advance which circuits gain. \Otag
   \end{itemize}
@@ -79,7 +79,7 @@
   \begin{itemize}\setlength{\itemsep}{4pt}
     \item \textbf{User.} A team that runs arithmetic and oracle subroutines on Quantinuum H2 from a fixed HQC budget. \Otag
     \item \textbf{Decision.} Should this circuit go through ZX rewriting before pytket's Quantinuum pass?
-    \item \textbf{Answer.} PSEL4 compiles the circuit at level 2 and level 3, each with and without teleport\_reduce. It keeps the cheapest result that passes its checks. Both levels are always candidates.
+    \item \textbf{Answer.} PSEL4 compiles the circuit at level 2 and level 3, each with and without teleport\_reduce. It keeps the cheapest result that passes its checks, which run up to 20 qubits only. Both levels are always candidates.
     \item \textbf{Guarantee.} PSEL4 never costs more HQC than level 2 or level 3 when both pass its checks. This is a design property, not a measured result.
     \item \textbf{Why per circuit.} On the 60 XXZ circuits P2 alone raises the total HQC by 12.33\,\%. PSEL keeps P0 on all 60.
     \item \textbf{Finals roadmap.} Learned ZX rewriting is the finals goal. A model will predict which ZX rewrites lower HQC. The P0 and P2 rows of the PSEL ledger are its training data. \Otag

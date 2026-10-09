@@ -10,7 +10,7 @@ A run on Quantinuum H2 is billed in HQC = 5 + C (N_1q + 10 N_2q + 5 N_SPAM) / 50
 
 ## Approach
 
-The baseline is pytket-quantinuum at optimisation level 3. On the 20 family C circuits level 3 alone costs 23.16 % less than the default level 2. PSEL4 compiles each circuit four ways. These are level 2, level 3, PyZX teleport_reduce before level 2 and teleport_reduce before level 3. It drops a candidate that fails its exactness check and keeps the one with the lower HQC. Level 2 and level 3 are always candidates. The guarantee above is therefore a design property. It is not a measured result. A PyZX miter proves the PSEL4 output equal to its input on 17 of the 20 family C circuits. PSEL4 is pytket's `PassSelector` pattern with HQC as the metric. The contribution is the measured cost ledger and the guard. [O]
+The baseline is pytket-quantinuum at optimisation level 3. On the 20 family C circuits level 3 alone costs 23.16 % less than the default level 2. PSEL4 compiles each circuit four ways. These are level 2, level 3, PyZX teleport_reduce before level 2 and teleport_reduce before level 3. It drops a candidate that fails its exactness check, which runs up to 20 qubits only, and keeps the one with the lower HQC. Level 2 and level 3 are always candidates. The guarantee above is therefore a design property. It is not a measured result. A PyZX miter proves the PSEL4 output equal to its input on 17 of the 20 family C circuits. PSEL4 is pytket's `PassSelector` pattern with HQC as the metric. The contribution is the measured cost ledger and the guard. [O]
 
 ## Key results
 
