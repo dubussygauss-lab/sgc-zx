@@ -61,6 +61,7 @@ git -C third_party/pyzx-fork checkout e695d6d711e67b2b7223417c4714b6b1fcc09191
 | Family C selector, Tables 1.1b and C3 | `python value/family_C_selector.py` |
 | Grover use case, Table U1 | `python value/usecase.py` |
 | Family C circuits, compilation and basis check | `python bench/build_family_C.py`, `python pipelines/run_family_C.py --workers 2`, then `python pipelines/run_family_C.py --check` |
+| Family C equivalence proof by PyZX miter | `python pipelines/equiv_family_C.py --methods pyzx` (36 min of summed check time), then `python pipelines/equiv_family_C.py --summary` |
 | Use-case circuits | `python bench/usecase/build_usecase.py` |
 | Official baseline comparison | `python pipelines/official_baseline.py run`, then `python pipelines/official_baseline.py report` |
 | Section 1 value ledger, Tables 1.1 and 1.2 | `python value/value_ledger.py`, then `python value/value_by_application.py` |
@@ -72,7 +73,7 @@ git -C third_party/pyzx-fork checkout e695d6d711e67b2b7223417c4714b6b1fcc09191
 
 ## Tests (logs in `build_logs/`)
 
-Rerun all nineteen with `bash submission/run_tests.sh`. Seven run as scripts and twelve under pytest. The results below are from the run of 9 October 2026 stored in `build_logs/tests_summary.txt`.
+Rerun all twenty with `bash submission/run_tests.sh`. Seven run as scripts and thirteen under pytest. The results below are from the run of 9 October 2026 stored in `build_logs/tests_summary.txt`.
 
 | File | Command | Result | Wall |
 |---|---|---|---|
@@ -95,6 +96,7 @@ Rerun all nineteen with `bash submission/run_tests.sh`. Seven run as scripts and
 | `pipelines/test_official_baseline.py` | `python -m pytest pipelines/test_official_baseline.py -q` | 10 passed | 12 s |
 | `value/test_family_C_selector.py` | `python -m pytest value/test_family_C_selector.py -q` | 5 passed | 2 s |
 | `value/test_usecase.py` | `python -m pytest value/test_usecase.py -q` | 7 passed | 36 s |
+| `pipelines/test_equiv_family_C.py` | `python -m pytest pipelines/test_equiv_family_C.py -q` | 2 passed | 2 s |
 
 ## Rebuilding this package
 

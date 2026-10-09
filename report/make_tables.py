@@ -988,6 +988,12 @@ def family_c():
     assert abs(a[a.application == "all"].saved_hqc.iloc[0] - r.saved_hqc.sum()) < 1e-6
     cont = dict(zip(man.file, man.continuous_angles))
     checked = (r.check_P0 == "pass") & (r.check_P2 == "pass")
+    # PyZX miter verdict of the PSEL output against the input (results/family_C_equivalence.csv)
+    eq = pd.read_csv(os.path.join(RESULTS, "family_C_equivalence.csv"))
+    eq = eq[eq.method == "pyzx"]
+    ver = {(f, c): v for f, c, v in zip(eq.file, eq.comparison, eq.verdict)}
+    proof = [ver.get((f, p), "not run") for f, p in zip(r.file, r.pick)]
+    proven = pd.Series([v == "proven" for v in proof], index=r.index)
     apps = pd.DataFrame({"application": a.application, "circuits": a.n_circuits.astype(int),
                          "qubits": a.qubits, "PSEL picks P2": a.p2_picks.astype(int),
                          "HQC P0": a.hqc_P0, "HQC P2": a.hqc_P2, "HQC PSEL": a.hqc_PSEL,
@@ -1003,7 +1009,8 @@ def family_c():
                         "n_2q PSEL": r.n2q_PSEL.astype(int), "T written": r.t_written.astype(int),
                         "T after ZX P2": r.t_zx_P2.astype(int),
                         "continuous angles": ["yes" if cont[f] else "no" for f in r.file],
-                        "check": ["pass" if c else "unchecked" for c in checked]})
+                        "check": ["pass" if c else "unchecked" for c in checked],
+                        "proof PSEL": proof})
     fmt = {c: "{:,.1f}" for c in ["HQC P0", "HQC P2", "HQC PSEL", "saved vs P0", "saved vs P2"]}
     fmt.update({"saved %": "{:.1f}", "n_2q P0": "{:d}", "n_2q PSEL": "{:d}", "T saved": "{:d}",
                 "PSEL picks P2": "{:d}", "checked": "{:d}", "T after ZX P2": "{:d}"})
@@ -1020,22 +1027,29 @@ def family_c():
             "where PSEL picks P2. checked counts circuits whose P0 and P2 outputs both agree with the input on "
             "64 random basis inputs up to a global phase (`pipelines/run_family_C.py --check`). unchecked means "
             "the sparse simulation exceeded 2^20 amplitudes. A pass covers 64 of 2^n inputs and is not a proof "
-            "of equivalence. continuous angles marks inputs with rotations outside the pi/4 grid "
+            "of equivalence. proof PSEL is the PyZX miter verdict for the PSEL output against the input as a full "
+            "unitary up to global phase (`pipelines/equiv_family_C.py`, `results/family_C_equivalence.md`). "
+            "continuous angles marks inputs with rotations outside the pi/4 grid "
             "(`bench/family_C/manifest.csv`). Source: `value/family_C_selector.csv`.\n\n"
             + md_table(apps, "{:.1f}", fmt=fmt)
             + "\n" + md_table(per, "{:.1f}", fmt=fmt)
-            + f"\n`[F]` {len(r)} circuits, {int(checked.sum())} checked and {n_unc} unchecked. PSEL saves "
+            + f"\n`[F]` {len(r)} circuits. {int(checked.sum())} pass the basis check and {n_unc} are not basis-checked. PSEL saves "
               f"{sv.saved_hqc:,.1f} HQC or {sv.saved_pct:.1f} % against P0 and {sv.hqc_P2 - sv.hqc_PSEL:,.1f} HQC "
-              f"against P2. Saving on the checked circuits {r[checked].saved_hqc.sum():,.1f} HQC, on the unchecked "
-              f"circuits {r[~checked].saved_hqc.sum():,.1f} HQC.\n")
+              f"against P2. Saving on the basis-checked circuits {r[checked].saved_hqc.sum():,.1f} HQC and on the "
+              f"others {r[~checked].saved_hqc.sum():,.1f} HQC.\n")
     disc = r[[not cont[f] for f in r.file]]
     ca = r[[bool(cont[f]) for f in r.file]]
     text += (f"\n`[F]` On the {len(disc)} circuits without continuous angles PSEL saves "
              f"{disc.saved_hqc.sum():,.1f} of {disc.hqc_P0.sum():,.1f} HQC "
              f"({100 * disc.saved_hqc.sum() / disc.hqc_P0.sum():.2f} %). The {len(ca)} continuous-angle circuits "
              f"save {ca.saved_hqc.sum():,.1f} of {ca.hqc_P0.sum():,.1f} HQC, all of it from the two multipliers.\n")
+    dproven = int(proven[[not cont[f] for f in r.file]].sum())
+    text += (f"\n`[F]` The PSEL output is proven equal to its input on {int(proven.sum())} of {len(r)} circuits "
+             f"and on {dproven} of {len(disc)} circuits without continuous angles. "
+             + " ".join(f"The verdict for {f.replace('.qasm', '')} under {p} is {v}." for f, p, v, ok in
+                        zip(r.file, r.pick, proof, proven) if not ok) + "\n")
     write("C3_familyC", text)
-    return {"r": r, "a": a, "checked": int(checked.sum()), "unchecked": n_unc}
+    return {"r": r, "a": a, "checked": int(checked.sum()), "unchecked": n_unc, "proven": int(proven.sum())}
 
 
 def usecase_table():
