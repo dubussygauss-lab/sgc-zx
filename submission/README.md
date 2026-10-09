@@ -7,7 +7,7 @@ Team Learned ZX Rewriting, Quantinuum Singapore Grand Challenge. A resource-cert
 ```
 pip install -r requirements.txt                                   # Python 3.13, pinned versions
 python3 pipelines/pass_select.py bench/family_B1/vbe_adder_3.qasm # PSEL on one circuit: P0, P2 and the pick with HQC
-bash run_tests.sh                                                 # all 22 test files, about 4 to 6 min, logs in submission/build_logs/
+bash run_tests.sh                                                 # all 24 test files, about 4 to 6 min, logs in submission/build_logs/
 marimo edit report/notebook_skeleton.py                           # notebook: tables, figures, live compilation
 python3 submit/evidence_index.py                                  # rebuilds results/EVIDENCE.md from the stored job payloads
 ```
@@ -94,7 +94,7 @@ python value/value_ledger.py
 python value/value_by_application.py
 ```
 
-Tests. `bash run_tests.sh` runs all 22 test files: seven as scripts and fifteen under pytest, with the Selene tests run with the proxy variables cleared (see the proxy note below). One log per file and `tests_summary.txt` go to `submission/build_logs/` or to `$TEST_LOG_DIR`. The list of files and the results of the last run are in `submission/REPRODUCE.md`.
+Tests. `bash run_tests.sh` runs all 24 test files: seven as scripts and seventeen under pytest, with the Selene tests run with the proxy variables cleared (see the proxy note below). One log per file and `tests_summary.txt` go to `submission/build_logs/` or to `$TEST_LOG_DIR`. The list of files and the results of the last run are in `submission/REPRODUCE.md`.
 
 ## Notebook
 

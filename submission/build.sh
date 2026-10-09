@@ -127,9 +127,9 @@ if [[ $RC -ne 0 ]]; then log "SUMMARY NUMBER CHECK FAILED"; exit 1; fi
 if ! python3 report/check_short_numbers.py report/one_page_summary.md | tee -a "$LOG/build.log"; then
   log "ONE-PAGE SUMMARY NUMBER CHECK FAILED"; exit 1
 fi
-pandoc report/one_page_summary.md -f gfm -t html5 --standalone --embed-resources --css="$OUT/summary.css" \
+pandoc report/one_page_summary.md -f gfm -t html5 --standalone --embed-resources --resource-path=report --css="$OUT/summary.css" \
   --metadata pagetitle=one_page_summary -o "$LOG/one_page_summary.html" 2>>"$LOG/build.log"
-wkhtmltopdf --quiet --page-size A4 --margin-top 10mm --margin-bottom 10mm --margin-left 12mm --margin-right 12mm \
+wkhtmltopdf --quiet --enable-local-file-access --page-size A4 --margin-top 10mm --margin-bottom 10mm --margin-left 12mm --margin-right 12mm \
   "$LOG/one_page_summary.html" "$OUT/one_page_summary.pdf" 2>>"$LOG/build.log" || true
 rm -f "$LOG/one_page_summary.html"
 NP=$(pdfinfo "$OUT/one_page_summary.pdf" | awk '/^Pages:/{print $2}')

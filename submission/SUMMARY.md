@@ -54,7 +54,7 @@ Team Learned ZX Rewriting. Report title: "A pass selector keeps ZX rewriting onl
 
 ## Certified fraction
 
-`[F]` The exactness-barrier certificate (Kam et al., arXiv:2608.22801) gives a per-instance floor on the T-count of every semantics-exact rewrite. It covers 24 circuits, all with n at most 5. On the 20 B2 circuits at n = 2 and 3 the floor is 41,414 against 41,534 T gates after ZX. The certified-incompressible fraction is 0.997. On the four B1 circuits at n = 5 the floor is 47 against 106 and the fraction is 0.443. The fraction 0.997 does not hold for B1.
+`[F]` The per-instance floor on the T-count of every semantics-exact rewrite is the channel bound of Gosset, Kliuchnikov, Mosca and Russo (arXiv:1308.4134), restated in the exactness-barrier manuscript (Kam et al., arXiv:2608.22801). The team evaluates it exactly. The bound itself is not new. It covers 24 circuits, all with n at most 5. On the 20 B2 circuits at n = 2 and 3 the floor is 41,414 against 41,534 T gates after ZX. The certified-incompressible fraction is 0.997. On the four B1 circuits at n = 5 the floor is 47 against 106 and the fraction is 0.443. The fraction 0.997 does not hold for B1.
 
 `[O]` The certificate does not say whether the B1 gap is headroom for a better rewrite or slack in the bound.
 
@@ -69,6 +69,14 @@ Team Learned ZX Rewriting. Report title: "A pass selector keeps ZX rewriting onl
 `[F]` Three H2-Emulator jobs with 22 circuit rows and six H2-2E jobs ran on 8 October 2026 at 1000 shots. Twelve repeat H2-2E jobs ran vbe_adder_3 and grover_5 three more times. The 18 H2-2E jobs carry HQC estimates that sum to 5933.2 HQC. On H2-2E at 1000 shots the difference F_H(P2) minus F_H(P0) is +0.0050 on vbe_adder_3 (z = +0.55), -0.0150 on hwb6 (z = -1.21) and +0.0076 on grover_5 (z = +0.48). On the H2-Emulator the four Toffoli comparisons all lie within two sd of zero. Neither tier resolves P2 against P0 at 1000 shots. At the predicted gain a 2-sd resolution needs 1147 shots per pipeline on vbe_adder_3, 1974 on grover_5 and 20462 on hwb6. At 4000 shots per pipeline the pooled H2-2E difference is +0.0108 on vbe_adder_3 with z = +2.38 and a two-sided p of 0.017. The repeat circuits were chosen after Table E2. The Holm-adjusted p is 0.035 over the two repeated circuits and 0.052 over all three H2-2E circuits. On grover_5 it is +0.0007 with z = +0.10 and is not resolved. It lies 2.94 sd below the predicted gain of 0.0229. Two more H2-2E jobs ran the 22-qubit family C adder vbe_adder_7 under P0 and P2 at 1000 shots. F_H is 0.886 under P0 and 0.897 under P2 with z = 0.79, not resolved. All 20 H2-2E jobs total 6598.0 HQC. Nothing in the report has run on hardware.
 
 `[O]` The emulator runs confirm execution and HQC accounting on the Quantinuum platform. The vbe_adder_3 difference is significant before correction and after correction over the two repeated circuits. The gain is not established at 0.05 after correction over all three H2-2E circuits. Elsewhere the P2 against P0 comparison rests on the ZZPhase counts and the Selene ensemble means.
+
+## Stronger baselines
+
+`[F]` pytket-quantinuum's default compilation is optimisation level 2, our P0. Against level 3 PSEL costs 9.92 % more on 14 B1 circuits and 8.37 % more on family C. Running teleport_reduce before level 3 and keeping the cheaper result saves 3.49 % and 2.34 % against level 3 (appendix Section 3.8.1).
+
+## Confirmatory emulator test
+
+`[F]` On the repeats r2 to r4 alone, run after the two circuits were chosen, vbe_adder_3 gives a difference of +0.0127 with z = +2.44 and a Holm-adjusted p of 0.030 over the two repeated circuits. The choice to report the repeats alone was made after the pooled result was known. Every circuit ran on the all-zero input.
 
 ## Table C2 finding
 

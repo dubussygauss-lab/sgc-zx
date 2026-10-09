@@ -1,6 +1,6 @@
 # Reproduction record
 
-Team Learned ZX Rewriting. Recorded 8 October 2026 in the development container and updated 9 October 2026. `code.zip` is `git archive` of commit `580b3ecd9d435099fd6ee552d3ca9860cfb69d88` with `submission/` excluded. The main report is `report.pdf`, built from `report/report_short.md`. The technical appendix is `report_full.pdf`, built from `report/report_v5.md` without its changelog sections. Run every command from the repository root. This page follows `README.md` and report Section 5. A clean-clone run of these steps is recorded in `results/repro_2026-10-08/repro_log.md`.
+Team Learned ZX Rewriting. Recorded 8 October 2026 in the development container and updated 9 October 2026. `code.zip` is `git archive` of commit `07e744915d129c7875f65eda3b847f493ce5f290` with `submission/` excluded. The main report is `report.pdf`, built from `report/report_short.md`. The technical appendix is `report_full.pdf`, built from `report/report_v5.md` without its changelog sections. Run every command from the repository root. This page follows `README.md` and report Section 5. A clean-clone run of these steps is recorded in `results/repro_2026-10-08/repro_log.md`.
 
 ## Environment
 
@@ -76,7 +76,7 @@ git -C third_party/pyzx-fork checkout e695d6d711e67b2b7223417c4714b6b1fcc09191
 
 ## Tests (logs in `build_logs/`)
 
-Rerun all twenty-two with `bash run_tests.sh` (repository root, also inside an unzipped `code.zip`). Seven run as scripts and fifteen under pytest. The results below are from the runs of 9 October 2026. Wall times vary between runs; those of the latest run are in `build_logs/tests_summary.txt`.
+Rerun all twenty-four with `bash run_tests.sh` (repository root, also inside an unzipped `code.zip`). Seven run as scripts and seventeen under pytest. The results below are from the runs of 9 October 2026. Wall times vary between runs; those of the latest run are in `build_logs/tests_summary.txt`.
 
 | File | Command | Result | Wall |
 |---|---|---|---|
@@ -102,6 +102,8 @@ Rerun all twenty-two with `bash run_tests.sh` (repository root, also inside an u
 | `pipelines/test_equiv_family_C.py` | `python -m pytest pipelines/test_equiv_family_C.py -q` | 2 passed | 2 s |
 | `submit/test_evidence_index.py` | `python -m pytest submit/test_evidence_index.py -q` | 3 passed | under 1 s |
 | `submit/test_famC_h22e.py` | `python -m pytest submit/test_famC_h22e.py -q` | 6 passed | 32 s |
+| `submit/test_h22e_confirmatory.py` | `python -m pytest submit/test_h22e_confirmatory.py -q` | 10 passed | see `build_logs/tests_summary.txt` |
+| `pipelines/test_strong_baselines.py` | `python -m pytest pipelines/test_strong_baselines.py -q` | 17 passed | see `build_logs/tests_summary.txt` |
 
 ## Rebuilding this package
 
