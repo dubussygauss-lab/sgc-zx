@@ -52,3 +52,5 @@ timestamp,platform,family,file,pipeline,shots,options,job_id,status,hqc_or_secon
 2026-10-08T21:18:49.606664Z,nexus:H2-2E,B1,vbe_adder_3.qasm,P0,1000,"{""noisy_simulation"": true}",AFByb3ZpZGVySm9iAaEdYjNvcqOEcN9YNr2S7A,COMPLETED,"{""duration"": 2}",results/emulator/nexus_H2-2E_r4/P0/vbe_adder_3.json
 2026-10-08T21:19:24.907058Z,nexus:H2-2E,B1,vbe_adder_3.qasm,P2,1000,"{""noisy_simulation"": true}",AFByb3ZpZGVySm9iAaEdYqgddNGsOWEAzIf6zg,COMPLETED,"{""duration"": 4}",results/emulator/nexus_H2-2E_r4/P2/vbe_adder_3.json
 2026-10-08T23:15:24.417142Z,nexus:H2-2SC,B1,tof_3.qasm,select:P2,1000,{},AFByb3ZpZGVySm9iAaEdzTywfrOWhGbnlXxd-w,COMPLETED,"{""duration"": null}",results/emulator/nexus_H2-2SC/notebook_select/tof_3.json
+2026-10-09T16:57:50.773833Z,nexus:H2-2E,C,vbe_adder_7.qasm,P0,1000,"{""noisy_simulation"": true}",AFByb3ZpZGVySm9iAaEhmeKbc_OjVQOEHS-ddA,COMPLETED,"{""duration"": 636}",results/emulator/nexus_H2-2E_famC/P0/vbe_adder_7.json
+2026-10-09T17:08:39.551937Z,nexus:H2-2E,C,vbe_adder_7.qasm,P2,1000,"{""noisy_simulation"": true}",AFByb3ZpZGVySm9iAaEho9Ofd-OloWOVOFZbIw,COMPLETED,"{""duration"": 347}",results/emulator/nexus_H2-2E_famC/P2/vbe_adder_7.json

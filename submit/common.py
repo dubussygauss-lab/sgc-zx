@@ -46,11 +46,11 @@ RESULTS = ROOT / "results"
 EMU_DIR = RESULTS / "emulator"
 LEDGER = RESULTS / "emulator_jobs.csv"
 BENCH = {"A": ROOT / "bench" / "family_A", "B1": ROOT / "bench" / "family_B1",
-         "B2": ROOT / "bench" / "family_B2"}
+         "B2": ROOT / "bench" / "family_B2", "C": ROOT / "bench" / "family_C"}
 
 PLATFORMS = ("nexus:H2-2SC", "nexus:H2-Emulator", "nexus:H2-2E")
 PIPELINES = tuple(cmp.PIPELINES)
-FAMILIES = ("A", "B1", "B2")
+FAMILIES = ("A", "B1", "B2", "C")
 
 LEDGER_COLUMNS = ["timestamp", "platform", "family", "file", "pipeline", "shots",
                   "options", "job_id", "status", "hqc_or_seconds", "result_path"]
@@ -135,6 +135,12 @@ def list_family(family: str, max_n: int | None = None) -> list[dict]:
                 out.append(dict(file=row["file"], model=row["file"][:-5], n=int(row["n"]),
                                 r="", disorder="", instance=""))
         out.sort(key=lambda d: d["file"])
+    elif family == "C":
+        with open(BENCH["C"] / "manifest.csv") as fh:
+            for row in csv.DictReader(fh):
+                out.append(dict(file=row["file"], model=row["file"][:-5], n=int(row["n_qubits"]),
+                                r="", disorder="", instance=""))
+        out.sort(key=lambda d: d["file"])
     elif family == "B2":
         for f in sorted(os.listdir(BENCH["B2"])):
             m = _B2_NAME.match(f)
@@ -183,11 +189,23 @@ def exact_probs(pipeline: str, file: str) -> np.ndarray:
     return cmp.probs_from_measured_qasm(compiled_path(pipeline, file).read_text())
 
 
+def written_probs(family: str, file: str) -> np.ndarray:
+    """Ideal Z-basis distribution of the bench circuit as written on |0..0>,
+    by the independent numpy simulator bench/sv.py (q[0] most significant)."""
+    if str(ROOT / "bench") not in sys.path:
+        sys.path.insert(0, str(ROOT / "bench"))
+    import sv
+    return sv.probabilities(sv.run_qasm((BENCH[family] / file).read_text())).reshape(-1)
+
+
 def reference_probs(family: str, file: str) -> np.ndarray:
     """Reference distribution as in noise/run_proxy.py: family A from the bench
-    .npy of the circuit as written; B1 / B2 from the P0ref compilation."""
+    .npy of the circuit as written; B1 / B2 from the P0ref compilation;
+    C from the circuit as written simulated by bench/sv.py (written_probs)."""
     if family == "A":
         return np.load(BENCH["A"] / (file[:-5] + ".npy"))
+    if family == "C":
+        return written_probs("C", file)
     return exact_probs("P0ref", file)
 
 

@@ -1,0 +1,19 @@
+job 1: 1 circuits, HQC estimate 370.40
+   P0    vbe_adder_7.qasm                         n=22  hqc=370.40
+job 2: 1 circuits, HQC estimate 294.40
+   P2    vbe_adder_7.qasm                         n=22  hqc=294.40
+
+platform nexus:H2-2E family C shots 1000 options {"noisy_simulation": true}
+jobs: 2  circuits: 2  total HQC estimate: 664.80
+submitted job AFByb3ZpZGVySm9iAaEhmeKbc_OjVQOEHS-ddA with 1 circuits
+[runner stopped at 2026-10-09T17:08:10Z while P0 job AFByb3ZpZGVySm9iAaEhmeKbc_OjVQOEHS-ddA was WAITING in the H2-2E queue; P0 fetched later with submit/fetch_job.py, P2 submitted by a second run_emulator.py call below]
+job 1: 1 circuits, HQC estimate 294.40
+   P2    vbe_adder_7.qasm                         n=22  hqc=294.40
+
+platform nexus:H2-2E family C shots 1000 options {"noisy_simulation": true}
+jobs: 1  circuits: 1  total HQC estimate: 294.40
+submitted job AFByb3ZpZGVySm9iAaEho9Ofd-OloWOVOFZbIw with 1 circuits
+[fetch_job.py for P0 at 2026-10-09T17:19:36Z]
+job AFByb3ZpZGVySm9iAaEhmeKbc_OjVQOEHS-ddA: 1 circuits on nexus:H2-2E, shots 1000
+job AFByb3ZpZGVySm9iAaEhmeKbc_OjVQOEHS-ddA COMPLETED cost {'duration': 636} rows 1
+job AFByb3ZpZGVySm9iAaEho9Ofd-OloWOVOFZbIw COMPLETED cost {'duration': 347} rows 1

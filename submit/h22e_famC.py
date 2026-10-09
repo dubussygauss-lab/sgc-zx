@@ -1,0 +1,109 @@
+"""Statistics of the family C H2-2E run: vbe_adder_7 (22 qubits) under P0 and P2.
+
+Inputs (all under results/)
+  emulator/nexus_H2-2E_famC/<pipeline>/vbe_adder_7.json   counts, job_id, hqc_estimate
+  emulator_nexus_H2-2E_famC.csv                            one row per job (run_emulator.py)
+  emulator_jobs.csv                                        job ledger
+
+The run tag famC keeps these payloads out of the nexus_H2-2E_r* glob of
+h22e_pooled.py, so Table E3 and value/finals_plan.py are unchanged.
+
+What it computes (same formulas as h22e_stats.compute, Table E2)
+  reference  ideal distribution of bench/family_C/vbe_adder_7.qasm as written on
+             |0..0>, by bench/sv.py (common.written_probs).
+  F_H        Hellinger fidelity of the returned counts to the reference.
+  sd F_H     binomial sqrt(F (1 - F) / N) when the reference has a single
+             outcome, otherwise the sd over BOOT multinomial bootstrap resamples
+             with seed SEED (h22e_stats conventions).
+  dF         F_H(P2) - F_H(P0), sd = hypot of the two sds, z = dF / sd.
+  hqc        hqc_estimate of each payload (pipelines/compile.py:hqc formula).
+
+Run from the repository root:
+
+    python3 submit/h22e_famC.py
+"""
+
+import json
+import os
+import sys
+
+import numpy as np
+import pandas as pd
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import common  # noqa: E402
+import h22e_stats  # noqa: E402
+
+RESULTS = h22e_stats.RESULTS
+PLATFORM = "nexus:H2-2E"
+RUN_DIR = os.path.join(RESULTS, "emulator", "nexus_H2-2E_famC")
+CSV = os.path.join(RESULTS, "emulator_nexus_H2-2E_famC.csv")
+LEDGER = h22e_stats.LEDGER
+FILE = "vbe_adder_7.qasm"
+PIPELINES = ["P0", "P2"]
+
+
+def load_payload(pipeline: str, file: str = FILE) -> dict:
+    with open(os.path.join(RUN_DIR, pipeline, file[:-5] + ".json")) as f:
+        return json.load(f)
+
+
+def compute(ref=None) -> dict:
+    """{"rows": DataFrame per pipeline, "dF", "sd_diff", "z", "hqc_total",
+    "support", "ref_nonzero"}.  ref may be passed to skip the 22-qubit
+    simulation of the circuit as written."""
+    if ref is None:
+        ref = common.written_probs("C", FILE)
+    n_q = int(np.log2(len(ref)))
+    support = int((ref > h22e_stats.SUPPORT_TOL).sum())
+    e = pd.read_csv(CSV)
+    ledger = pd.read_csv(LEDGER)
+    ledger = ledger[ledger.platform == PLATFORM]
+    rng = np.random.default_rng(h22e_stats.SEED)
+    rows = []
+    for pipe in PIPELINES:
+        d = load_payload(pipe)
+        assert d["platform"] == PLATFORM and d["file"] == FILE and d["pipeline"] == pipe
+        assert d["options"] == {"noisy_simulation": True}
+        r = e[(e.file == FILE) & (e.pipeline == pipe) & (e.job_id == d["job_id"])]
+        assert len(r) == 1
+        r = r.iloc[0]
+        c = h22e_stats.counts_vector(d["counts"], n_q)
+        N = int(c.sum())
+        assert N == int(d["shots"]) == int(r.shots) == 1000
+        phat = c / N
+        f = h22e_stats.hellinger_fidelity(phat, ref)
+        if support == 1:
+            sd, method = float(np.sqrt(f * (1 - f) / N)), "binomial"
+        else:
+            boot = rng.multinomial(N, phat, size=h22e_stats.BOOT) / N
+            sd, method = float((np.sum(np.sqrt(boot * ref[None, :]), axis=1) ** 2).std(ddof=1)), "bootstrap"
+        led = ledger[(ledger.file == FILE) & (ledger.pipeline == pipe) & (ledger.job_id == d["job_id"])]
+        assert len(led) == 1 and led.status.iloc[0] == "COMPLETED"
+        rows.append({"file": FILE, "pipeline": pipe, "n_qubits": n_q, "n_2q": int(r.n_2q),
+                     "support": support, "shots": N, "hqc": float(d["hqc_estimate"]),
+                     "duration": d["cost_fields"].get("duration"), "job_id": d["job_id"],
+                     "F_H": f, "F_H_csv": float(r.F_H), "F_H_json": float(d["F_H"]),
+                     "ideal_vs_ref_maxdiff": float(r.ideal_vs_ref_maxdiff),
+                     "sd": sd, "sd_method": method})
+    t = pd.DataFrame(rows)
+    a0, a2 = t.iloc[0], t.iloc[1]
+    dF = float(a2.F_H - a0.F_H)
+    sd = float(np.hypot(a0.sd, a2.sd))
+    return {"rows": t, "dF": dF, "sd_diff": sd, "z": dF / sd, "dN_2q": int(a0.n_2q - a2.n_2q),
+            "hqc_total": float(t.hqc.sum()), "support": support,
+            "ref_nonzero": [format(int(i), "0%db" % n_q) for i in np.flatnonzero(ref > h22e_stats.SUPPORT_TOL)]}
+
+
+def main():
+    r = compute()
+    pd.set_option("display.width", 200)
+    print(r["rows"].to_string(index=False))
+    print("reference: %d nonzero basis state(s) %s" % (r["support"], r["ref_nonzero"]))
+    print("dF = F_H(P2) - F_H(P0) = %+.4f, sd %.4f, z %.2f, dN_2q %d"
+          % (r["dF"], r["sd_diff"], r["z"], r["dN_2q"]))
+    print("HQC estimate of the two jobs %.1f" % r["hqc_total"])
+
+
+if __name__ == "__main__":
+    main()

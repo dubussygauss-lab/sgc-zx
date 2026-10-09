@@ -86,7 +86,11 @@ def test_pairs(res):
 
 def test_hqc_sum(res):
     done = sub = 0.0
+    # Table E2/E3 runs only: nexus_H2-2E and nexus_H2-2E_r<k> (the family C run, nexus_H2-2E_famC,
+    # is outside Table E3 and is counted in submit/test_evidence_index.py)
     for p in glob.glob(os.path.join(hp.EMU, "nexus_H2-2E*", "P*", "*.json")):
+        if not re.fullmatch(r"nexus_H2-2E(_r\d+)?", Path(p).parts[-3]):
+            continue
         x = json.load(open(p))
         sub += x["hqc_estimate"]
         if x.get("counts") and not x.get("error"):

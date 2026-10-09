@@ -9,7 +9,8 @@ one mapping per program in submission order (aqora/qpu.py docstrings).  For
 every circuit the counts are saved to
 results/emulator/<platform>/<pipeline>/<file>.json, F_H and TVD are computed
 against the reference distribution (family A: bench .npy of the circuit as
-written; B1/B2: P0ref compilation, both as noise/run_proxy.py), and a row
+written; B1/B2: P0ref compilation, both as noise/run_proxy.py; C: the bench
+circuit as written simulated on |0..0> by bench/sv.py), and a row
 with the proxy-CSV columns + job_id, shots is appended to
 results/emulator_<platform>.csv so model/cost_model.py reruns unchanged.
 """
