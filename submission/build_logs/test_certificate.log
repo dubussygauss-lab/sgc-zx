@@ -68,4 +68,4 @@ PASS  qasm: word = reversed time order (unitary of circuit)
 PASS  qasm rejects rz 
 PASS  qasm round trip of a random 3-qubit word 
 
-69/69 checks passed in 44.0s
+69/69 checks passed in 43.6s

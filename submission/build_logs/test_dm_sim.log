@@ -13,7 +13,7 @@ PASS test_p1_depolarising_formula
 PASS test_qasm_parser
 PASS test_rz_virtual_flag
 PASS test_spam
-  n=8, 500 gates (ideal + noisy run): 4.97 s, F_H=0.9831, TVD=0.0795
+  n=8, 500 gates (ideal + noisy run): 4.50 s, F_H=0.9831, TVD=0.0795
 PASS test_timing_n8
 PASS test_zzmax_depolarised
 17/17 passed

@@ -1,6 +1,6 @@
 # Reproduction record
 
-Team Learned ZX Rewriting. Recorded 8 October 2026 in the development container and updated 9 October 2026. `code.zip` is `git archive` of commit `05f1363473982035cd0bf8d4f6078dffa994f25c` with `submission/` excluded. The main report is `report.pdf`, built from `report/report_short.md`. The technical appendix is `report_full.pdf`, built from `report/report_v5.md` without its changelog sections. Run every command from the repository root. This page follows `README.md` and report Section 5. A clean-clone run of these steps is recorded in `results/repro_2026-10-08/repro_log.md`.
+Team Learned ZX Rewriting. Recorded 8 October 2026 in the development container and updated 9 October 2026. `code.zip` is `git archive` of commit `bcee97aaec7133f13bbd73db564cfbb6c6e05c3f` with `submission/` excluded. The main report is `report.pdf`, built from `report/report_short.md`. The technical appendix is `report_full.pdf`, built from `report/report_v5.md` without its changelog sections. Run every command from the repository root. This page follows `README.md` and report Section 5. A clean-clone run of these steps is recorded in `results/repro_2026-10-08/repro_log.md`.
 
 ## Environment
 
@@ -76,7 +76,7 @@ git -C third_party/pyzx-fork checkout e695d6d711e67b2b7223417c4714b6b1fcc09191
 
 ## Tests (logs in `build_logs/`)
 
-Rerun all twenty-six with `bash run_tests.sh` (repository root, also inside an unzipped `code.zip`). Eight run as scripts and eighteen under pytest. The results below are from the runs of 9 October 2026. Wall times vary between runs; those of the latest run are in `build_logs/tests_summary.txt`.
+Rerun all twenty-seven with `bash run_tests.sh` (repository root, also inside an unzipped `code.zip`). Eight run as scripts and nineteen under pytest. The results below are from the runs of 9 October 2026. Wall times vary between runs; those of the latest run are in `build_logs/tests_summary.txt`.
 
 | File | Command | Result | Wall |
 |---|---|---|---|
@@ -106,6 +106,7 @@ Rerun all twenty-six with `bash run_tests.sh` (repository root, also inside an u
 | `pipelines/test_strong_baselines.py` | `python -m pytest pipelines/test_strong_baselines.py -q` | 17 passed | see `build_logs/tests_summary.txt` |
 | `pipelines/test_psel4.py` | `python pipelines/test_psel4.py` | all tests passed | see `build_logs/tests_summary.txt` |
 | `pipelines/test_equiv_psel4_C.py` | `python -m pytest pipelines/test_equiv_psel4_C.py -q` | 3 passed | see `build_logs/tests_summary.txt` |
+| `value/test_zx_classifier.py` | `python -m pytest value/test_zx_classifier.py -q` | 5 passed | see `build_logs/tests_summary.txt` |
 
 ## Rebuilding this package
 

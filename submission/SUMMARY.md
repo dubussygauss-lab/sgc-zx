@@ -74,6 +74,14 @@ Team Learned ZX Rewriting. Report title: "A pass selector keeps ZX rewriting onl
 
 `[F]` pytket-quantinuum's default compilation is optimisation level 2, our P0. Against level 3 PSEL costs 9.92 % more on 14 B1 circuits and 8.37 % more on family C. Running teleport_reduce before level 3 and keeping the cheaper result saves 3.49 % and 2.34 % against level 3 (appendix Section 3.8.1). The level-3-aware selector PSEL4 keeps the lowest HQC of P0, P2, L3 and P2L3. It costs no more than either level on all 217 circuits where both passed. It saves 3.50 % against level 3 and 25.85 % against level 2 on family C. A PyZX miter proves its output on 17 of these 20 circuits. On those 17 it saves 0.80 % against level 3 and 10.22 % against level 2 (appendix Table P4).
 
+## Learned gate
+
+`[F]` A classifier on input-circuit features (`value/zx_classifier.md`) predicts whether P2 is cheaper than P0. With a whole family held out it does not beat always P0 or always P2 in balanced accuracy or regret. As a gate the logistic regression skips 123 of 245 ZX compilations for 46.6 HQC of lost saving.
+
+## Related work
+
+`[O]` Learned ZX rewriters (Nägele and Marquardt, Riu et al.) and Quarl minimise node or gate counts. None of them prices its output with the H2 HQC formula. This submission adds no new rewriter. It adds a measured HQC ledger on H2 against the official pytket-quantinuum pass with equivalence proofs (appendix Section 3.4.1).
+
 ## Confirmatory emulator test
 
 `[F]` On the repeats r2 to r4 alone, run after the two circuits were chosen, vbe_adder_3 gives a difference of +0.0127 with z = +2.44 and a Holm-adjusted p of 0.030 over the two repeated circuits. The choice to report the repeats alone was made after the pooled result was known. Every circuit ran on the all-zero input.
