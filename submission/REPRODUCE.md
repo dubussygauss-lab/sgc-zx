@@ -1,6 +1,6 @@
 # Reproduction record
 
-Team Learned ZX Rewriting. Recorded 8 October 2026 in the development container. `code.zip` is `git archive` of commit `1a3185b799eee911cf6ffc3ae89f1a8ed568cf90`. Run every command from the repository root. This page follows `README.md` and report Section 5. A clean-clone run of these steps is recorded in `results/repro_2026-10-08/repro_log.md`.
+Team Learned ZX Rewriting. Recorded 8 October 2026 in the development container and updated 9 October 2026. `code.zip` is `git archive` of commit `fffac06316520bdeb203caed33df5ffd580eed58`. The main report is `report.pdf`, built from `report/report_short.md`. The technical appendix is `report_full.pdf`, built from `report/report_v5.md` without its changelog sections. Run every command from the repository root. This page follows `README.md` and report Section 5. A clean-clone run of these steps is recorded in `results/repro_2026-10-08/repro_log.md`.
 
 ## Environment
 
@@ -58,6 +58,11 @@ git -C third_party/pyzx-fork checkout e695d6d711e67b2b7223417c4714b6b1fcc09191
 | Table S2 | `HTTPS_PROXY= https_proxy= HTTP_PROXY= http_proxy= NO_PROXY= no_proxy= python selene/run_selene_depol_full.py --procs 2 --shots 2000`, then `python selene/summarise_depol_full.py` |
 | Tables M1, M2, Figure 4 | `python model/cost_model.py` |
 | Section 4.7 table | `python model/build_selene_cost_inputs.py`, `python model/cost_model.py --family-a results/cost_model_selene_input_A.csv --family-b results/cost_model_selene_input_B1.csv --prefix selene_`, then `python model/report_selene_cost.py` |
+| Family C selector, Tables 1.1b and C3 | `python value/family_C_selector.py` |
+| Grover use case, Table U1 | `python value/usecase.py` |
+| Family C circuits, compilation and basis check | `python bench/build_family_C.py`, `python pipelines/run_family_C.py --workers 2`, then `python pipelines/run_family_C.py --check` |
+| Use-case circuits | `python bench/usecase/build_usecase.py` |
+| Official baseline comparison | `python pipelines/official_baseline.py run`, then `python pipelines/official_baseline.py report` |
 | Section 1 value ledger, Tables 1.1 and 1.2 | `python value/value_ledger.py`, then `python value/value_by_application.py` |
 | Table 1.1a, pass selector PSEL totals | `python value/selector_ledger.py` (reads `value/value_ledger.csv` and `results/family_B2_counts.csv`) |
 | Pass selector PSEL on new circuits | `python pipelines/pass_select.py [--shots N] [--candidates P0,P2] <qasm files>` |
@@ -67,28 +72,33 @@ git -C third_party/pyzx-fork checkout e695d6d711e67b2b7223417c4714b6b1fcc09191
 
 ## Tests (logs in `build_logs/`)
 
-Rerun all fourteen with `bash submission/run_tests.sh`. Seven run as scripts and seven under pytest. The results below are from the run of 9 October 2026 stored in `build_logs/tests_summary.txt`.
+Rerun all nineteen with `bash submission/run_tests.sh`. Seven run as scripts and twelve under pytest. The results below are from the run of 9 October 2026 stored in `build_logs/tests_summary.txt`.
 
 | File | Command | Result | Wall |
 |---|---|---|---|
-| `bench/test_gen_trotter.py` | `python bench/test_gen_trotter.py` | 12/12 passed | 64 s |
-| `noise/test_dm_sim.py` | `python noise/test_dm_sim.py` | 17/17 passed | 5 s |
-| `barrier/test_certificate.py` | `python barrier/test_certificate.py` | 69/69 checks passed | 43 s |
-| `pipelines/test_compile.py` | `python pipelines/test_compile.py` | 6/6 passed | 3 s |
-| `pipelines/test_pass_select.py` | `python pipelines/test_pass_select.py` | 3/3 passed | 7 s |
-| `model/test_cost_model.py` | `python model/test_cost_model.py` | 7/7 passed | 1 s |
-| `report/test_c2_literature.py` | `python report/test_c2_literature.py` | all checks passed | under 1 s |
-| `selene/test_selene.py` | proxy variables cleared, `python -m pytest selene/test_selene.py -q` | 6 passed | 9 s |
+| `bench/test_gen_trotter.py` | `python bench/test_gen_trotter.py` | 12/12 passed | 55 s |
+| `noise/test_dm_sim.py` | `python noise/test_dm_sim.py` | 17/17 passed | 4 s |
+| `barrier/test_certificate.py` | `python barrier/test_certificate.py` | 69/69 checks passed | 30 s |
+| `pipelines/test_compile.py` | `python pipelines/test_compile.py` | 6/6 passed | 2 s |
+| `pipelines/test_pass_select.py` | `python pipelines/test_pass_select.py` | 3/3 passed | 4 s |
+| `model/test_cost_model.py` | `python model/test_cost_model.py` | 7/7 passed | under 1 s |
+| `report/test_c2_literature.py` | `python report/test_c2_literature.py` | all checks passed | 1 s |
+| `selene/test_selene.py` | proxy variables cleared, `python -m pytest selene/test_selene.py -q` | 6 passed | 23 s |
 | `submit/test_submit.py` | `python -m pytest submit/test_submit.py -q` | 11 passed (offline, no credentials) | 4 s |
-| `submit/test_h22e_stats.py` | `python -m pytest submit/test_h22e_stats.py -q` | 7 passed | 5 s |
-| `submit/test_h22e_pooled.py` | `python -m pytest submit/test_h22e_pooled.py -q` | 10 passed | 11 s |
-| `value/test_value_ledger.py` | `python -m pytest value/test_value_ledger.py -q` | 5 passed | 3 s |
-| `value/test_value_by_application.py` | `python -m pytest value/test_value_by_application.py -q` | 5 passed | 2 s |
-| `value/test_selector_ledger.py` | `python -m pytest value/test_selector_ledger.py -q` | 4 passed | 2 s |
+| `submit/test_h22e_stats.py` | `python -m pytest submit/test_h22e_stats.py -q` | 7 passed | 3 s |
+| `submit/test_h22e_pooled.py` | `python -m pytest submit/test_h22e_pooled.py -q` | 10 passed | 8 s |
+| `value/test_value_ledger.py` | `python -m pytest value/test_value_ledger.py -q` | 5 passed | 2 s |
+| `value/test_value_by_application.py` | `python -m pytest value/test_value_by_application.py -q` | 5 passed | 1 s |
+| `value/test_selector_ledger.py` | `python -m pytest value/test_selector_ledger.py -q` | 4 passed | 1 s |
+| `report/test_notebook_submit.py` | `python -m pytest report/test_notebook_submit.py -q` | 20 passed | 1 s |
+| `value/test_finals_plan.py` | `python -m pytest value/test_finals_plan.py -q` | 5 passed | 7 s |
+| `pipelines/test_official_baseline.py` | `python -m pytest pipelines/test_official_baseline.py -q` | 10 passed | 12 s |
+| `value/test_family_C_selector.py` | `python -m pytest value/test_family_C_selector.py -q` | 5 passed | 2 s |
+| `value/test_usecase.py` | `python -m pytest value/test_usecase.py -q` | 7 passed | 36 s |
 
 ## Rebuilding this package
 
-`bash submission/build.sh` (add `--tests` to rerun the tests). The script writes `report.md` from `report/report_v5.md` without the changelog sections, renders `report.pdf`, checks that Tables 1.1a, 1.1, C2, E1 and E2 render every row and that no `[PENDING` or `TBD` remains, rebuilds `code.zip` with `git archive HEAD`, checks the archive for credential files and token strings, runs `check_summary_numbers.py` and writes `MANIFEST.txt`. Nothing is uploaded.
+`bash submission/build.sh` (add `--tests` to rerun the tests). The script first runs `report/check_short_numbers.py` on `report/report_short.md`. It copies that file to `report.md` and renders `report.pdf`. It writes `report_full.md` from `report/report_v5.md` without the changelog sections and renders `report_full.pdf`. For each PDF it checks that no `[PENDING`, `TBD` or `Changelog` remains and that the main tables render every row (`check_pdf_tables.py --set short` for Tables 1 to 4b, the official-baseline, use-case and finals-plan tables, `--set full` for Tables 1.1a, 1.1, C2, E1 and E2). It rebuilds `code.zip` with `git archive HEAD` and checks that this page names HEAD as the `code.zip` commit. It checks the archive for credential files and token strings, runs `check_summary_numbers.py` and writes `MANIFEST.txt`. Nothing is uploaded.
 
 ## Rubric evidence map (Engineering and Reproducibility)
 

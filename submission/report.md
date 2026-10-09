@@ -1,955 +1,315 @@
 # A pass selector keeps ZX rewriting only where it lowers the cost of a circuit on Quantinuum H2
 
-Team Learned ZX Rewriting. Quantinuum Singapore Grand Challenge, submission 1, report version 5 (9 October 2026).
+Team Learned ZX Rewriting: C.-F. Kam, A. Mahasinghe, D. De Silva, N. Karunarathne, F. Cadet, M. Bessafi and K. De Silva. Quantinuum Singapore Grand Challenge, submission 1, judge-facing report. The full report v5 is attached as the technical appendix `report_full.pdf` and is cited below as "Appendix" with its section numbers.
 
-Tags: `[F]` marks a statement verifiable from an artifact in the repository or from the cited source. `[O]` marks a judgement or a plan. Every number in a results table of Section 3 is produced by `report/make_tables.py` from `results/*.csv`. The emulator runs are reported in Sections 3.7 and 3.7.1.
+`[F]` Tags. `[F]` marks a statement that can be checked against a file in the repository or a cited source. `[O]` marks a judgement or a plan. Every number in this report appears in the full report or in the script outputs it names under `value/` and `results/`. `report/check_short_numbers.py` checks this.
 
-## Scoring map
+| Rubric criterion | Weight | Section here | Appendix |
+|---|---|---|---|
+| Problem & Value | 30 % | 1 | 1, 1.1 to 1.5, 3.8, 3.9 |
+| Technical Performance & Hardware Use | 30 % | 3, 6 | 2.2, 3, 3.6, 3.7, 3.7.1, 3.8, 3.9, 6 |
+| Scientific Merit | 20 % | 2.5, 4 | 2.5, 3.4 |
+| Engineering & Reproducibility | 20 % | 5 | 5 |
 
-`[F]` The four criteria and their weights are those of the track rubric, read from the Aqora GraphQL API on 8 October 2026 and stored in `docs/rubric.md`. `[O]` The table assigns the evidence for each criterion to a section of this report.
+## Summary
 
-| Criterion | Weight | Where the evidence is |
-|---|---|---|
-| Problem & Value | 30 % | Section 1, Section 7 |
-| Technical Performance & Hardware Use | 30 % | Section 1.2 and Table 1.1a for the pass selector PSEL from `value/selector_ledger.md`, Section 3 (count tables A1 to B2 and the count-only table B1x, proxy tables A4 and A5, Selene tables S1 and S2, H2-Emulator table E1, H2-2E tables E2 and E3), Section 2.6 and `results/selene.md` for the Selene runs, Sections 3.7 and 3.7.1 and `results/emulator_jobs.csv` for the platform jobs, Section 6 for the H2 hardware plan of the finals, notebook `report/notebook_skeleton.py` |
-| Scientific Merit | 20 % | Section 2.5 (certificate), Section 3.4 and `results/certificates.md`, arXiv:2608.22801 and arXiv:2608.22810 |
-| Engineering & Reproducibility | 20 % | Section 5 (environment, seeds, script table, test table, verification reports), `pipelines/pass_select.py` with `pipelines/test_pass_select.py`, `value/selector_ledger.py` with `value/test_selector_ledger.py`, `README.md`, the tests under `bench/`, `noise/`, `barrier/`, `pipelines/`, `selene/`, `model/`, `submit/` and `value/`, Section 4.7 for the refit command |
+`[F]` We deliver PSEL, a pass selector in `pipelines/pass_select.py`. For each circuit it compiles once with P0 and once with P2 and keeps the result with the lower H2 cost in HQC. P0 is the Quantinuum default pass of pytket at optimisation level 2. P2 runs PyZX teleport_reduce before P0. Our P0 gives the same counts as the official pytket-quantinuum default pass on all 445 compiled rows. PSEL cannot cost more than P0 where P0 passes the exactness check. On 15 application-scale circuits of 20 to 56 qubits without continuous rotation angles it saves 748.4 of 10,019.6 HQC or 7.47 % against P0. Over all 20 application-scale circuits it saves 4104.4 HQC or 16.7 %. The saving is 12.9 % on adders and 34.5 % on multipliers. The 34.5 % comes from two multipliers with continuous rotation angles. It is 0.1 % on multi-controlled Toffolis and 0 on QFT adders. These 20 circuits are count-only and 14 of them are spot-checked on 64 random basis inputs. On two exact Grover search instances PSEL saves 5.42 % and 4.96 % of the HQC. On the H2-2E emulator P2 raises the Hellinger fidelity of vbe_adder_3 by 0.0108 at 4000 shots per pipeline with z = +2.38. A certified T-count floor from the team's exactness-barrier theorem bounds what any exact rewrite can still remove. `[O]` PSEL tells an H2 user per circuit whether ZX rewriting pays, and it never answers at a loss against P0.
 
 ## 1. Problem and value
 
-`[F]` The HQC, shot and T-count numbers below come from the script outputs `value/selector_ledger.md`, `value/value_ledger.md` and `value/value_by_application.md`. The noise parameters come from `docs/platform_notes.md` section 3.3. Manuscript statements are cited by their labels in arXiv:2608.22801. P0 is pytket's Quantinuum pass at level 2. P2 runs PyZX teleport_reduce before that pass. The pass selector PSEL compiles each circuit with P0 and with P2 and keeps the result with the lower HQC. HQC figures are for 1000 shots.
+### 1.1 User, decision and tool
 
-- `[F]` Tool. The delivered tool is the pass selector PSEL in `pipelines/pass_select.py`. It compiles each circuit with P0 and with P2 and keeps the compiled circuit with the lower HQC.
-- `[F]` H2 cost. PSEL cannot cost more HQC than P0 on a circuit where P0 passes the exactness check, because P0 is always one of its two candidates. This holds by construction and is not a measured result. PSEL picks P2 on 14 of the 15 checked B1 circuits and saves 743.6 HQC or 4.79 % there. It picks P2 on 57 of the 180 circuits of family A and saves 46.0 HQC or 0.28 %. It never raises n_2q against P0 on any of the 223 circuits of the four families. P2 run on every family A circuit would cost 6.27 % more than P0.
-- `[O]` User. A team that runs Clifford+T subroutines on Quantinuum H2 under a fixed HQC budget and will later price them on a fault-tolerant Helios.
-- `[O]` Decision. Should this circuit go through ZX rewriting before pytket's Quantinuum pass? `[F]` PSEL takes this decision per circuit from the HQC of both compilations.
-- `[F]` Fault-tolerant cost. Against the written input circuits ZX removes 2,862 of 7,048 T gates on B1. Each T gate is one magic state, so the saving against the written circuits is 40.6 %. Our T-count after ZX equals the best ancilla-free value in the six papers of Section 3.4 on 14 of 22 comparable B1 and B1x circuits and is above it on the other 8 (Table C2). On the four B1 circuits with a certificate the certified fraction of the remaining T-count is 0.443. The fraction 0.997 holds for the 20 synthesised B2 Haar circuits at n = 2 and 3 and not for the B1 circuits.
-- `[F]` Algorithms. Every circuit except hwb6, hwb8 and the two ham15 circuits is an adder, multiplier, Fourier transform, oracle, search instance or multi-controlled Toffoli. The adders, multipliers and the Fourier transform come from factoring and discrete-log circuits. grover_5 and mod5_4 come from search (Section 1.4). `[O]` The Toffoli circuits are placed in search as oracle and diffusion parts.
+- `[O]` User. A team that runs Clifford+T subroutines on Quantinuum H2 from a fixed HQC budget and will later price the same subroutines on a fault-tolerant machine.
+- `[O]` Decision. Should this circuit go through ZX rewriting before pytket's Quantinuum pass?
+- `[F]` Tool. PSEL takes this decision per circuit from the HQC of both compilations. An HQC tie goes to the lower two-qubit count n_2q. A further tie goes to P0. A candidate that fails the exactness check is dropped (Appendix 2.2).
+- `[F]` Guarantee. P0 is always one of the two candidates. PSEL therefore cannot cost more HQC than P0 on a circuit where P0 passes the check. This holds by construction and is not a measured result.
+- `[F]` Need for a selector. Running P2 on every circuit is not safe. On the 180 Trotter circuits of family A P2 alone would cost 1,030.4 HQC or 6.27 % more than P0. On the 60 XXZ circuits it would raise the total by 12.33 %. PSEL keeps P0 on all 60 of them.
+- `[F]` User validation. No user interview or survey is part of this submission. `[O]` The need rests on the H2 cost formula and on the algorithm literature cited in Appendix 1.4.
 
-### 1.1 The user and the decision
+### 1.2 Savings by application on H2
 
-`[O]` The user pays each H2 run in HQC from a fixed budget. On a fault-tolerant machine the same subroutines are priced in T gates. `[F]` The track budget is 10,000 HQC per team on H2-1E and H2-2E according to the Aqora forum topic "Emulator Cost" by Irfan Khan of Quantinuum (Section 3.7). No copy is in the repository.
+`[F]` Table 1. HQC at 1000 shots of P0 and PSEL. Family C is count-only above 20 qubits and is reported per application (`value/family_C_selector.md`, Appendix Table 1.1b). B1 is the checked Clifford+T benchmark set with n <= 12 (`value/selector_ledger.md`, Appendix Table 1.1a). The two multipliers and the three QFT adders carry continuous rotation angles. The row without continuous angles holds the 9 adders and the 6 MCX oracles.
 
-`[F]` The decision is made per circuit between P0 alone and the ZX stage followed by P0. PSEL takes it from the HQC of both compilations. `[O]` The ledger explains the decision in HQC and in magic states and shows where the answer is no.
+| Application | Family | Circuits | Qubits | PSEL picks P2 | HQC P0 | HQC PSEL | Saved | Saved % |
+|---|---|---|---|---|---|---|---|---|
+| Adder | C | 9 | 20-56 | 9 | 5777.0 | 5031.4 | 745.6 | 12.9 |
+| Grover oracle (MCX) | C | 6 | 21-56 | 3 | 4242.6 | 4239.8 | 2.8 | 0.1 |
+| Family C without continuous angles | C | 15 | 20-56 | 12 | 10019.6 | 9271.2 | 748.4 | 7.47 |
+| Multiplier, continuous angles | C | 2 | 21-24 | 2 | 9737.0 | 6381.0 | 3356.0 | 34.5 |
+| QFT adder, continuous angles | C | 3 | 20-56 | 0 | 4778.4 | 4778.4 | 0.0 | 0.0 |
+| All of family C | C | 20 | 20-56 | 14 | 24535.0 | 20430.6 | 4104.4 | 16.7 |
+| Clifford+T benchmarks | B1 | 15 | 5-12 | 14 | 15,516.0 | 14,772.4 | 743.6 | 4.79 |
 
-`[F]` No user interview or survey is part of this submission. `[O]` The need rests on the H2 cost formula and on the algorithm literature of Section 1.4. None of the six papers of Section 3.4 compares ZX rewriting against pytket's Quantinuum pass on the native H2 gate set.
+`[F]` Shots. With one 10,000 HQC budget per circuit PSEL affords between 0 and 7,159 more shots per circuit. The budget allows at most 10,000 shots per job and charges 5 HQC per job. vbe_adder_7 gains the most. Shot gains belong to single circuits and are not summed.
 
-### 1.2 What the pipeline saves on H2 today
+`[F]` Table 1b. P2 against P0 on the checked B1 circuits by application area (Appendix Table 1.1, `value/value_by_application.md`). PSEL equals P2 on every B1 circuit except qft_4, where P2 costs 0.4 HQC more and PSEL keeps P0.
 
-`[F]` The organisers' sample code prices an H2 program as HQC = 5 + N_shots (N_1q + 10 N_2q + 5 N_M) / 5000. N_1q counts PhasedX gates. N_2q counts ZZPhase and ZZMax gates. N_M counts initialisations, measurements and resets. Rz gates are free. The source is `estimate_cost` in `src/python/pytket_cost_estimation.py` of `Quantinuum/sg_grand_challenge`. `pipelines/compile.py:hqc` reproduces that function. `[O]` We take this as the H2 price. `[F]` The Helios costing page gives the same form with maxima over 10 shots in its equation (1). See Reference 6 and `docs/platform_notes.md` section 3.4.
-
-`[F]` p2 = 1.29e-3 is the largest gate fault rate of the H2-2E emulator. The H2-2E emulator parameters are p2 = 1.29e-3 and p1 = 7.3e-5 per gate, readout flips 9e-4 and 1.8e-3 for states 0 and 1 and p_init = 4e-5 (`docs/platform_notes.md` section 3.3).
-
-`[F]` The tool we deliver is the pass selector PSEL in `pipelines/pass_select.py`. It compiles each circuit with P0 and with P2 and keeps the compiled circuit with the lower HQC. An HQC tie goes to the lower n_2q and a further tie goes to P0. A candidate that fails the exactness check of `pipelines/compile.py:check` is dropped. Section 2.2 defines PSEL next to the other pipelines.
-
-`[F]` Table 1.1a. HQC at 1000 shots of PSEL against P0 and P2, per family. B1x is count-only and is never merged with B1. Saved % is computed on the family sums. The median is over per-circuit percentages against P0. Source: `value/selector_ledger.md`, computed from the P0 and P2 rows of `value/value_ledger.csv` and `results/family_B2_counts.csv`.
-
-| Family | Circuits | PSEL picks P2 | HQC P0 | HQC P2 | HQC PSEL | Saved vs P0 | Saved vs P0 % | Saved vs P2 | Median per-circuit % vs P0 |
-|---|---|---|---|---|---|---|---|---|---|
-| A, Trotter | 180 | 57 | 16,422.6 | 17,453.0 | 16,376.6 | 46.0 | 0.28 | 1,076.4 | 0.00 |
-| B1, checked | 15 | 14 | 15,516.0 | 14,772.8 | 14,772.4 | 743.6 | 4.79 | 0.4 | 3.94 |
-| B1x, count-only | 8 | 7 | 3,288.8 | 3,141.0 | 3,141.0 | 147.8 | 4.49 | 0.0 | 2.40 |
-| B2, Haar | 20 | 0 | 730.0 | 731.6 | 730.0 | 0.0 | 0.00 | 1.6 | 0.00 |
-
-`[F]` PSEL costs more HQC than P0 only if P0 is dropped by an error or by the exactness check. No P0 row of the four families was dropped. The four families hold 223 circuits. PSEL saves 743.6 HQC or 4.79 % on B1. It saves 147.8 HQC or 4.49 % on B1x. On family A it saves 46.0 HQC or 0.28 %. On B2 it saves nothing because P2 is never cheaper than P0 there.
-
-`[F]` PSEL never raises the ZZ gate count against P0 on any of the 223 circuits. It lowers n_2q on 13 of the 15 B1 circuits and on 5 of the 8 B1x circuits. The choice that minimises n_2q, with an n_2q tie broken by HQC, agrees with the choice of PSEL on all 223 circuits (`value/selector_ledger.md`).
-
-`[F]` Table 1.1. HQC at 1000 shots of P2 against P0 by application area. B1 is checked. B1x is count-only and is never merged with B1. Saved % is computed on the area sums. Source: `value/value_by_application.md`.
-
-| Area | Family | Circuits | HQC P0 | HQC P2 | HQC saved | Saved % | Median per-circuit % |
-|---|---|---|---|---|---|---|---|
-| Integer factoring (Shor) | B1 | 4 | 592.2 | 545.6 | 46.6 | 7.9 | 4.2 |
-| Elliptic-curve discrete log, GF(2^m) | B1 | 1 | 216.2 | 215.2 | 1.0 | 0.5 | 0.5 |
-| Unstructured search (Grover) | B1 | 8 | 1,183.6 | 1,127.0 | 56.6 | 4.8 | 3.0 |
-| Reversible logic, no sourced algorithm | B1 | 2 | 13,524.0 | 12,885.0 | 639.0 | 4.7 | 4.5 |
-| All areas | B1 | 15 | 15,516.0 | 14,772.8 | 743.2 | 4.8 | 3.9 |
-| Integer factoring (Shor) | B1x | 2 | 386.2 | 380.2 | 6.0 | 1.6 | 1.4 |
-| Elliptic-curve discrete log, GF(2^m) | B1x | 2 | 783.0 | 776.4 | 6.6 | 0.8 | 0.9 |
-| Unstructured search (Grover) | B1x | 2 | 632.0 | 610.0 | 22.0 | 3.5 | 3.7 |
-| Reversible logic, no sourced algorithm | B1x | 2 | 1,487.6 | 1,374.4 | 113.2 | 7.6 | 6.2 |
-| All areas | B1x | 8 | 3,288.8 | 3,141.0 | 147.8 | 4.5 | 2.4 |
-
-`[F]` P2 is cheaper than P0 in HQC on 14 of the 15 B1 circuits. The exception is qft_4 in the integer factoring row. There P2 costs 0.4 HQC more and PSEL keeps P0. This is the only HQC difference between PSEL and P2 on B1 and B1x.
-
-`[F]` hwb8 alone accounts for 84.5 % of the PSEL saving on B1 but serves no sourced quantum algorithm. Without hwb8 the PSEL saving on B1 is 115.0 HQC. `[O]` The median of 3.94 % is the better guide for a single circuit.
-
-`[F]` Saved HQC buys shots. The following figures assume one job that pays the 5 HQC job fee once. PSEL picks P2 for vbe_adder_3. At the 10,000 HQC team budget P0 affords 68,178 shots of vbe_adder_3 and PSEL affords 87,675. That is 19,497 extra shots or 28.6 % more. vbe_adder_3 has the largest per-circuit percentage saving of the 15 B1 circuits. The median extra-shot gain of P2 over the 15 circuits is 4.3 % (`value/value_by_application.md`). On the Grover oracle mod5_4 PSEL also picks P2 and the gain is 11,757 shots or 7.5 %.
-
-`[F]` The H2 hardware guide limits a job to 10,000 shots (`docs/platform_notes.md` section 3.4). With that limit and one fee per job P0 affords 67,974 shots of vbe_adder_3 and PSEL affords 87,324. That is 19,350 extra shots or 28.5 % more. On mod5_4 the gain is 11,584 shots or 7.4 % (`value/value_by_application.md`). Whether the per-job limit applies on H2-2E is Unverifiable from the repository.
-
-`[F]` PSEL keeps P0 on 123 of the 180 family A circuits. P2 is dearer on 108 of them and ties P0 in HQC on 15. Run on every family A circuit P2 would cost 17,453.0 HQC against 16,422.6 for P0. That is 6.27 % more. On the 60 XXZ circuits P2 is dearer on every circuit and would raise the total by 12.33 %. PSEL keeps P0 on all 60 of them. On the 60 TFIM circuits PSEL picks P2 on 32 and saves 0.62 % against P0. On the 60 ladder circuits it picks P2 on 25 and saves 0.52 %. `[O]` A user with a Trotter circuit runs PSEL and does not need to decide in advance whether the ZX stage pays.
-
-### 1.3 What it saves on the fault-tolerant layer
-
-`[F]` In a surface-code machine each T gate consumes one magic state (Litinski, Quantum 3, 128 (2019), arXiv:1808.02892). Magic-state counts below therefore equal T-counts. On H2 a T gate is a free Rz and changes no H2 cost.
-
-`[F]` Table 1.2. T-count written and after the ZX stage of P2, by application area. Source: `value/value_by_application.md`.
-
-| Area | Family | T written | T after ZX | Magic states saved | Saved % |
+| Area | Circuits | HQC P0 | HQC P2 | Saved % | Median per-circuit % |
 |---|---|---|---|---|---|
-| Integer factoring (Shor) | B1 | 307 | 199 | 108 | 35.2 |
-| Elliptic-curve discrete log, GF(2^m) | B1 | 112 | 68 | 44 | 39.3 |
-| Unstructured search (Grover) | B1 | 637 | 327 | 310 | 48.7 |
-| Reversible logic, no sourced algorithm | B1 | 5,992 | 3,592 | 2,400 | 40.1 |
-| All areas | B1 | 7,048 | 4,186 | 2,862 | 40.6 |
-| Integer factoring (Shor) | B1x | 147 | 109 | 38 | 25.9 |
-| Elliptic-curve discrete log, GF(2^m) | B1x | 427 | 265 | 162 | 37.9 |
-| Unstructured search (Grover) | B1x | 343 | 171 | 172 | 50.1 |
-| Reversible logic, no sourced algorithm | B1x | 735 | 309 | 426 | 58.0 |
-| All areas | B1x | 1,652 | 854 | 798 | 48.3 |
+| Integer factoring (Shor) | 4 | 592.2 | 545.6 | 7.9 | 4.2 |
+| Elliptic-curve discrete log | 1 | 216.2 | 215.2 | 0.5 | 0.5 |
+| Unstructured search (Grover) | 8 | 1,183.6 | 1,127.0 | 4.8 | 3.0 |
+| Reversible logic, no sourced algorithm | 2 | 13,524.0 | 12,885.0 | 4.7 | 4.5 |
 
-`[F]` The 40.6 % saving on B1 in Table 1.2 is measured against the written input circuits and not against published optimisers. Our T-count after ZX equals the best ancilla-free value in the six papers of Section 3.4 on 14 of 22 comparable B1 and B1x circuits and is above it on the other 8 (Table C2).
+- `[F]` Multipliers. rgqft_mult_6 drops from 4445.6 to 2206.6 HQC, a saving of 50.4 %. Its two-qubit count falls from 1994 to 990. Both multipliers carry continuous rotation angles and supply 3356.0 of the 4104.4 HQC saved on family C.
+- `[F]` Adders. PSEL picks P2 on all 9 adders. The three VBE adders save 20.5 %, 20.9 % and 23.6 %. The four CDKM adders save 10.2 % to 10.5 %.
+- `[F]` Where ZX does not pay. On the three QFT adders P2 is dearer than P0 and PSEL keeps P0. On the MCX oracles the saving is 2.8 HQC in total. A fixed choice of P2 would cost 21487.8 HQC on family C against 20430.6 for PSEL. `[O]` These rows show the selector at work.
+- `[F]` hwb8 caveat. On B1 the circuit hwb8 alone accounts for 84.5 % of the PSEL saving and serves no sourced quantum algorithm. Without hwb8 the B1 saving is 115.0 HQC. The median per-circuit saving on B1 is 3.94 %. `[O]` The median is the better guide for a single small circuit.
 
-`[F]` The exactness-barrier manuscript gives a per-instance floor (Kam et al., arXiv:2608.22801). The least denominator exponent of the exact Pauli channel of a Clifford+T circuit over Z[sqrt 2] is a lower bound on the T-count of every semantics-exact rewrite. The statements are Theorem B, Corollary cert and Theorem C of arXiv:2608.22801.
+### 1.3 Use case: Grover search within the 10,000 HQC budget
 
-`[F]` On the 20 synthesised Haar circuits of family B2 the ZX stage removes 862 of 42,396 T gates or 2.0 %. The certified floor is 41,414 against 41,534 T gates after ZX. The certified-incompressible fraction is 0.997. Further exact T optimisation of these instances can gain at most 0.3 % of the remaining T-count. On the worst single instance the bound is 0.7 %.
+`[F]` Two complete Grover searches with one marked item were built from Grover 1996 and the multi-controlled gate of Barenco et al. 1995 (`value/usecase.md`, Appendix 3.9 and Table U1). They are small enough for an exact check. Both pass it under P0 and P2 with a deviation of at most 2.7e-14 in magnitude.
 
-`[F]` On the four certified B1 circuits the floor is 47 against 106 T gates after ZX. The fraction is 0.443. `[O]` The certificate does not say whether this gap is headroom for a better rewrite or slack in the bound (Section 3.4).
+| Instance | Qubits | Ideal success | HQC P0 | HQC PSEL | Saving % | Shots in 10,000 HQC, P0 | Shots, PSEL | Extra shots |
+|---|---|---|---|---|---|---|---|---|
+| grover_d5 | 7 | 0.999182 | 734.2 | 694.4 | 5.42 | 13699 | 14490 | 791 |
+| grover_d6 | 9 | 0.996586 | 1629.4 | 1548.6 | 4.96 | 6153 | 6475 | 322 |
 
-`[F]` Converting magic states into Helios time or cost needs factory and logical-cycle figures that Quantinuum has not published in any source we found. No conversion is made. As context only, Dasu et al. report a logical magic state on H1-1 with infidelity 7(+3/-1) x 10^-5 (arXiv:2506.14688).
+- `[F]` The shot counts respect the H2 limit of 10,000 shots per job and charge 5 HQC per job. PSEL buys 5.77 % more shots on grover_d5 and 5.23 % more on grover_d6.
+- `[F]` The expected number of marked-item hits within the budget rises from 13687.8 to 14478.2 on grover_d5 at the ideal success probability.
+- `[O]` A slope model fitted on B1 proxy data predicts a fidelity ratio of 1.0287 and 1.0583 in favour of PSEL. This is a model prediction. No platform job ran these instances.
 
-### 1.4 Where these circuits sit in real algorithms
+### 1.4 Magic states on a fault-tolerant machine
 
-`[F]` Table 1.3. All B1 and B1x circuit names appear in Table II of Amy and Mosca (arXiv:1601.07363). Their Grover_5 is a different circuit (Section 3.4). Each circuit is counted in the first area of the summary table of `docs/applications.md` that lists it.
+- `[F]` Each T gate of a surface-code machine consumes one magic state (Litinski 2019). On H2 a T gate is a free Rz and changes no HQC.
+- `[F]` On B1 the ZX stage removes 2,862 of 7,048 T gates of the written circuits, or 40.6 %. On family C the ZX stage removes 1110 T gates from the 9 adders and 30 from the 3 MCX oracles where PSEL picks P2. The two multipliers lose 1,408 more but keep 600 and 507 rotations outside the pi/4 grid, so T-count is not their non-Clifford cost. On the Grover instances the T-count falls from 448 to 210 and from 1008 to 436.
+`[F]` Table 1c. T-count as written and after the ZX stage of P2 by application area (Appendix Table 1.2). Each saved T gate is one magic state.
 
-| Area | Our circuits | Role | Citation | Status |
+| Area | Family | T written | T after ZX | Saved % |
 |---|---|---|---|---|
-| Integer factoring (Shor) | vbe_adder_3, mod_mult_55, mod_red_21, qft_4 (B1). rc_adder_6, csla_mux_3 (B1x) | Adders and modular arithmetic of modular exponentiation. Fourier transform | arXiv:quant-ph/9511018, arXiv:1202.6614, arXiv:1710.07345, arXiv:quant-ph/0201067 | `[F]` |
-| Elliptic-curve discrete log, GF(2^m) | gf2_pow_4_mult (B1). gf2_pow_5_mult, gf2_pow_6_mult (B1x) | Binary-field multiplier | arXiv:0710.1093 | `[F]` |
-| Unstructured search (Grover) | grover_5, mod5_4 (B1) | Full search instance. Divisibility-by-5 oracle | arXiv:quant-ph/9605043, arXiv:1601.07363, reversiblebenchmarks.github.io/mod5.html | `[F]` |
-| Unstructured search (Grover) | tof_3..5, barenco_tof_3..5 (B1). tof_10, barenco_tof_10 (B1x) | Multi-controlled Toffoli in oracle and diffusion | arXiv:1703.10535, arXiv:quant-ph/9503016 | `[O]` placement |
-| Reversible logic, no sourced algorithm | hwb6, hwb8 (B1). ham15-low, ham15-med (B1x) | Reversible-logic stress tests | reversiblebenchmarks.github.io hwbs and ham15 pages | `[F]` no algorithm role found |
+| Integer factoring (Shor) | B1 | 307 | 199 | 35.2 |
+| Elliptic-curve discrete log | B1 | 112 | 68 | 39.3 |
+| Unstructured search (Grover) | B1 | 637 | 327 | 48.7 |
+| Reversible logic, no sourced algorithm | B1 | 5,992 | 3,592 | 40.1 |
+| All areas | B1x | 1,652 | 854 | 48.3 |
 
-`[O]` The three adders also fit arithmetic oracles for chemistry and simulation (arXiv:1805.12445, arXiv:1807.03206). They are counted once under factoring.
-
-`[F]` Unverifiable items. The function computed by mod_red_21 beyond its name is Unverifiable. Whether arXiv:0710.1093 is the exact work Amy, Maslov and Mosca cite for the field multipliers is Unverifiable.
-
-### 1.5 Value statement and scope of claims
-
-`[F]` The delivered tool is PSEL in `pipelines/pass_select.py`. It decides per circuit whether to run PyZX teleport_reduce before pytket's Quantinuum pass. It cannot cost more HQC than P0 where P0 passes the exactness check, because P0 is always one of its candidates. This holds by construction. It picks P2 on 14 of the 15 checked B1 circuits and saves 4.79 % there. It saves 0.28 % on family A. P2 saves 7.9 % on the checked factoring circuits and 4.8 % on the checked search circuits. On family A P2 alone would cost 6.27 % more and PSEL keeps P0 on 123 of the 180 circuits. `[O]` A user does not need to decide in advance whether the ZX stage pays. `[F]` The ledger gives magic-state counts for every B1, B1x and B2 circuit. The certificate covers only the 24 circuits of `results/certificates.csv`, all with n at most 5. Four of them are B1 subroutines with a pooled certified fraction of 0.443. The other 20 are the synthesised B2 Haar circuits at n = 2 and 3 with a pooled fraction of 0.997.
-
-`[F]` The winner of the finals receives credits on the on-premise Helios machine in Singapore according to the organisers' timeline email of 25 Aug 2026. No copy is in the repository. `[O]` Quantinuum's Helios roadmap targets fault tolerance. The T-count column prices a later fault-tolerant layer. `[F]` The Helios HQC formula charges no Rz gate (`docs/platform_notes.md` section 3.4). The T-count therefore does not change the cost of the finals credits.
-
-`[F]` Model prediction. A proxy fit of 1.18e-3 per ZZ gate predicts a relative fidelity gain of 1.79 % for P2 on vbe_adder_3 and a median relative gain of 0.24 % over B1. `[O]` These are model predictions and not measurements.
-
-`[F]` The 18 H2-2E jobs carry HQC estimates that sum to 5933.2 HQC. Six ran vbe_adder_3, hwb6 and grover_5 under P0 and P2 at 1000 shots. Twelve repeated vbe_adder_3 and grover_5 three more times. At 1000 shots the emulator does not resolve P2 against P0 on any of the three circuits. At 4000 shots per pipeline the pooled F_H of vbe_adder_3 is 0.9520 under P0 and 0.9628 under P2. The difference of +0.0108 has z = +2.38 and a two-sided p of 0.017. The repeat circuits were chosen after Table E2. The Holm-adjusted p is 0.035 over the two repeated circuits and 0.052 over all three H2-2E circuits. This measured relative gain of 1.13 % lies below the predicted 1.79 % by 1.38 sd of the difference. On grover_5 the pooled difference is +0.0007 with z = +0.10 and is not resolved at 4000 shots per pipeline. It lies 2.94 sd of the difference below the predicted gain of 0.0229 (Section 3.7.1). `[O]` The vbe_adder_3 gain is significant before correction and after correction over the two repeated circuits. It is not significant at 0.05 after correction over all three H2-2E circuits.
-
-`[F]` The ledger states value in HQC, shots and magic states and makes no claim in currency. `[O]` The team name Learned ZX Rewriting names the research programme. `[F]` The learned component of this submission is the cost model of Section 4, which predicts fidelity from compile-time features. This submission contains no learned rewriting.
+- `[F]` These savings are against the written circuits. Against six published optimisers our T-count after ZX equals the best ancilla-free value on 14 of 22 comparable circuits (Section 4).
+- `[F]` Scope of the certificate. The certified floor covers only the 24 circuits of `results/certificates.csv`, all with n at most 5. It covers no circuit of family C and no Grover instance.
+- `[F]` No conversion of magic states into Helios time or cost is made. Quantinuum has not published the factory and logical-cycle figures in any source we found.
 
 ## 2. Method
 
-### 2.1 Circuit families
+### 2.1 Pipelines and selector
 
-`[F]` Family A consists of 180 Trotter spin-chain circuits generated by `bench/gen_trotter.py`. Three models: the transverse-field Ising chain with open boundary, the XXZ chain started from the Neel state, and the transverse-field Ising ladder. Sizes n in {4, 6, 8, 10, 12}. Trotter steps r in {1, 2, 4} with dt = 0.1. Couplings are uniform (one instance per group) or drawn from [0.5, 1.5] with `numpy.random.default_rng(20261006)` (three instances per group). Every two-body Pauli exponential is written as a cx-rz-cx block with basis changes. The circuit as written therefore has n_cx = 2 x (number of ZZ-type terms). Ideal output distributions for n <= 10 are stored as `.npy` references.
-
-`[F]` Family B1, 15 standard Clifford+T benchmark circuits with n <= 12 from the Quantinuum pyzx fork at commit e695d6d7 (`third_party/pyzx-fork/circuits/qasm`), built by `bench/build_family_B1.py`. Every Toffoli is expanded into the 7-T decomposition by pyzx so that the file as written is Clifford+T. The manifest `bench/family_B1/manifest.csv` records the source file, its commit and the counts before and after expansion, for example a T-count as written of 21 for tof_3 and 28 for mod5_4.
-
-`[F]` Family B1x consists of 8 further Clifford+T benchmark circuits from the same pyzx fork at commit e695d6d7, selected by `bench/build_family_B1x.py` with the window 13 <= n <= 20 and at most 3000 gates after Toffoli expansion. The circuits are rc_adder_6 (n = 14), csla_mux_3 (15), gf2_pow_5_mult (15), ham15-low (17), ham15-med (17), gf2_pow_6_mult (18), barenco_tof_10 (19) and tof_10 (19). The qubit numbers reached run from 14 to 19 and the largest circuit is ham15-med with 1600 gates after expansion. The conversion and the manifest columns are those of family B1 (`bench/family_B1x/manifest.csv`). These circuits are compiled count-only under P0ref, P0 and P2 with the `--no-check` flag of `pipelines/run_bench_B.py`. No unitary, statevector or distribution check was run on them at this size and only the gate-set check applies. Every row of `results/family_B1x_counts.csv` therefore carries the status `ok-unchecked` and the family is reported separately from the checked families in Section 3.2.1.
-
-`[F]` Family B2 consists of 20 Clifford+T circuits synthesised from Haar-random unitaries by `bench/gen_haar_b2.py`. There are five targets at n = 2 and five at n = 3 drawn with the same seed. Each target is synthesised at eps = 1e-3 and at eps = 1e-5. The construction is qiskit `qs_decomposition` followed by `transpile` to the basis {rz, sx, x, cx} with `seed_transpiler=0`. Every rz angle that is not a multiple of pi/4 is then replaced by a pygridsynth (Ross-Selinger) approximation to precision eps. The operator-norm error of each written circuit against its target is stored in the manifest, with the triangle-inequality bound n_rz x eps. This family reproduces the construction of Table E6 in the barrier manuscript.
-
-### 2.2 Pipelines
-
-`[F]` All compile pipelines are in `pipelines/compile.py` and target the H2 gate set {Rz, PhasedX, ZZPhase, ZZMax, Measure, Reset} with all-to-all connectivity. Seven compile pipelines run on families A and B1. Five run on family B2 and three run on the count-only family B1x. These are P0ref, P0, P1, P2 and P3 on B2 and P0ref, P0 and P2 on B1x. The pass selector PSEL is a selector over P0 and P2 and not an eighth compile pipeline. It is defined after the table.
+`[F]` All pipelines are in `pipelines/compile.py` and target the H2 gate set of Rz, PhasedX, ZZPhase, ZZMax, Measure and Reset with all-to-all connectivity (Appendix 2.2).
 
 | Name | Stages |
 |---|---|
-| P0ref | DecomposeBoxes, AutoRebase to the native set, SquashRzPhasedX, RemoveRedundancies. The circuit as written, in native gates, with no optimisation. |
-| P0 | pytket-quantinuum 0.59.3 `default_compilation_pass(optimisation_level=2)`, reproduced pass by pass from the installed source without a backend object (FullPeepholeOptimise to TK2, NormaliseTK2, DecomposeTK2 to ZZPhase, AutoRebase, squash, RemoveRedundancies). P0 is the baseline. |
-| P0L1 | The same at optimisation level 1. |
-| P1 | PyZX `full_reduce`, `extract_circuit`, `basic_optimization`, then P0. |
-| P2 | PyZX `teleport_reduce`, `Circuit.from_graph`, `basic_optimization`, then P0. |
-| P3 | pytket `ZXGraphlikeOptimisation`, then P0. |
-| P4 | The ZX stage of P1, then P0 without FullPeepholeOptimise. |
-
-`[F]` The P0 reproduction has not been compared against `QuantinuumBackend.default_compilation_pass` on a live backend object. `[O]` A difference between the two passes would shift every P0 count and every saving quoted against P0. The baseline therefore rests on our reading of the pytket-quantinuum 0.59.3 source.
-
-`[F]` PSEL is the pass selector in `pipelines/pass_select.py`. It is a choice between pipelines and adds no compilation stage of its own. It compiles the input circuit with P0 and with P2 through `pipelines/compile.py` unchanged. It drops a candidate that raises an error, leaves the native gate set or fails the exactness check of `pipelines/compile.py:check`. Of the survivors it returns the compiled circuit with the lowest HQC at the requested shot count. An HQC tie goes to the lower n_2q and a further tie goes to P0. Above 20 qubits no exactness check is run and the candidate is marked ok-unchecked. The family totals of PSEL in Section 1.2 are computed in `value/selector_ledger.py` from the existing P0 and P2 rows of `value/value_ledger.csv` and `results/family_B2_counts.csv`. They are not a rerun of `pipelines/pass_select.py`.
-
-`[F]` The ZX stages run on the circuit as written, in the gate set the ZX tools accept, and the pytket pass runs afterwards on the result. Angles are passed to PyZX through QASM, and the rounding introduced by PyZX's float-to-fraction conversion is recorded per circuit in the column `pyzx_angle_err` of `results/family_A_counts.csv`. Its maximum over the 1260 family A rows is 1.48e-10 rad, which is 4.7e-11 x pi.
-
-### 2.3 Metrics
-
-`[F]` For every compiled circuit `pipelines/compile.py:metrics` records n_2q (ZZPhase plus ZZMax count), the two-qubit depth, the PhasedX and Rz counts and the total gate count and depth. It also records the HQC at N_shots = 1000 with N_M = 2 n_qubits, one initialisation and one terminal measurement per qubit. The T-count after the ZX stage is counted on the PyZX circuit before any pytket pass, as the number of phase gates with angle an odd multiple of pi/4. After rebasing to the H2 gate set the T-count is undefined and is not reported.
-
-`[F]` The fidelity metrics are the Hellinger fidelity F_H = (sum_i sqrt(p_i q_i))^2 and the total variation distance TVD = 0.5 sum_i |p_i - q_i| between a noisy or measured distribution q and the ideal distribution p from the `.npy` references. Both are reported for the local density-matrix proxy and for the Selene runs of Section 2.6.
-
-`[F]` Both metrics are reported for the H2-Emulator output in Section 3.7. F_H is reported for the H2-2E output in Section 3.7.1, and TVD is in `results/emulator_nexus_H2-2E.csv`.
-
-### 2.4 Exactness checks
-
-`[F]` Every compiled circuit is checked against the P0ref compilation of the same input. The check is the unitary deviation 1 - |tr(U^dagger V)| / 2^n for n <= 8 and the statevector infidelity on |0...0> beyond, with tolerance 1e-8. Where a `.npy` reference exists, the maximum difference between the compiled output distribution and that reference is recorded as well. The measured QASM written for submission is re-simulated independently (`qasm_dist_maxdiff`). All 1260 family A rows, all 100 family B2 rows and all 105 family B1 rows pass. The two hwb8 rows under P1 and P2 come from the 5400 s run of Section 5 and have `check_dev` at most 1.7e-13. The 24 rows of family B1x were compiled with `--no-check` and carry no such check (Section 3.2.1).
-
-`[F]` Family B2 is additionally checked against the Haar target it approximates. The largest deviation 1 - |tr(U_target^dagger U_compiled)| / 2^n over all 100 rows is 7.1e-6, within the gridsynth bound.
-
-### 2.5 The certificate
-
-`[F]` The barrier manuscript (arXiv:2608.22801) gives the floor in Theorem B(a) for one qubit and in Corollary cert for any n. Theorem C(c) gives the removable-fraction bound. Let C be an n-qubit Clifford+T circuit and let O be any optimiser that preserves its unitary exactly. Then the T-count of O(C) is at least lde(C^). Here C^ is the exact 4^n x 4^n Pauli-channel matrix of C with entries in Z[sqrt 2]. lde(C^) is the least e such that C^ = (P + Q sqrt 2) / sqrt 2^e with integer matrices P and Q. The fraction of T-count that any exact optimiser can remove is at most 1 - lde(C^) / t(C). The floor is computed from any word realising C, in one exact channel multiplication per gate, and does not depend on the word chosen.
-
-`[F]` `barrier/certificate.py` implements the floor in exact integer arithmetic, with the single-qubit linkage procedure and the residue automaton of the manuscript as cross-checks. `barrier/test_certificate.py` reproduces the manuscript's finite verifications. These are the Clifford group order 24, the residue automaton with 24 states and 1536 transitions and the 18384 Matsumoto-Amano words with t <= 8. `barrier/NOTES.md` maps every implemented quantity to the line of the manuscript it comes from. These line numbers refer to the team's local TeX source, which is not distributed.
-
-`[F]` The certificate was computed for the 20 family B2 circuits and for the four family B1 circuits at n = 5, where the 4^n x 4^n channel is small. The output per circuit is the floor, the T-count after the ZX stage of P1 and of P2 and the ratio floor / T_zx. The 24 rows are in `results/certificates.csv` and `results/certificates.md`. The invariant floor <= T_zx holds on all 24 rows, and P1 and P2 give the same T_zx on every row. Section 3.4 reports the rows.
-
-`[F]` The manuscript is not re-derived here, with one exception that needs stating. While implementing the per-step bookkeeping of Lemma mqval(b), the implementation found that the "reduction fires exactly once" half of that lemma fails on the word T T (`barrier/NOTES.md`, section 8). The floor of Corollary cert does not use that half, and the manuscript's own text says nothing downstream depends on it. `[O]` The correction is being made in the manuscript.
-
-### 2.6 Hardware use
-
-`[F]` Two emulator tiers exist (`docs/platform_notes.md`, section 3.1). `H2-Emulator` is hosted by Nexus and costed in seconds. `H2-2E` is a hardware-tier emulator costed in HQCs with the published H2-2E noise parameters. Quantinuum documents that the syntax checker `H2-2SC` returns the HQC cost of a circuit without charge. Our one H2-2SC job returned no cost value (Section 3.7).
-
-`[F]` Quantinuum's local emulator Selene (`selene-sim` 0.3.4 with `guppylang` 1.1.2) ran 468 noiseless runs, 68 depolarising runs in a first comparison and 468 depolarising runs on the full set on the team's container. The route reads `results/compiled/<pipeline>/<file>.qasm` with `pytket.qasm.circuit_from_qasm` and loads the circuit into a guppy program with `guppylang.guppy.load_pytket`. The program is built by `selene_sim.build` and run by `run_shots` on the Quest statevector backend at 2000 shots. `load_pytket` accepted the PhasedX, Rz, ZZPhase and Measure gates of every compiled circuit without rebase. The noiseless runs cover 144 family A circuits with n <= 10 and 12 family B1 circuits with n <= 10 under P0, P1 and P2. No run was flagged by the criterion TVD > 4 x sqrt(support / (2 pi N_shots)) and no shot landed outside the exact support. Scripts are in `selene/`, data in `results/selene_noiseless.csv` and `results/selene_depolarizing.csv`, and the summary in `results/selene.md`.
-
-`[F]` The 68 depolarising runs use Selene's `DepolarizingErrorModel` at the H2-2E rates p_1q = 7.3e-5 and p_2q = 1.29e-3 on 17 circuits under P0 and P2, in two variants of 34 runs. The variant `gates_meas_init` adds p_meas = 1.35e-3 and p_init = 4e-5, where 1.35e-3 is the mean of the two H2-2E readout rates because Selene takes one symmetric rate. In that variant 32 of 34 runs agree with the local density-matrix proxy within two sampling standard deviations. The variant `gates_only` leaves readout and initialisation noiseless and is not the like-for-like comparison.
-
-`[F]` The full depolarising run has 468 runs on the same 156 circuits under P0, P1 and P2 with the `gates_meas_init` rates at 2000 shots. Section 3.6 and Table S2 report it.
-
-`[F]` The local proxy `noise/dm_sim.py` is a density-matrix simulator. It applies a depolarising channel after every PhasedX and ZZPhase gate and adds an asymmetric readout flip and an initialisation flip. The parameters are the published H2-2E values p1, p2, p_meas and p_init from `noise/h2_params.py:H2_2E_EMULATOR`. The emission, crosstalk, dephasing and angle-scaling entries of the H2-2E model are not modelled. `noise/run_proxy.py` produced `results/family_A_proxy_h22e.csv` (540 rows, 108 circuits x 5 pipelines) and `results/family_B1_proxy_h22e.csv` (35 rows, 7 circuits x 5 pipelines). The two files feed Tables A4 and A5 and the cost model of Section 4.
-
-`[F]` Platform jobs started on 8 October 2026 through `aqora` 0.35.1 as team `learned_zx_rewriting`. The scripts `submit/syntax_check.py` and `submit/run_emulator.py` submit the compiled and measured QASM files in `results/compiled/<pipeline>/` at 1000 shots with `options={"noisy_simulation": True}`. One H2-2SC syntax check and three H2-Emulator jobs with 22 circuit rows completed. Section 3.7 and Table E1 report them. Eighteen H2-2E jobs completed with an HQC estimate of 5933.2 in total. Six are the original runs of Table E2. Twelve are repeats of vbe_adder_3 and grover_5 pooled in Table E3. Section 3.7.1 reports them.
-
-`[F]` The emulator jobs ran P0 on every circuit. P2 ran on every circuit except grover_5 and ladder_n6_r1 on the H2-Emulator, and grover_5 under P2 ran on H2-2E. P1 ran on the three barenco_tof circuits and the three ladder_n4 circuits of Table E1. `[O]` P1, P3 and P4 were otherwise left out because the count tables of Section 3 show them above P0 on ZZPhase count on every family A circuit and on 14 of 15, 14 of 15 and 15 of 15 family B1 circuits. Emulating them would spend HQCs to confirm a lower fidelity.
-
-## 3. Results
-
-### 3.1 Family A, Trotter spin chains
-
-`[F]` Table A1. Mean ZZPhase count by n and pipeline, 36 circuits per n. "ZZ terms" is n_cx / 2 of the circuit as written, the number of two-body Pauli exponentials in the Trotter formula.
-
-<!-- TABLE:A1_zz_by_n -->
-| n | circuits | ZZ terms | P0ref | P0 | P0L1 | P1 | P2 | P3 | P4 |
-|---|---|---|---|---|---|---|---|---|---|
-| 4 | 36 | 12.4 | 24.9 | 12.4 | 24.9 | 25.9 | 12.9 | 26.1 | 31.4 |
-| 6 | 36 | 21.0 | 42.0 | 21.0 | 42.0 | 62.0 | 22.7 | 58.9 | 71.0 |
-| 8 | 36 | 29.6 | 59.1 | 29.6 | 59.1 | 107.6 | 32.2 | 108.2 | 119.9 |
-| 10 | 36 | 38.1 | 76.2 | 38.1 | 76.2 | 173.7 | 41.7 | 157.2 | 189.8 |
-| 12 | 36 | 46.7 | 93.3 | 46.7 | 93.3 | 246.1 | 50.7 | 233.4 | 262.6 |
-<!-- /TABLE:A1_zz_by_n -->
-
-`[F]` Table A2. Each pipeline against P0 on the same circuit, 180 circuits. Ratios are averaged over circuits.
-
-<!-- TABLE:A2_vs_P0 -->
-| pipeline | better than P0 | equal to P0 | worse than P0 | mean ZZ ratio | min ZZ ratio | max ZZ ratio | mean 2q-depth ratio | mean HQC ratio |
-|---|---|---|---|---|---|---|---|---|
-| P0ref | 0 | 0 | 180 | 2.00 | 2.00 | 2.00 | 2.00 | 1.63 |
-| P0L1 | 0 | 0 | 180 | 2.00 | 2.00 | 2.00 | 2.00 | 1.63 |
-| P1 | 0 | 0 | 180 | 4.43 | 1.28 | 10.32 | 10.92 | 3.03 |
-| P2 | 0 | 120 | 60 | 1.04 | 1.00 | 1.19 | 1.25 | 1.03 |
-| P3 | 0 | 0 | 180 | 3.79 | 1.31 | 7.91 | 10.29 | 2.76 |
-| P4 | 0 | 0 | 180 | 4.90 | 1.44 | 10.36 | 11.88 | 3.33 |
-<!-- /TABLE:A2_vs_P0 -->
-
-`[F]` Table A3. P0 against the ZZ term count, by model and Trotter steps.
-
-<!-- TABLE:A3_floor -->
-| model | r | circuits | mean ZZ terms | mean n_2q P0 | circuits with n_2q = ZZ terms |
-|---|---|---|---|---|---|
-| ladder | 1 | 20 | 10.0 | 10.0 | 20 |
-| ladder | 2 | 20 | 20.0 | 20.0 | 20 |
-| ladder | 4 | 20 | 40.0 | 40.0 | 20 |
-| tfim | 1 | 20 | 7.0 | 7.0 | 20 |
-| tfim | 2 | 20 | 14.0 | 14.0 | 20 |
-| tfim | 4 | 20 | 28.0 | 28.0 | 20 |
-| xxz | 1 | 20 | 21.0 | 21.0 | 20 |
-| xxz | 2 | 20 | 42.0 | 42.0 | 20 |
-| xxz | 4 | 20 | 84.0 | 84.0 | 20 |
-<!-- /TABLE:A3_floor -->
+| P0ref | Rebase to the native set with no optimisation. Reference for the exactness check. |
+| P0 | pytket-quantinuum 0.59.3 default pass at optimisation level 2. The baseline. |
+| P2 | PyZX teleport_reduce, then P0. |
+| P1, P3, P4 | ZX extraction variants, then P0. Kept as controls. |
+| PSEL | Selector over P0 and P2. Adds no compilation stage. |
 
 ![Family A ZZPhase ratio](figures/fig_A_zz_ratio.png)
 
-Figure 1. Family A. ZZPhase count of each pipeline divided by the P0 count on the same circuit, mean over the 36 circuits at each n with the min-max band shaded. The dashed line is P0 itself. Data: Table A2 and `results/family_A_counts.csv`.
+`[F]` Figure 1. Family A. ZZPhase count of each pipeline divided by the P0 count on the same circuit, mean over the 36 circuits at each n with the min-max band shaded. Data: Appendix Table A2.
 
-`[F]` P0 compiles every one of the 180 circuits to exactly one ZZPhase per two-body term. No pipeline goes below that count on any circuit. P2 equals P0 on 120 circuits and is worse on 60, by at most a factor 1.19. P1, P3 and P4 are worse than P0 on all 180 circuits. The ratio to P0 runs from 1.28 to 10.32 for P1, from 1.31 to 7.91 for P3 and from 1.44 to 10.36 for P4. The mean ratio grows with n for each of the three, from 2.39 at n = 4 to 6.53 at n = 12 for P1, from 2.49 to 5.18 for P3 and from 2.92 to 6.92 for P4.
+`[F]` P1, P3 and P4 are above P0 in ZZPhase count on all 180 family A circuits. On B1 they are above P0 on 14, 14 and 15 of the 15 circuits. `[O]` Only teleport reduction keeps the circuit skeleton and helps on H2. PSEL therefore selects between P0 and P2 only.
 
-`[O]` One ZZPhase per two-body exponential is the natural count for this family and P0 reaches it. `[F]` No pipeline goes below the P0 count on any of the 180 circuits. `[O]` The ZX extraction pipelines add ZZPhase gates because `extract_circuit` resynthesises the graph with CNOTs that no longer follow the Trotter term structure.
+### 2.2 Official baseline check
 
-### 3.2 Family B1, Clifford+T benchmarks
+`[F]` Our P0 reproduces the pass from the pytket-quantinuum source. `results/official_baseline.md` compares it with `QuantinuumBackend("H2-1").get_compiled_circuit(circ, optimisation_level=2)` built offline from the device list in the package. The two passes have the same stages in the same order. The one parameter difference is a set of classical op types that no benchmark input contains. On all 445 compiled rows of families A, B1, B1x and B2 the official pass gives the same n_2q, n_1q, two-qubit depth and HQC as our P0 and P2. The PSEL savings against the official P0 are therefore identical to ours.
 
-`[F]` Table B1. ZZPhase count per circuit and pipeline. "T after ZX" is the T-count of the PyZX circuit after the ZX stage of P1 and P2, which agree on every circuit. The hwb8 rows under P1 and P2 come from the 5400 s run described below.
+| Family | Official P0 rows identical | Official P2 rows identical | Exactness of official output |
+|---|---|---|---|
+| A | 180 of 180 | 180 of 180 | 180 and 180 checked, all ok |
+| B1 | 15 of 15 | 14 of 14 | 15 and 14 checked, all ok |
+| B1x | 8 of 8 | 8 of 8 | unchecked |
+| B2 | 20 of 20 | 20 of 20 | 20 and 20 checked, all ok |
+ The one missing row is hwb8 under the official P2, which timed out at 565 s.
 
-<!-- TABLE:B1_per_circuit -->
-| circuit | n | T written | ZZ P0ref | ZZ P0 | ZZ P0L1 | ZZ P1 | ZZ P2 | ZZ P3 | ZZ P4 | P2 vs P0 % | T after ZX | note |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| tof_3 | 5 | 21 | 18 | 15 | 18 | 22 | 14 | 25 | 25 | 6.7 | 15 |  |
-| barenco_tof_3 | 5 | 28 | 24 | 20 | 24 | 23 | 19 | 27 | 27 | 5.0 | 16 |  |
-| mod5_4 | 5 | 28 | 28 | 24 | 28 | 25 | 22 | 20 | 29 | 8.3 | 8 |  |
-| qft_4 | 5 | 69 | 46 | 36 | 46 | 43 | 36 | 64 | 57 | 0.0 | 67 |  |
-| tof_4 | 7 | 35 | 30 | 25 | 30 | 31 | 23 | 40 | 38 | 8.0 | 23 |  |
-| barenco_tof_4 | 7 | 56 | 48 | 40 | 48 | 41 | 38 | 54 | 54 | 5.0 | 28 |  |
-| hwb6 | 7 | 105 | 116 | 99 | 116 | 130 | 94 | 189 | 144 | 5.1 | 75 |  |
-| mod_mult_55 | 9 | 49 | 48 | 41 | 48 | 71 | 39 | 85 | 90 | 4.9 | 35 |  |
-| tof_5 | 9 | 49 | 42 | 35 | 42 | 48 | 32 | 56 | 66 | 8.6 | 31 |  |
-| barenco_tof_5 | 9 | 84 | 72 | 60 | 72 | 70 | 57 | 90 | 87 | 5.0 | 40 |  |
-| grover_5 | 9 | 336 | 288 | 240 | 288 | 256 | 218 | 322 | 278 | 9.2 | 166 |  |
-| vbe_adder_3 | 10 | 70 | 66 | 56 | 66 | 55 | 41 | 61 | 67 | 26.8 | 24 |  |
-| mod_red_21 | 11 | 119 | 105 | 88 | 105 | 107 | 83 | 140 | 132 | 5.7 | 73 |  |
-| gf2_pow_4_mult | 12 | 112 | 99 | 83 | 99 | 260 | 83 | 277 | 290 | 0.0 | 68 |  |
-| hwb8 | 12 | 5887 | 7118 | 5912 | 7118 | 8305 | 5587 | 11537 | 8461 | 5.5 | 3517 |  |
-<!-- /TABLE:B1_per_circuit -->
+### 2.3 HQC formula
+
+`[F]` The organisers' sample code prices an H2 program as HQC = 5 + N_shots (N_1q + 10 N_2q + 5 N_SPAM) / 5000. N_1q counts PhasedX gates. N_2q counts ZZPhase and ZZMax gates. N_SPAM counts initialisations, measurements and resets. `estimate_cost` starts N_SPAM at the number of qubits and adds one per measurement and reset. A circuit with every qubit measured once has N_SPAM = 2n. Rz gates are free. `pipelines/compile.py:hqc` reproduces the function `estimate_cost` of `Quantinuum/sg_grand_challenge` (Appendix 1.2). All HQC figures are at 1000 shots unless a row states otherwise.
+
+### 2.4 Exactness checks
+
+- `[F]` Families A, B1 and B2. Every compiled circuit is checked against P0ref. The check is the unitary deviation for n <= 8 and the statevector infidelity beyond, with tolerance 1e-8. All 1260 family A rows, all 105 B1 rows and all 100 B2 rows pass (Appendix 2.4).
+- `[F]` Family C. The compiled circuit is spot-checked on 64 random basis inputs and must agree with the input up to one global phase. 14 of the 20 circuits pass under P0 and P2. The other 6 exceed 2^20 amplitudes in the sparse simulation and are unchecked. Four of them are P2 picks, namely modadd_2n_10, modadd_2n_20, mcx_dirty_28 and mcx_b95_54. A pass covers 64 of 2^n inputs and is not a proof of equivalence (Appendix 2.4).
+- `[F]` Continuous angles. The Draper adders and the two multipliers carry rotation angles off the pi/4 grid (`bench/family_C/manifest.csv`). PyZX rounds angles to fractions. On draper_adder_28 this changes the P2 input by at most 1.50e-06 rad per angle. PSEL keeps P0 on that circuit.
+- `[F]` Family B1x has 8 circuits with 14 to 19 qubits and is count-only. Its rows carry no exactness check and are never merged with B1.
+
+### 2.5 The certificate
+
+`[F]` Corollary cert and Theorem C(c) of the exactness-barrier manuscript of Kam et al. give a per-instance floor (arXiv:2608.22801). Let C be a Clifford+T circuit. Its exact Pauli channel is a 4^n x 4^n matrix over Z[sqrt 2]. The least denominator exponent of that matrix bounds from below the T-count of every rewrite that preserves C exactly. `barrier/certificate.py` computes it in exact integer arithmetic. `barrier/test_certificate.py` reproduces the finite checks of the manuscript with 69 of 69 checks passed (Appendix 2.5).
+
+## 3. Results on Quantinuum platforms
+
+### 3.1 Count results by family
+
+`[F]` Table 2. PSEL against P0 and P2 per family at 1000 shots (`value/selector_ledger.md`, `value/family_C_selector.md`, Appendix Tables 1.1a and 1.1b). The PSEL column never exceeds the P0 column. On family C the 15 circuits without continuous angles save 7.47 %.
+
+| Family | Content | Circuits | Qubits | Check | Picks P2 | HQC P0 | HQC P2 | HQC PSEL | Saved vs P0 % |
+|---|---|---|---|---|---|---|---|---|---|
+| A | Trotter TFIM, XXZ, ladder | 180 | 4-12 | exact | 57 | 16,422.6 | 17,453.0 | 16,376.6 | 0.28 |
+| B1 | Clifford+T benchmarks | 15 | 5-12 | exact | 14 | 15,516.0 | 14,772.8 | 14,772.4 | 4.79 |
+| B1x | Clifford+T benchmarks | 8 | 14-19 | none | 7 | 3,288.8 | 3,141.0 | 3,141.0 | 4.49 |
+| B2 | Synthesised Haar unitaries | 20 | 2-3 | exact | 0 | 730.0 | 731.6 | 730.0 | 0.00 |
+| C | Arithmetic and oracles | 20 | 20-56 | spot check on 14 | 14 | 24535.0 | 21487.8 | 20430.6 | 16.7 |
+
+`[F]` Table 2b. Family C per circuit (`value/family_C_selector.md`, Appendix Section 3.8 and Table C3). Check "pass" means agreement on 64 random basis inputs under both P0 and P2. "none" means the sparse simulation exceeded 2^20 amplitudes.
+
+| Circuit | Qubits | Application | HQC P0 | HQC PSEL | Pick | Saved % | n_2q P0 | n_2q PSEL | Check |
+|---|---|---|---|---|---|---|---|---|---|
+| mcx_clean_11 | 21 | Grover oracle (MCX) | 180.8 | 180.8 | P0 | 0.0 | 59 | 59 | pass |
+| mcx_b95_20 | 22 | Grover oracle (MCX) | 693.4 | 693.0 | P2 | 0.1 | 292 | 292 | pass |
+| mcx_clean_20 | 39 | Grover oracle (MCX) | 339.2 | 339.2 | P0 | 0.0 | 113 | 113 | pass |
+| mcx_clean_28 | 55 | Grover oracle (MCX) | 480.0 | 480.0 | P0 | 0.0 | 161 | 161 | pass |
+| mcx_dirty_28 | 55 | Grover oracle (MCX) | 591.0 | 589.0 | P2 | 0.3 | 216 | 215 | none |
+| mcx_b95_54 | 56 | Grover oracle (MCX) | 1958.2 | 1957.8 | P2 | 0.0 | 836 | 836 | none |
+| draper_adder_10 | 20 | QFT adder | 370.4 | 370.4 | P0 | 0.0 | 145 | 145 | pass |
+| draper_adder_16 | 32 | QFT adder | 906.8 | 906.8 | P0 | 0.0 | 376 | 376 | none |
+| draper_adder_28 | 56 | QFT adder | 3501.2 | 3501.2 | P0 | 0.0 | 1483 | 1483 | none |
+| modadd_2n_10 | 20 | adder | 388.2 | 371.6 | P2 | 4.3 | 147 | 142 | none |
+| cdkm_adder_10 | 22 | adder | 371.6 | 333.8 | P2 | 10.2 | 141 | 121 | pass |
+| vbe_adder_7 | 22 | adder | 370.4 | 294.4 | P2 | 20.5 | 142 | 107 | pass |
+| cdkm_adder_15 | 32 | adder | 551.6 | 494.4 | P2 | 10.4 | 211 | 181 | pass |
+| vbe_adder_11 | 34 | adder | 593.6 | 469.4 | P2 | 20.9 | 230 | 173 | pass |
+| modadd_2n_20 | 40 | adder | 802.2 | 779.6 | P2 | 2.8 | 307 | 302 | none |
+| cdkm_adder_20 | 42 | adder | 731.6 | 655.8 | P2 | 10.4 | 281 | 241 | pass |
+| vbe_adder_18 | 55 | adder | 984.2 | 751.6 | P2 | 23.6 | 384 | 279 | pass |
+| cdkm_adder_27 | 56 | adder | 983.6 | 880.8 | P2 | 10.5 | 379 | 325 | pass |
+| hrs_mult_5 | 21 | multiplier | 5291.4 | 4174.4 | P2 | 21.1 | 2335 | 1807 | pass |
+| rgqft_mult_6 | 24 | multiplier | 4445.6 | 2206.6 | P2 | 50.4 | 1994 | 990 | pass |
+
+- `[F]` On family A PSEL avoids 1,076.4 HQC against always running P2 and still saves 46.0 HQC against P0. This avoided loss is what PSEL adds over P2 on Trotter circuits.
+- `[F]` PSEL never raises n_2q against P0 on any of the 223 circuits of families A, B1, B1x and B2. On family C it lowers n_2q by 1884 in total.
+- `[F]` Family A by model. PSEL picks P2 on 32 of the 60 TFIM circuits and saves 0.62 % against P0. On the 60 ladder circuits it picks P2 on 25 and saves 0.52 %. On the 60 XXZ circuits it keeps P0 throughout.
 
 ![Family B1 ZZPhase count](figures/fig_B1_zz.png)
 
-Figure 2. Family B1. ZZPhase count per circuit for P0ref, P0 and P2 on a log scale. Circuits are ordered by qubit number and then by T-count. hwb8 (5912 under P0) is omitted. Data: Table B1.
+`[F]` Figure 2. Family B1. ZZPhase count per circuit for P0ref, P0 and P2 on a log scale, ordered by qubit number and then by T-count. hwb8 is omitted. Data: Appendix Table B1.
 
-`[F]` On the 15 circuits P2 is below P0 on 13, equal on 2 (qft_4 and gf2_pow_4_mult) and above on none. The mean reduction against P0 is 6.9 %. The largest is vbe_adder_3, 56 to 41 ZZPhase gates, 26.8 %. P1 is above P0 on 14 of 15 and below on one (vbe_adder_3). P3 is above P0 on 14 of 15 and below on one (mod5_4). P4 is above P0 on 15 of 15.
+- `[F]` The best single B1 circuit is vbe_adder_3. P2 cuts its ZZPhase count from 56 to 41, a reduction of 26.8 %. At a 10,000 HQC budget PSEL buys 28.6 % more shots of it.
+- `[F]` Scalability. Family C reaches 56 qubits. Its largest circuit under P0 has 2335 two-qubit gates. The largest B1 circuit hwb8 took 815.7 s under P2 in the stored run. `[O]` The ZX stage is the time cost of PSEL. It runs once per circuit before any shot is paid.
 
-`[F]` The hwb8 rows under P1 and P2 come from a separate run with a 5400 s limit (`results/family_B1_hwb8_long_counts.csv`, run log `results/family_B1_hwb8_long_run.log`), which completed P1 in 886 s and P2 in 844 s of wall time. P1 gives 8305 ZZPhase gates against 5912 under P0 and P2 gives 5587, a reduction of 5.5 %. Both leave the T-count at 3517, the P4 value. The two rows are merged into `results/family_B1_counts.csv`, and Table B1 and the counts in the previous paragraph include them. The pre-merge file is kept as `results/family_B1_counts_before_hwb8_merge.csv`.
+### 3.2 H2-Emulator and H2-2E
 
-`[F]` The T-counts after the ZX stage equal the PyZX column of Table 1 of arXiv:1903.10477 (Reference 3). This holds for all 13 family B1 circuits that table lists. It holds for the T-count as written and after phase teleportation. The check used arXiv:1903.10477v3 on 7 October (`results/literature_tcount_check.md`). grover_5 and qft_4 are not in that table. Their values 166 and 67 equal the T-counts of the optimised circuits shipped in the PyZX repository (circuits/optimized/grover_5_pyzx.qc and qft_4_pyzx.qc, commit e695d6d7).
+`[F]` Access. The team reached the platforms on 8 October 2026 through `aqora` 0.35.1 as team `learned_zx_rewriting`. Every job is a row of `results/emulator_jobs.csv` with its job id (Appendix 3.7).
 
-- tof_3: 21 to 15
-- mod5_4: 28 to 8
-- vbe_adder_3: 70 to 24
-- grover_5: 336 to 166
+- `[F]` H2-Emulator. Three jobs with 22 circuit rows completed at 1000 shots with noise. At this shot count no P2 against P0 difference is resolved on a single circuit. A fourth job was rejected by the platform quota.
+- `[F]` H2-2E. 18 jobs completed. Six ran vbe_adder_3, hwb6 and grover_5 under P0 and P2 at 1000 shots. Twelve repeated vbe_adder_3 and grover_5 three more times. Their HQC estimates sum to 5933.2 of the 10,000 HQC team quota, or 59.3 %.
 
-`[O]` Teleport reduction keeps the circuit skeleton and only moves phases, so the pytket pass that follows sees a circuit of the same shape with fewer non-Clifford phases and can merge more. Full reduction with extraction replaces the skeleton, and the extracted CNOT structure costs more two-qubit gates on H2 than the original.
+`[F]` Table 3a. Single H2-2E runs at 1000 shots, one job per row (Appendix Table E2). The HQC estimate is the formula value stored with each job.
 
-`[F]` The certified T-count floors for the four n = 5 circuits are in Table C1 of Section 3.4. The floor is at or below the T-count after the ZX stage on all four, and the ratio floor / T after ZX is 25.00 % for barenco_tof_3 and mod5_4, 26.67 % for tof_3 and 55.22 % for qft_4.
-
-`[F]` Neither the H2-Emulator rows of Section 3.7 nor the H2-2E rows of Section 3.7.1 resolve P2 against P0 on a single circuit at 1000 shots. At 4000 shots per pipeline the pooled H2-2E difference of Table E3 on vbe_adder_3 has z = +2.38 and a two-sided p of 0.017. Its Holm-adjusted p is 0.035 over the two repeated circuits and 0.052 over all three H2-2E circuits. The pooled runs do not resolve grover_5.
-
-#### 3.2.1 Family B1x, 13 to 20 qubits, count-only
-
-`[F]` The 8 circuits of family B1x are unchecked. No unitary, statevector or distribution check was run on them and only the gate-set check applies. Every row of `results/family_B1x_counts.csv` carries the status `ok-unchecked`. `[O]` Their counts are reported here as a separate block and are not merged into the family B1 totals above. `[F]` Table B1x. ZZPhase count and two-qubit depth per circuit under P0ref, P0 and P2, with the T-count as written and the T-count after the ZX stage of P2. Circuits are ordered by n and then by T-count as written.
-
-<!-- TABLE:B1x_per_circuit -->
-Count-only rows, status ok-unchecked on every row: no unitary, statevector or distribution check was run at this size, only the gate-set check. P2 vs P0 % = 100 (1 - ZZ P2 / ZZ P0).
-
-| file | n | ZZ P0ref | ZZ P0 | ZZ P2 | P2 vs P0 % | depth_2q P0 | depth_2q P2 | T written | T after ZX P2 |
-|---|---|---|---|---|---|---|---|---|---|
-| rc_adder_6 | 14 | 88 | 76 | 73 | 3.9 | 48 | 43 | 77 | 47 |
-| csla_mux_3 | 15 | 76 | 63 | 63 | 0.0 | 31 | 32 | 70 | 62 |
-| gf2_pow_5_mult | 15 | 154 | 129 | 129 | 0.0 | 68 | 84 | 175 | 115 |
-| ham15-low | 17 | 236 | 204 | 198 | 2.9 | 145 | 124 | 161 | 97 |
-| ham15-med | 17 | 534 | 427 | 379 | 11.2 | 344 | 266 | 574 | 212 |
-| gf2_pow_6_mult | 18 | 221 | 185 | 185 | 0.0 | 86 | 90 | 252 | 150 |
-| tof_10 | 19 | 102 | 85 | 77 | 9.4 | 77 | 68 | 119 | 71 |
-| barenco_tof_10 | 19 | 192 | 160 | 152 | 5.0 | 145 | 130 | 224 | 100 |
-<!-- /TABLE:B1x_per_circuit -->
-
-`[F]` On the 8 circuits P2 is below P0 on 5, equal on 3 (csla_mux_3, gf2_pow_5_mult and gf2_pow_6_mult) and above on none. The aggregate ZZPhase count over the 8 circuits is 1329 under P0 and 1256 under P2, a reduction of 5.5 %. The mean of the per-circuit reductions is 4.1 %. The largest reduction is ham15-med, 427 to 379 ZZPhase gates, 11.2 %. P0 is below P0ref on 8 of 8, with an aggregate of 1603 under P0ref against 1329 under P0. The two-qubit depth under P2 is below P0 on the 5 circuits where the count is below and above P0 on the 3 circuits where the count is equal. The ZX stage of P2 leaves no phase outside the pi/4 grid on any circuit and lowers the T-count from 1652 written to 854 over the 8 circuits.
-
-`[F]` On rc_adder_6 the circuit as written has 93 CX gates and the P0ref compilation has 88 ZZPhase gates, so the rebase-only pipeline already removes 5 two-qubit gates before any optimisation. The same happens on csla_mux_3, 80 CX as written against 76 under P0ref. On the other 6 circuits the P0ref count equals the CX count as written. `[F]` pytket `RemoveRedundancies` applied alone to the written circuit leaves 91 CX on rc_adder_6 and 72 on csla_mux_3 (recomputed on 8 October), so the P0ref figures come from the whole stage sequence of P0ref and not from one cancellation rule. `[O]` The P0ref count is the right reference for the P0 and P2 reductions on these two circuits, and the CX count as written is not.
-
-`[O]` The combined statement for the Clifford+T benchmarks is: checked family B1, 15 circuits, P2 below P0 on 13 and equal on 2. Count-only family B1x, 8 circuits, P2 below P0 on 5 and equal on 3. The two totals stay separate because the B1x rows have no exactness check.
-
-### 3.3 Family B2, synthesised Haar unitaries
-
-`[F]` Table B2. Means over 5 circuits per row. "T red. %" is the T-count reduction by the ZX stage against the circuit as written. "max target dev." is the largest 1 - |tr(U_target^dagger U_compiled)| / 2^n in the row.
-
-<!-- TABLE:B2_summary -->
-| n | eps | circuits | mean T written | T after ZX P1 | T red. % P1 | T after ZX P2 | T red. % P2 | T after ZX P3 | T red. % P3 | ZZ P0 | ZZ P2 | HQC P0 | max target dev. |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 2 | 1e-05 | 5 | 1048.4 | 1024.4 | 2.3 | 1024.4 | 2.3 | 1037.6 | 1.0 | 3 | 3 | 16.6 | 3.2e-10 |
-| 2 | 0.001 | 5 | 638.4 | 624.4 | 2.2 | 624.4 | 2.2 | 628.4 | 1.6 | 3 | 3 | 16.6 | 1.9e-06 |
-| 3 | 1e-05 | 5 | 4220.8 | 4167.2 | 1.3 | 4167.2 | 1.3 | 4189.6 | 0.7 | 19 | 19 | 56.4 | 9.4e-10 |
-| 3 | 0.001 | 5 | 2571.6 | 2490.8 | 3.1 | 2490.8 | 3.1 | 2522.8 | 1.9 | 19 | 19 | 56.4 | 7.1e-06 |
-<!-- /TABLE:B2_summary -->
-
-![Family B2 T-count reduction](figures/fig_B2_t.png)
-
-Figure 3. Family B2. Percentage of the written T-count removed by the ZX stage of P1, P2 and P3, mean over the 5 circuits in each (n, eps) group. P1 and P2 give the same T-count on every circuit. Data: Table B2.
-
-`[F]` The mean raw T-counts match the barrier manuscript's Table E6 for the two rows it reports: n = 2 at eps = 1e-3 gives 638.4 here against 644 there, and n = 3 at eps = 1e-3 gives 2571.6 against 2570. The manuscript rows are means over 50 and 8 instances, this table over 5.
-
-`[F]` The ZX stage removes between 1.3 % and 3.1 % of the T-count under P1 and P2, and between 0.7 % and 1.9 % under P3. The ZZPhase count after P0 is 3 at n = 2 and 19 at n = 3 for every circuit, and P2 leaves it unchanged.
-
-`[O]` Synthesised circuits are the case where the fault-tolerant layer matters and the NISQ layer does not. The two-qubit count is fixed by the KAK or QSD skeleton. The whole cost is in the gridsynth words, which are near their floors by construction, and the certificate measures how near.
-
-`[F]` The certified floor of every one of the 20 circuits is in Table C1 of Section 3.4. The floor divided by the T-count after the ZX stage averages 99.84, 99.79, 99.57 and 99.76 % over the four (n, eps) configurations in the row order of Table C1. The minimum over the 20 circuits is 99.28 %.
-
-### 3.4 Certificates
-
-`[F]` Table C1. The exactness-barrier certificate (`barrier/certificate.py`, Section 2.5) on the 20 family B2 circuits and the four family B1 circuits with n = 5, from `results/certificates.csv`. The 4^n x 4^n channel is small at these sizes. The floor is the least denominator exponent of the exact Pauli channel of the circuit as written. "T after ZX" is the T-count after PyZX teleport_reduce, which equals the full_reduce value on every row.
-
-<!-- TABLE:C1_certificates -->
-Per circuit. floor = lde of the exact Pauli channel (Corollary cert, Theorem C(c)), T after ZX = T-count after PyZX teleport_reduce (P2, equal to the full_reduce value on every row), achieved % = 100 (1 - T after ZX / T written).
-
-| family | file | n | T written | floor | T after ZX | floor / T after ZX % | achieved % |
-|---|---|---|---|---|---|---|---|
-| B2 | haar_n2_eps1e-03_s1 | 2 | 662 | 651 | 652 | 99.85 | 1.51 |
-| B2 | haar_n2_eps1e-03_s2 | 2 | 628 | 611 | 612 | 99.84 | 2.55 |
-| B2 | haar_n2_eps1e-03_s3 | 2 | 638 | 630 | 630 | 100.00 | 1.25 |
-| B2 | haar_n2_eps1e-03_s4 | 2 | 622 | 613 | 614 | 99.84 | 1.29 |
-| B2 | haar_n2_eps1e-03_s5 | 2 | 642 | 612 | 614 | 99.67 | 4.36 |
-| B2 | haar_n2_eps1e-05_s1 | 2 | 1046 | 1021 | 1022 | 99.90 | 2.29 |
-| B2 | haar_n2_eps1e-05_s2 | 2 | 1046 | 1025 | 1026 | 99.90 | 1.91 |
-| B2 | haar_n2_eps1e-05_s3 | 2 | 1038 | 1002 | 1004 | 99.80 | 3.28 |
-| B2 | haar_n2_eps1e-05_s4 | 2 | 1052 | 1030 | 1036 | 99.42 | 1.52 |
-| B2 | haar_n2_eps1e-05_s5 | 2 | 1060 | 1033 | 1034 | 99.90 | 2.45 |
-| B2 | haar_n3_eps1e-03_s1 | 3 | 2566 | 2483 | 2496 | 99.48 | 2.73 |
-| B2 | haar_n3_eps1e-03_s2 | 3 | 2544 | 2442 | 2452 | 99.59 | 3.62 |
-| B2 | haar_n3_eps1e-03_s3 | 3 | 2570 | 2486 | 2490 | 99.84 | 3.11 |
-| B2 | haar_n3_eps1e-03_s4 | 3 | 2588 | 2511 | 2520 | 99.64 | 2.63 |
-| B2 | haar_n3_eps1e-03_s5 | 3 | 2590 | 2478 | 2496 | 99.28 | 3.63 |
-| B2 | haar_n3_eps1e-05_s1 | 3 | 4208 | 4132 | 4144 | 99.71 | 1.52 |
-| B2 | haar_n3_eps1e-05_s2 | 3 | 4218 | 4158 | 4162 | 99.90 | 1.33 |
-| B2 | haar_n3_eps1e-05_s3 | 3 | 4224 | 4179 | 4188 | 99.79 | 0.85 |
-| B2 | haar_n3_eps1e-05_s4 | 3 | 4248 | 4184 | 4192 | 99.81 | 1.32 |
-| B2 | haar_n3_eps1e-05_s5 | 3 | 4206 | 4133 | 4150 | 99.59 | 1.33 |
-| B1 | barenco_tof_3 | 5 | 28 | 4 | 16 | 25.00 | 42.86 |
-| B1 | mod5_4 | 5 | 28 | 2 | 8 | 25.00 | 71.43 |
-| B1 | qft_4 | 5 | 69 | 37 | 67 | 55.22 | 2.90 |
-| B1 | tof_3 | 5 | 21 | 4 | 15 | 26.67 | 28.57 |
-
-Family B2 by configuration, 5 circuits each.
-
-| n | eps | circuits | mean T written | mean floor / T after ZX % | min floor / T after ZX % | mean achieved % | mean collapse rate % |
-|---|---|---|---|---|---|---|---|
-| 2 | 1e-03 | 5 | 638.4 | 99.84 | 99.67 | 2.19 | 1.25 |
-| 2 | 1e-05 | 5 | 1048.4 | 99.79 | 99.42 | 2.29 | 1.34 |
-| 3 | 1e-03 | 5 | 2571.6 | 99.57 | 99.28 | 3.14 | 1.86 |
-| 3 | 1e-05 | 5 | 4220.8 | 99.76 | 99.59 | 1.27 | 0.80 |
-<!-- /TABLE:C1_certificates -->
-
-`[F]` The invariant floor <= T after ZX holds on 24 of 24 rows, for the full_reduce and the teleport_reduce T-counts alike, and the two T-counts are equal on 24 of 24 rows. The certificate ran in at most 0.4 s per circuit at n = 2, at most 36.4 s at n = 3 and at most 38.5 s on the n = 5 family B1 circuits (`wall_s` in the CSV).
-
-`[F]` On family B2 the configuration means of the floor divided by the T-count after the ZX stage are 99.84, 99.79, 99.57 and 99.76 % in the row order of Table C1. The minimum over the 20 circuits is 99.28 % (haar_n3_eps1e-03_s5, floor 2478 against 2496 after ZX) and the maximum is 100.00 % (haar_n2_eps1e-03_s3). The barrier manuscript calls this quantity lde / T_tel (caption of Table tab:e6 of arXiv:2608.22801). Its Table tab:e6 reports 99.79 +/- 0.30 with minimum 98.6 at (2, 1e-3) over 50 instances and 99.55 +/- 0.20 with minimum 99.3 at (3, 1e-3) over 8 instances. Its subsection on multi-qubit rigidity in the section on numerical methods and results states that the quantity averages 99.4 to 99.9 % and never falls below 96.9 % on any instance. All four configuration means here lie inside 99.4 to 99.9 % and every instance is above 96.9 %. The (n, eps) = (2, 1e-5) and (3, 1e-5) configurations have no counterpart in that table. The same subsection gives the collapse rate as 1.0 to 2.3 %. The collapse rate here is 1.25, 1.34, 1.86 and 0.80 % in the same row order. The last configuration sits below that range.
-
-`[O]` The number a user reads from Table C1 is the gap between the two percentages. On family B2 the ZX stage removes 1.3 to 3.1 % of the written T-count. The certificate shows that at most 0.16 to 0.43 % of the remaining count is removable by any semantics-exact rewrite on the configuration means and at most 0.72 % on any single instance. The gridsynth words are within a fraction of a percent of their floor and no further exact optimiser effort on them is worth paying for.
-
-`[F]` On the four family B1 circuits the floor is loose. For mod5_4 the floor is 2 while the ZX stage leaves 8 T gates, so the floor is 25.00 % of the achieved count, and the denominator exponent collapses at 19 of the 28 T gates in the certificate's step record (`collapse_count` in the CSV). The ratios on barenco_tof_3 and tof_3 are 25.00 % and 26.67 % and on qft_4 it is 55.22 %.
-
-`[O]` The B1 floors are loose because these circuits are hand-written Toffoli networks, not synthesised ring elements. `[F]` The theorem bounds the T-count of every exact rewrite from below by the denominator exponent of the channel. On a gridsynth word of family B2 the exponent grows by one at all but 0.5 to 2.5 % of the T gates (`collapse_rate` in `results/certificates.csv`). `[O]` The bound is therefore tight there. In a Toffoli network most T gates cancel in the channel and the exponent stays small, so the bound stays well below what any known rewrite reaches. The gap between 2 and 8 on mod5_4 is either headroom for a better rewrite or slack in the bound, and the certificate does not say which. The manuscript's percentages are stated for synthesised circuits only and the B1 rows are not covered by them.
-
-`[F]` Table C2 places the smallest T-count reported in the six papers for each B1 and B1x circuit beside our T-count after the ZX stage and the certified floor of Table C1. The values were copied from the tables of six papers fetched from arXiv on 8 October 2026 and are listed per source in `results/literature_tcounts.csv`. A published value enters the ancilla-free column only if the paper's circuit has our qubit count and our written T-count. AQ2024 lists no original T-count and takes its circuits from Amy's benchmark set (arXiv:2402.14396, "We take the circuits from Amy [36]", text before Table 2). Nam2018 lists no qubit count. For these two sources the match rests on the circuit name. Values from methods that add Hadamard ancillas sit in a separate column because the floor bounds circuits on the n circuit qubits only. grover_5 has no entry because the published Grover5 starts from 140 T gates and ours from 336.
-
-<!-- TABLE:C2_literature -->
-`[F]` Per circuit of families B1 and B1x. T after ZX is the P2 T-count. best ancilla-free is the smallest T-count reported in the six papers on the same n qubits, taken over the columns of `results/literature_tcounts.csv` with ancilla_free = yes, same_circuit = yes and reported_error = no. best with ancillas is the smallest published T-count of a method that adds Hadamard ancillas. These methods are TODD and AlphaTensor-Quantum when its compiled qubit count exceeds n. The floor is the certified lde floor of Table C1 and exists for the four n = 5 circuits only. T after ZX - best is the part of the ZX output that a published ancilla-free method is known to remove. best - floor is the part that neither a published method nor the certificate has closed. Source keys: AMM2014 arXiv:1303.2042 Table 1, AM2016 arXiv:1601.07363 Table II, Nam2018 arXiv:1710.07345 Table 4, TODD2018 and TODDpart2018 arXiv:1712.01557 Tables I and II, KvdW2020 arXiv:1903.10477 Table 1, AQ2024 arXiv:2402.14396 Table 2. grover_5 has no same-circuit published value.
-
-| family | circuit | n | T written | T after ZX | best ancilla-free | source | best with ancillas | source (ancillas) | floor | T after ZX - best | best - floor |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| B1 | barenco_tof_3 | 5 | 28 | 16 | 16 | AM2016_RMmaj, AM2016_RMrec, AM2016_Tpar, AMM2014_Tpar, KvdW2020_PyZX, KvdW2020_PyZXTODD, Nam2018_H, Nam2018_L | 13 | AQ2024 | 4 | 0 | 12 |
-| B1 | mod5_4 | 5 | 28 | 8 | 7 | AQ2024, KvdW2020_PyZXTODD | 16 | TODD2018 | 2 | 1 | 5 |
-| B1 | qft_4 | 5 | 69 | 67 | 67 | AM2016_RMmaj, AM2016_RMrec, AM2016_Tpar, TODDpart2018 | 53 | AQ2024 | 37 | 0 | 30 |
-| B1 | tof_3 | 5 | 21 | 15 | 15 | AM2016_RMmaj, AM2016_RMrec, AM2016_Tpar, AMM2014_Tpar, KvdW2020_PyZX, KvdW2020_PyZXTODD, Nam2018_L, TODDpart2018 | 13 | AQ2024, TODD2018 | 4 | 0 | 11 |
-| B1 | barenco_tof_4 | 7 | 56 | 28 | 28 | AM2016_RMmaj, AM2016_RMrec, AM2016_Tpar, AMM2014_Tpar, KvdW2020_PyZX, KvdW2020_PyZXTODD, Nam2018_H, Nam2018_L | 23 | AQ2024 |  | 0 |  |
-| B1 | hwb6 | 7 | 105 | 75 | 71 | AM2016_Tpar | 51 | AQ2024, TODD2018 |  | 4 |  |
-| B1 | tof_4 | 7 | 35 | 23 | 23 | AM2016_RMmaj, AM2016_RMrec, AM2016_Tpar, AMM2014_Tpar, KvdW2020_PyZX, KvdW2020_PyZXTODD, Nam2018_L, TODDpart2018 | 19 | AQ2024, TODD2018 |  | 0 |  |
-| B1 | barenco_tof_5 | 9 | 84 | 40 | 40 | AM2016_RMmaj, AM2016_RMrec, AM2016_Tpar, AMM2014_Tpar, KvdW2020_PyZX, KvdW2020_PyZXTODD, Nam2018_H, Nam2018_L | 33 | AQ2024 |  | 0 |  |
-| B1 | grover_5 | 9 | 336 | 166 |  |  |  |  |  |  |  |
-| B1 | mod_mult_55 | 9 | 49 | 35 | 20 | KvdW2020_PyZXTODD | 17 | AQ2024, TODD2018 |  | 15 |  |
-| B1 | tof_5 | 9 | 49 | 31 | 31 | AM2016_RMmaj, AM2016_RMrec, AM2016_Tpar, AMM2014_Tpar, KvdW2020_PyZX, KvdW2020_PyZXTODD, Nam2018_L, TODDpart2018 | 25 | AQ2024, TODD2018 |  | 0 |  |
-| B1 | vbe_adder_3 | 10 | 70 | 24 | 24 | AM2016_RMmaj, AM2016_RMrec, AM2016_Tpar, AMM2014_Tpar, KvdW2020_PyZX, KvdW2020_PyZXTODD, Nam2018_L | 19 | AQ2024 |  | 0 |  |
-| B1 | mod_red_21 | 11 | 119 | 73 | 73 | AM2016_RMmaj, AM2016_RMrec, AM2016_Tpar, AMM2014_Tpar, KvdW2020_PyZX, KvdW2020_PyZXTODD, Nam2018_H, Nam2018_L | 51 | AQ2024 |  | 0 |  |
-| B1 | gf2_pow_4_mult | 12 | 112 | 68 | 39 | AQ2024 | 54 | TODD2018 |  | 29 |  |
-| B1 | hwb8 | 12 | 5887 | 3517 | 3501 | KvdW2020_PyZXTODD |  |  |  | 16 |  |
-| B1x | rc_adder_6 | 14 | 77 | 47 | 47 | AM2016_RMmaj, AM2016_RMrec, KvdW2020_PyZX, KvdW2020_PyZXTODD, Nam2018_H, Nam2018_L | 37 | AQ2024, TODD2018 |  | 0 |  |
-| B1x | csla_mux_3 | 15 | 70 | 62 | 45 | KvdW2020_PyZXTODD | 39 | AQ2024 |  | 17 |  |
-| B1x | gf2_pow_5_mult | 15 | 175 | 115 | 59 | AQ2024 | 87 | TODD2018 |  | 56 |  |
-| B1x | ham15-low | 17 | 161 | 97 | 97 | AM2016_RMmaj, AM2016_RMrec, AM2016_Tpar, KvdW2020_PyZX, KvdW2020_PyZXTODD | 73 | AQ2024 |  | 0 |  |
-| B1x | ham15-med | 17 | 574 | 212 | 212 | KvdW2020_PyZX, KvdW2020_PyZXTODD | 162 | TODD2018 |  | 0 |  |
-| B1x | gf2_pow_6_mult | 18 | 252 | 150 | 77 | AQ2024 | 126 | TODD2018 |  | 73 |  |
-| B1x | barenco_tof_10 | 19 | 224 | 100 | 100 | AM2016_RMmaj, AM2016_RMrec, AM2016_Tpar, AMM2014_Tpar, KvdW2020_PyZX, KvdW2020_PyZXTODD, Nam2018_H, Nam2018_L | 83 | AQ2024 |  | 0 |  |
-| B1x | tof_10 | 19 | 119 | 71 | 71 | AM2016_RMmaj, AM2016_RMrec, AM2016_Tpar, AMM2014_Tpar, KvdW2020_PyZX, KvdW2020_PyZXTODD, Nam2018_L, TODDpart2018 | 55 | AQ2024, TODD2018 |  | 0 |  |
-
-`[F]` On the 4 circuits with a floor: T after ZX 106, best ancilla-free 105, floor 47. T after ZX - best = 1, best - floor = 58, sum 59. Best with ancillas on the same circuits: 95.
-<!-- /TABLE:C2_literature -->
-
-`[F]` On the four certified circuits the ZX stage leaves 106 T gates and the floor is 47. The best published ancilla-free T-counts sum to 105. Optimisers reported in the six papers therefore close 1 of the 59 gates between our count and the floor. That gate is on mod5_4, where PyZX with TODD and AlphaTensor-Quantum both reach 7 against our 8. On barenco_tof_3, tof_3 and qft_4 no ancilla-free method reported in the six papers goes below our count. The remaining 58 gates lie between the best published count and the floor and are closed by neither side.
-
-`[F]` Our ZX stage matches the best published ancilla-free count on 14 of the 22 comparable circuits. On four of the other eight the better value comes from TODD applied after PyZX. On the three Galois-field multipliers it comes from AlphaTensor-Quantum. The hwb6 value of 71 is the T-par entry of arXiv:1601.07363 Table II, repeated as the input of arXiv:1712.01557 Table I. It conflicts with the text of arXiv:1601.07363 and with the 75 listed for T-par in arXiv:1903.10477. On the four certified circuits the best ancilla-free values of the six papers sum to 105 against 146 written T gates, a move of 41 gates. Beyond our ZX output the six papers lower the four certified circuits by one gate in total.
-
-`[O]` The certificate cannot tell whether the 58 open gates are headroom or slack in the bound.
-
-### 3.5 Noise proxy with H2-2E parameters
-
-`[F]` Table A4. Local density-matrix proxy on family A at n <= 8 with 36 circuits per (n, pipeline) cell and 540 rows in `results/family_A_proxy_h22e.csv`. The simulator is `noise/dm_sim.py` with the published H2-2E emulator parameters from `noise/h2_params.py` (p1 = 7.3e-5, p2 = 1.29e-3, readout flips 9e-4 and 1.8e-3, p_init = 4e-5). The ideal distribution is the family reference `bench/family_A/<stem>.npy`.
-
-<!-- TABLE:A4_proxy -->
-Provisional local proxy. Density-matrix simulation with the published H2-2E emulator parameters (p1 = 7.3e-5, p2 = 1.29e-3, readout 9e-4 and 1.8e-3, p_init = 4e-5) and no leakage, crosstalk or dephasing, to be replaced by emulator runs. Mean Hellinger fidelity F_H of the noisy output distribution against the ideal one.
-
-| n | circuits per pipeline | F_H P0ref | F_H P0 | F_H P1 | F_H P2 | F_H P3 |
-|---|---|---|---|---|---|---|
-| 4 | 36 | 0.9867 | 0.9922 | 0.9893 | 0.9919 | 0.9893 |
-| 6 | 36 | 0.9785 | 0.9874 | 0.9735 | 0.9862 | 0.9743 |
-| 8 | 36 | 0.9704 | 0.9826 | 0.9504 | 0.9807 | 0.9514 |
-
-| pipeline | mean F_H | mean TVD | mean n_2q | mean n_1q |
-|---|---|---|---|---|
-| P0ref | 0.9785 | 0.0352 | 42.0 | 57.7 |
-| P0 | 0.9874 | 0.0210 | 21.0 | 40.1 |
-| P1 | 0.9710 | 0.0494 | 65.1 | 62.8 |
-| P2 | 0.9863 | 0.0221 | 22.6 | 42.0 |
-| P3 | 0.9717 | 0.0482 | 64.4 | 72.9 |
-<!-- /TABLE:A4_proxy -->
-
-`[F]` The caption above is generated by `report/make_tables.py` for drafts v1 to v5 alike. `[O]` Its phrase "to be replaced by emulator runs" states the plan of the earlier drafts. `[F]` Table E1 of Section 3.7 holds 10 family A rows on four ladder circuits and Table E2 holds none. `[O]` The emulator runs therefore do not replace this proxy, which stays the primary noise data for family A.
-
-`[F]` P0 and P2 have the highest fidelity in every one of the nine (model, n) cells of family A and P0 is above P0ref on 108 of 108 circuits. P0 and P2 differ by at most 0.0056 in any cell (xxz at n = 8), and per circuit P2 is above P0 on 43 and below on 65. P1 and P3 are below P0 and below P2 in every cell. The position of P0ref depends on the model. On ladder and tfim P0ref is above P1 and P3 in all six cells and on 36 of 36 circuits each. On xxz P0ref is below P1 in all three cells and below P3 at n = 4 and n = 6, because on xxz the extraction pipelines leave a ZZPhase count close to the P0ref count (30.3 against 42.0 at n = 4 under P1) while on ladder and tfim they leave 1.4 to 3.2 times the P0ref count. Over the 36 circuits at each n the ordering is P0 ~ P2 > P0ref > P1 ~ P3 at n = 6 and n = 8, and at n = 4 P1 and P3 (both 0.9893) sit above P0ref (0.9867).
-
-`[F]` Table A5. The same proxy on the seven family B1 circuits with n <= 7, 35 rows in `results/family_B1_proxy_h22e.csv`. The ideal distribution is the noise-free output of the P0ref circuit. "support" is the number of outcomes with probability above 1e-12.
-
-<!-- TABLE:A5_proxy_b1 -->
-| circuit | n | support | F_H P0ref | F_H P0 | F_H P1 | F_H P2 | F_H P3 | ZZ P0 | ZZ P2 |
-|---|---|---|---|---|---|---|---|---|---|
-| barenco_tof_3 | 5 | 1 | 0.9696 | 0.9739 | 0.9692 | 0.9747 | 0.9644 | 20 | 19 |
-| mod5_4 | 5 | 1 | 0.9647 | 0.9689 | 0.9661 | 0.9710 | 0.9705 | 24 | 22 |
-| qft_4 | 5 | 16 | 0.9641 | 0.9704 | 0.9623 | 0.9706 | 0.9527 | 36 | 36 |
-| tof_3 | 5 | 1 | 0.9759 | 0.9791 | 0.9691 | 0.9800 | 0.9655 | 15 | 14 |
-| barenco_tof_4 | 7 | 1 | 0.9430 | 0.9513 | 0.9451 | 0.9528 | 0.9316 | 40 | 38 |
-| hwb6 | 7 | 1 | 0.8751 | 0.8915 | 0.8521 | 0.8962 | 0.7977 | 99 | 94 |
-| tof_4 | 7 | 1 | 0.9614 | 0.9667 | 0.9567 | 0.9684 | 0.9464 | 25 | 23 |
-<!-- /TABLE:A5_proxy_b1 -->
-
-`[F]` On family B1 P2 is above P0 on 7 of 7 circuits and P0 is above P0ref on 7 of 7. P1 is below P0 on 7 of 7 and P3 on 6 of 7. The exception is mod5_4, where P3 has the fewest ZZPhase gates of any pipeline (20 against 24 under P0). The largest fidelity gain of P2 over P0 is hwb6, 0.8915 to 0.8962 with 99 to 94 ZZPhase gates.
-
-`[F]` A fit of -ln F_H = a n_2q with no intercept gives a = 1.18e-3 +/- 2.3e-5 on the 35 family B1 rows, with centred R^2 0.968, against the two-qubit error rate p2 = 1.29e-3 of the noise model. On the 540 family A rows the same fit gives a = 5.14e-4 +/- 1.3e-5 with centred R^2 0.612. Per model the slope is 2.28e-4 on ladder, 2.26e-4 on tfim and 7.58e-4 on xxz. The standard errors are from the residual variance and the R^2 is centred, 1 - SS_res / SS_tot about the mean of -ln F_H (`results/proxy_h22e_fits.log`, Section 4).
-
-`[F]` The family B1 circuits have a single-outcome ideal distribution on 6 of 7 circuits (support 16 on qft_4), the xxz circuits have mean support 29.8 and the ladder and tfim circuits have mean support 107.8 out of 2^n. Adding the term u support to the family A fit -ln F_H = a n_2q + b n_1q gives u = -7.9e-5 per outcome. It raises the centred R^2 of that fit from 0.714 to 0.784.
-
-`[O]` The slope follows the support of the ideal distribution. A depolarising error after a two-qubit gate moves probability off the ideal outcomes, and the Hellinger fidelity pays for it in full when the ideal distribution is a single outcome and only in part when the ideal distribution already covers most strings. The B1 slope close to p2 is the first case and the ladder and tfim slopes near 0.18 p2 are the second. A cost model that predicts F_H from gate counts therefore needs the support as a feature, which is the reason it enters Section 4.
-
-`[O]` The proxy contains no leakage, crosstalk, idle dephasing or the RZZ angle scaling of the published H2-2E model, so it ranks pipelines by their ZZPhase count under the H2-2E gate rates and does not predict the emulator's absolute fidelity. The four family A circuits of Table E1 are too few to replace it.
-
-### 3.6 Selene runs
-
-`[F]` Tables S1 and S2. Runs of the compiled circuits on Quantinuum's local emulator Selene (`selene-sim` 0.3.4, route in Section 2.6), from `results/selene_noiseless.csv` (468 rows), `results/selene_depolarizing.csv` (68 rows) and `results/selene_depolarizing_full.csv` (468 rows). The noiseless runs cover the 144 family A circuits with n <= 10 and the 12 family B1 circuits with n <= 10 under P0, P1 and P2 at 2000 shots. The full depolarising run covers the same 156 circuits under P0, P1 and P2 at 2000 shots with `DepolarizingErrorModel` at the H2-2E rates p_1q = 7.3e-5, p_2q = 1.29e-3, p_meas = 1.35e-3 and p_init = 4e-5.
-
-<!-- TABLE:S1_selene -->
-Noiseless runs (IdealErrorModel, Quest backend). TVD is against the exact output distribution of the compiled QASM, TVD_scale = sqrt(support / (2 pi shots)).
-
-| family | circuits | pipelines | runs | shots per run | max TVD | max TVD / TVD_scale | flagged (TVD > 4 TVD_scale) | shots outside support |
-|---|---|---|---|---|---|---|---|---|
-| A | 144 | P0, P1, P2 | 432 | 2000 | 0.117 | 1.111 | 0 | 0 |
-| B1 | 12 | P0, P1, P2 | 36 | 2000 | 0.080 | 1.121 | 0 | 0 |
-
-Depolarising runs (DepolarizingErrorModel, p_1q = 7.3e-5, p_2q = 1.29e-3) against the density-matrix proxy, pipelines P0 and P2. z = (F_H Selene - mean F_H of 400 2000-shot samples of the proxy distribution) / their sd. gates_meas_init adds p_meas = 1.35e-3 and p_init = 4e-5, gates_only sets both to 0.
-
-| family | variant | runs | abs z <= 2 | mean z | sd z | max abs z | mean F_H Selene - proxy exact | mean F_H Selene - proxy sampled |
-|---|---|---|---|---|---|---|---|---|
-| A | gates_meas_init | 20 | 20 | -0.13 | 0.82 | 1.73 | -0.0075 | -0.0007 |
-| A | gates_only | 20 | 17 | 0.83 | 1.17 | 3.52 | -0.0035 | 0.0033 |
-| B1 | gates_meas_init | 14 | 12 | -0.50 | 1.18 | 2.81 | -0.0029 | -0.0027 |
-| B1 | gates_only | 14 | 10 | 1.24 | 1.11 | 2.43 | 0.0045 | 0.0046 |
-<!-- /TABLE:S1_selene -->
-
-`[F]` In the 468 noiseless runs the largest TVD between the sampled and the exact distribution is 0.117 and the largest ratio of TVD to its sampling scale sqrt(support / (2 pi N_shots)) is 1.121, so no run reaches the flag threshold of 4. No shot landed outside the exact support in any of the 468 runs. The support is smaller than 2^n on 276 runs, so a shot could have landed outside it there. The exact distribution of each compiled QASM file agrees with the family reference to 5.7e-11. The TVD divided by its asymptotic expectation for the actual distribution has median 0.93 and maximum 2.26 over the 468 runs. A pooled chi-square test against the exact multinomial on the 234 runs with support between 2 and 64 gives p < 0.01 on 4 runs and p < 0.05 on 13, against 2.3 and 11.7 expected under the null. The 4 runs were resampled with fresh seeds at 20000 shots (`results/selene_recheck.txt`) and none of the deviations persists.
-
-`[O]` A wrong measure map or a wrong gate in the compiled QASM would put shots on zero-probability strings or push the TVD above its sampling scale. Neither happened on any of the 156 circuits under any of the three pipelines, so the compiled files run on Quantinuum's own toolchain and reproduce the distributions the local checks computed.
-
-<!-- TABLE:S2_selene_depol -->
-Depolarising runs on the full set (DepolarizingErrorModel, p_1q = 7.3e-5, p_2q = 1.29e-3, p_meas = 1.35e-3, p_init = 4e-5, 2000 shots). F_H is the Hellinger fidelity of the Selene samples to the ideal distribution. P0 > P1 and P2 > P1 count circuits with a strictly higher F_H.
-
-| family | n | circuits | mean F_H P0 | mean F_H P1 | mean F_H P2 | P0 > P1 | P2 > P1 |
-|---|---|---|---|---|---|---|---|
-| A | 4 | 36 | 0.9914 | 0.9880 | 0.9902 | 33 | 29 |
-| A | 6 | 36 | 0.9832 | 0.9706 | 0.9820 | 35 | 32 |
-| A | 8 | 36 | 0.9705 | 0.9410 | 0.9691 | 36 | 34 |
-| A | 10 | 36 | 0.9517 | 0.8918 | 0.9501 | 36 | 36 |
-| B1 | 5 | 4 | 0.9722 | 0.9638 | 0.9739 | 4 | 3 |
-| B1 | 7 | 3 | 0.9328 | 0.9210 | 0.9308 | 2 | 2 |
-| B1 | 9 | 4 | 0.9121 | 0.8816 | 0.9109 | 4 | 4 |
-| B1 | 10 | 1 | 0.9410 | 0.9260 | 0.9350 | 1 | 1 |
-| all |  | 156 | 0.9716 | 0.9459 | 0.9702 | 151 | 141 |
-<!-- /TABLE:S2_selene_depol -->
-
-`[F]` Table S2. The full depolarising run has 468 runs on 156 circuits. The mean F_H over the 156 circuits is 0.9716 for P0, 0.9459 for P1 and 0.9702 for P2. P0 is strictly above P1 on 151 circuits and P2 is strictly above P1 on 141. Both P0 and P2 are strictly above P1 on 140 of the 156 circuits. The 16 exceptions are 14 family A circuits with n <= 8 and the B1 circuits barenco_tof_3 and barenco_tof_4.
-
-`[F]` The mean of F_H(P2) minus F_H(P0) over the 156 circuits is -0.0013 and P2 is strictly above P0 on 67 circuits. The single-run sampling sd of F_H at 2000 shots has mean 0.0028 over the 345 runs with a proxy row. The mean difference is therefore 0.47 single-run sampling sd. The standard error of the mean difference over the 156 circuits is 0.0004.
-
-`[O]` A single circuit's ordering of P2 against P0 is not resolved at 2000 shots. The ensemble mean favours P0 by 0.0013 in F_H, which is small next to the P1 deficit of 0.0256 against P0.
-
-`[F]` 345 of the 468 runs have a density-matrix proxy row. The 123 runs without one are the family A circuits with n = 10 and the family B1 circuits with n = 9 and n = 10. On the 345 runs |z| <= 2 holds for 335, which is 97.1 %. The mean z is -0.001 and the population sd of z is 0.957 with largest |z| 2.82. Independent draws from the proxy's sampling distribution give mean 0, sd 1 and 95.4 % within two sd. The mean of F_H under Selene minus the exact proxy F_H is -0.0051 and falls to +0.0002 against the proxy's F_H evaluated on 2000-shot samples.
-
-`[F]` An earlier 68-run comparison on 17 circuits under P0 and P2 agreed within two sd on 32 of 34 runs in `gates_meas_init` and on 27 of 34 runs in `gates_only`, which leaves readout and initialisation noiseless.
-
-`[F]` Selene's `DepolarizingErrorModel` was probed at p = 0.3 with 20000 shots per probe (`selene/calibrate_error_model.py`, `results/selene_calibration.txt`). Rz gates receive no noise. A single-qubit gate flips with probability 0.2051 +/- 0.0029 against 2p / 3 = 0.200 for a uniformly random non-identity Pauli. A ZZPhase leaves the 00 state with probability 0.2442 +/- 0.0030 against 12p / 15 = 0.240. Readout flips symmetrically at 0.306 and 0.304 and initialisation flips at 0.298. The conventions match `noise/dm_sim.py`, except that the proxy's readout flip is asymmetric and Selene's is one rate.
-
-`[O]` Selene's `DepolarizingErrorModel` and the proxy share one gate-level convention, so their agreement checks the proxy's implementation and its handling of the measure map. The agreement does not test fidelity to H2-2E. Neither model contains the emission and leakage branch, the crosstalk or the duration-based dephasing of the published H2-2E model. The Selene runs are the first execution of the compiled circuits on a Quantinuum emulator in this submission and the emulator runs of Section 3.7 are the second.
-
-`[F]` Wall time on the 2-core container was 465 s for the 468 noiseless runs and 68 s for the 68-run comparison, both with two processes. The per-run wall times of the 468 full depolarising runs sum to 1437 s. Every TVD and F_H value of the noiseless runs and the 68-run comparison was bit-identical between two complete runs of the driver. `results/selene.md` records one execution of the full depolarising run.
-
-### 3.7 Emulator runs
-
-`[F]` Access. The team reached the Quantinuum platforms on 8 October 2026 through `aqora` 0.35.1 as team `learned_zx_rewriting`.
-
-`[F]` Quotas. The Aqora forum topic "Emulator Cost" by Irfan Khan of Quantinuum sets 2 hours of H2-Emulator time per team and 10,000 HQC per team on H2-1E and H2-2E. The syntax checkers are free. The same topic states that teams have no usage tracking. No copy is in the repository.
-
-`[F]` Syntax check. The H2-2SC syntax check of tof_3 under P0 completed as job `AFByb3ZpZGVySm9iAaEcdqFKfvGiVyt1pWCaEQ`. All 1000 shots returned the all-zero string and the job returned no cost. The raw payload is `results/emulator/nexus_H2-2SC/P0/tof_3.json`.
-
-`[F]` Table E1. Nexus H2-Emulator runs with noise at 1000 shots, from `results/emulator_nexus_H2-Emulator.csv` (22 rows) and the counts in `results/emulator/nexus_H2-Emulator/`. Three jobs completed. The first ran tof_3 under P0 and P2 with a reported duration of 167 s. The second ran barenco_tof_3, barenco_tof_4 and barenco_tof_5 under P0, P1 and P2 and grover_5 under P0 in 953 s. The third ran ladder_n4_r1, ladder_n4_r2 and ladder_n4_r4 under P0, P1 and P2 and ladder_n6_r1 under P0 in 309 s. The job ledger is `results/emulator_jobs.csv`. `report/make_tables.py` recomputes every F_H from the stored counts and asserts agreement with the CSV to 1e-9.
-
-<!-- TABLE:E1_h2emulator -->
-Nexus H2-Emulator, noisy_simulation = True, 1000 shots per row. F_H is the Hellinger fidelity of the returned counts to the ideal distribution. sd F_H emulator is the sd of F_H over 4000 multinomial bootstrap resamples of the counts (seed 20261008). F_H proxy is the exact density-matrix proxy value of Section 3.5 and is empty where the proxy has no row. F_H Selene depol is the 2000-shot Selene DepolarizingErrorModel value of Section 3.6.
-
-| file | n | pipeline | n_2q | F_H emulator | sd F_H emulator | F_H proxy | F_H Selene depol |
-|---|---|---|---|---|---|---|---|
-| tof_3 | 5 | P0 | 15 | 0.9860 | 0.0037 | 0.9791 | 0.9785 |
-| tof_3 | 5 | P2 | 14 | 0.9810 | 0.0044 | 0.9800 | 0.9810 |
-| barenco_tof_3 | 5 | P0 | 20 | 0.9770 | 0.0048 | 0.9739 | 0.9740 |
-| barenco_tof_3 | 5 | P1 | 23 | 0.9760 | 0.0049 | 0.9692 | 0.9700 |
-| barenco_tof_3 | 5 | P2 | 19 | 0.9660 | 0.0057 | 0.9747 | 0.9655 |
-| barenco_tof_4 | 7 | P0 | 40 | 0.9500 | 0.0068 | 0.9513 | 0.9470 |
-| barenco_tof_4 | 7 | P1 | 41 | 0.9420 | 0.0073 | 0.9451 | 0.9490 |
-| barenco_tof_4 | 7 | P2 | 38 | 0.9660 | 0.0057 | 0.9528 | 0.9450 |
-| barenco_tof_5 | 9 | P0 | 60 | 0.9280 | 0.0080 |  | 0.9305 |
-| barenco_tof_5 | 9 | P1 | 70 | 0.9160 | 0.0088 |  | 0.9120 |
-| barenco_tof_5 | 9 | P2 | 57 | 0.9130 | 0.0088 |  | 0.9255 |
-| grover_5 | 9 | P0 | 240 | 0.7898 | 0.0131 |  | 0.8245 |
-| ladder_n4_r1_uniform_s1 | 4 | P0 | 4 | 0.9993 | 0.0009 | 0.9992 | 0.9984 |
-| ladder_n4_r1_uniform_s1 | 4 | P1 | 11 | 0.9927 | 0.0027 | 0.9954 | 0.9948 |
-| ladder_n4_r1_uniform_s1 | 4 | P2 | 4 | 0.9981 | 0.0014 | 0.9992 | 0.9978 |
-| ladder_n4_r2_uniform_s1 | 4 | P0 | 8 | 0.9993 | 0.0017 | 0.9995 | 0.9975 |
-| ladder_n4_r2_uniform_s1 | 4 | P1 | 25 | 0.9901 | 0.0033 | 0.9933 | 0.9899 |
-| ladder_n4_r2_uniform_s1 | 4 | P2 | 8 | 0.9947 | 0.0018 | 0.9995 | 0.9970 |
-| ladder_n4_r4_uniform_s1 | 4 | P0 | 16 | 0.9957 | 0.0026 | 0.9998 | 0.9987 |
-| ladder_n4_r4_uniform_s1 | 4 | P1 | 42 | 0.9912 | 0.0032 | 0.9970 | 0.9950 |
-| ladder_n4_r4_uniform_s1 | 4 | P2 | 16 | 0.9924 | 0.0029 | 0.9998 | 0.9975 |
-| ladder_n6_r1_uniform_s1 | 6 | P0 | 7 | 0.9963 | 0.0018 | 0.9986 | 0.9962 |
-<!-- /TABLE:E1_h2emulator -->
-
-`[F]` Quota event. A fourth job of 10 family B1 circuits was rejected with `QuotaExceedException: Quota 'simulation' would be exceeded`. It held grover_5 under P1 and P2, hwb6 and mod5_4 under P0, P1 and P2 and mod_mult_55 under P0 and P1. The three completed jobs had reported 1429 s, which is 19.8 % of the 7200 s quota. The ledger records a duration of 823 s for the rejected job. `[O]` The cause of the gap between 1429 s and 7200 s is not known. One hypothesis is that the platform charges each circuit of a batch separately. The other is that it rejects a job on a duration pre-estimate before running it.
-
-`[F]` Sampling error. The bootstrap sd of F_H at 1000 shots is 0.0037 to 0.0088 on the 11 B1 rows with a single ideal outcome and agrees with the binomial value sqrt(F_H (1 - F_H) / 1000) to 2.2 %. It is 0.0009 to 0.0033 on the 10 family A rows and 0.0131 on grover_5. The no-intercept fit of -ln F_H on n_2q over the B1 proxy rows gives 1.18e-3 per ZZ gate. P2 removes 1 to 3 ZZ gates against P0 on tof_3, barenco_tof_3, barenco_tof_4 and barenco_tof_5. The F_H gain expected from that slope is 0.0012 to 0.0033 on those four circuits. The sd of the measured P2 minus P0 difference is 0.0057 to 0.0119 on the same circuits. The expected gain is therefore 0.15 to 0.28 of one sd. The measured differences are -0.005, -0.011, +0.016 and -0.015 with z = -0.87, -1.48, +1.81 and -1.26 in the order above. All four lie within two sd of zero. At F_H = 0.955, the mean over the 11 single-outcome B1 rows, a one-gate gain reaches two sd of the difference only at 2.7e5 shots per pipeline.
-
-`[O]` At 1000 shots the sampling error of F_H exceeds the fidelity difference expected from 1 to 3 fewer ZZ gates. The emulator data establish that the compiled circuits run correctly on the Quantinuum platform and that the team has used it. They do not resolve P2 against P0 on any single circuit. `[F]` In the Selene data of Table S2 F_H(P2) minus F_H(P0) has mean -0.0013 with standard error 0.0004 over the 156 circuits. Over the 12 B1 circuits the mean is -0.0009 with standard error 0.0016 and P2 is above P0 on 4. `[F]` On the B1 circuits Tables S2, E1 and E2 therefore do not resolve P2 against P0 in fidelity. Table E3 of Section 3.7.1 pools 4000 shots per pipeline. It resolves P2 above P0 on vbe_adder_3 with z = +2.38 and does not resolve grover_5. `[O]` The P2 against P0 comparison on H2 rests on the ZZ counts of Section 3.2 and the HQC counts of Section 1.2.
-
-`[F]` Comparison with the proxy. On the 18 rows with a proxy value the mean of F_H emulator minus F_H proxy is -0.0007 and the mean absolute difference is 0.0042. The mean is -0.0031 on the 10 family A rows and +0.0022 on the 8 B1 rows. 15 of the 18 rows lie within two emulator sd of the proxy. The three rows outside are barenco_tof_4, ladder_n4_r2 and ladder_n4_r4, all under P2.
-
-`[F]` Comparison with Selene. On all 22 rows the mean of F_H emulator minus F_H Selene is -0.0011 and the mean absolute difference is 0.0055. The sd of the difference combines the emulator sd with a Selene sd taken as the emulator sd times sqrt(1000 / 2000). 20 of the 22 rows lie within two sd. The two rows outside are barenco_tof_4 under P2 and grover_5 under P0.
-
-`[F]` On ladder_n4_r1, ladder_n4_r2 and ladder_n4_r4 the P2 circuit has the same ZZ count and two-qubit depth as P0 and no more PhasedX gates. The emulator F_H of P2 is below P0 on all three with z = -0.68, -1.88 and -0.83. `[O]` The proxy predicts equal F_H for these pairs. The published H2-2E noise model has angle-dependent two-qubit errors and dephasing that the proxy lacks. This report does not establish whether the H2-Emulator uses that model, and the difference is not resolved at 1000 shots.
-
-#### 3.7.1 H2-2E
-
-`[F]` Runs. vbe_adder_3, hwb6 and grover_5 ran on the Nexus H2-2E emulator under P0 and P2 with `noisy_simulation = True` at 1000 shots. Each of the six circuits went in its own job. All six jobs completed on 8 October 2026 and are the `nexus:H2-2E` rows of `results/emulator_jobs.csv`. The job ids in the order P0 then P2 are the following.
-
-- `[F]` vbe_adder_3: `AFByb3ZpZGVySm9iAaEcwoXVdfGm_ordi_7h5w`, `AFByb3ZpZGVySm9iAaEcyAXPe_KMnSd2cLrgKg`
-- `[F]` hwb6: `AFByb3ZpZGVySm9iAaEczGiEcIO6R60fhgRfMw`, `AFByb3ZpZGVySm9iAaEc2Kp3dxCmIno2DMeWtA`
-- `[F]` grover_5: `AFByb3ZpZGVySm9iAaEc31OVdBG5qZ8C3KUGnQ`, `AFByb3ZpZGVySm9iAaEc47DrcSKGODVcQ3R9uw`
-
-`[F]` Cost. The HQC estimates stored with the six jobs sum to 1840.0 HQC. With the twelve repeat jobs described below the 18 H2-2E jobs sum to 5933.2 HQC. That is 59.3 % of the 10,000 HQC quota per team on H2-1E and H2-2E. The cost fields returned by the platform hold a duration and no HQC value. The charged amount is therefore not recorded in the repository.
-
-`[F]` Table E2. The six rows of `results/emulator_nexus_H2-2E.csv` with the counts in `results/emulator/nexus_H2-2E/`. `submit/h22e_stats.py` recomputes every F_H from the counts. `report/make_tables.py` asserts agreement with the CSV and with the JSON payloads to 1e-9.
-
-<!-- TABLE:E2_h22e -->
-`[F]` Nexus H2-2E, noisy_simulation = True, 1000 shots per row, one job per row. F_H is the Hellinger fidelity of the returned counts to the ideal distribution. sd F_H is the binomial value sqrt(F_H (1 - F_H) / 1000) on vbe_adder_3 and hwb6, whose ideal output is a single bit string. On grover_5 it is the sd over 4000 multinomial bootstrap resamples of the counts (seed 20261008). HQC estimate is the formula value stored with each job. F_H proxy is the exact density-matrix proxy value of Section 3.5 and is empty where the proxy has no row (n > 7). F_H Selene depol is the 2000-shot Selene DepolarizingErrorModel value of Section 3.6.
-
-| file | n | pipeline | n_2q | HQC estimate | F_H | sd F_H | F_H proxy | F_H Selene depol |
-|---|---|---|---|---|---|---|---|---|
-| vbe_adder_3 | 10 | P0 | 56 | 151.6 | 0.9540 | 0.0066 |  | 0.9410 |
-| vbe_adder_3 | 10 | P2 | 41 | 119.0 | 0.9590 | 0.0063 |  | 0.9350 |
-| hwb6 | 7 | P0 | 99 | 243.0 | 0.9240 | 0.0084 | 0.8915 | 0.8845 |
-| hwb6 | 7 | P2 | 94 | 232.6 | 0.9090 | 0.0091 | 0.8962 | 0.8805 |
-| grover_5 | 9 | P0 | 240 | 565.6 | 0.8652 | 0.0114 |  | 0.8245 |
-| grover_5 | 9 | P2 | 218 | 528.2 | 0.8728 | 0.0112 |  | 0.8315 |
-<!-- /TABLE:E2_h22e -->
-
-`[F]` Paired differences. F_H(P2) minus F_H(P0) is +0.0050 with sd 0.0091 and z = +0.55 on vbe_adder_3. It is -0.0150 with sd 0.0124 and z = -1.21 on hwb6. It is +0.0076 with sd 0.0160 and z = +0.48 on grover_5. All three lie within two sd of zero.
-
-`[F]` Predicted gain. The no-intercept fit of -ln F_H on n_2q over the 35 family B1 proxy rows gives a = 1.1801e-3 per ZZ gate. `submit/h22e_stats.py` refits it and checks it against the value 1.1801e-3 printed at line 77 of `results/proxy_h22e_fits.log`. P2 removes 15, 5 and 22 ZZ gates against P0 on vbe_adder_3, hwb6 and grover_5. The predicted F ratio exp(a dN_2q) is 1.0179, 1.0059 and 1.0263 on the three circuits. Applied to the measured P0 value it gives predicted gains of 0.0170, 0.0055 and 0.0228. These are 1.87, 0.44 and 1.42 sd of the measured difference. The measured differences lie below the predicted gains by 1.32, 1.66 and 0.95 sd.
-
-`[F]` Shots for a 2-sd resolution. The sd of the difference scales as one over the square root of the shot count. The predicted gain equals two sd of the difference at 1147 shots per pipeline on vbe_adder_3, 20462 on hwb6 and 1974 on grover_5.
-
-`[F]` Comparison with the proxy. Only hwb6 has a proxy row because the proxy stops at n = 7. The emulator F_H of hwb6 lies 3.88 sd above the proxy under P0 and 1.41 sd above it under P2. The proxy predicts a P2 gain of +0.0047 on hwb6.
-
-`[F]` Comparison with Selene. The emulator F_H exceeds the 2000-shot Selene depolarising value on all six rows. The excess runs from 0.0130 to 0.0413 with z from 1.60 to 3.85. Five of the six rows lie more than two sd above Selene. The sd combines the emulator sd with a Selene sd taken as the emulator sd times sqrt(1000 / 2000) as in Section 3.7.
-
-`[F]` Comparison with the H2-Emulator. grover_5 under P0 also ran on the H2-Emulator in Table E1 with F_H 0.7898. Its H2-2E value 0.8652 is 4.33 sd higher. The sd combines the Table E1 sd 0.0131 with the Table E2 sd 0.0114. `submit/h22e_stats.py` prints this z.
-
-`[F]` Repeat runs. vbe_adder_3 and grover_5 were submitted three more times to H2-2E under P0 and P2. The repeats used the compiled circuits, options and shot count of Table E2. Each repeat went in its own job. The 12 completed repeat jobs are the `nexus:H2-2E` rows of `results/emulator_jobs.csv` whose result paths lie under `results/emulator/nexus_H2-2E_r2/`, `_r3/` and `_r4/`. Their stored HQC estimates sum to 4093.2 HQC. With the six jobs of Table E2 the 18 H2-2E jobs sum to 5933.2 HQC. That is 59.3 % of the team quota of 10000 HQC. Each of the four cells now holds 4000 shots from four runs of 1000. hwb6 has the original run only and is not pooled.
-
-<!-- TABLE:E3_h22e_pooled -->
-`[F]` Nexus H2-2E, noisy_simulation = True, 1000 shots per run, one job per run. runs counts the original run of Table E2 and the completed repeats. pooled F_H is the Hellinger fidelity of the summed counts to the ideal distribution. sd is binomial on vbe_adder_3 and the sd over 4000 multinomial bootstrap resamples of the pooled counts on grover_5 (seed 20261008). The per-run F_H range is the smallest and largest F_H of single runs.
-
-| file | pipeline | runs | shots | n_2q | pooled F_H | sd | per-run F_H range |
-|---|---|---|---|---|---|---|---|
-| vbe_adder_3 | P0 | 4 | 4000 | 56 | 0.9520 | 0.0034 | 0.9470 to 0.9560 |
-| vbe_adder_3 | P2 | 4 | 4000 | 41 | 0.9628 | 0.0030 | 0.9590 to 0.9680 |
-| grover_5 | P0 | 4 | 4000 | 240 | 0.8704 | 0.0053 | 0.8482 to 0.8652 |
-| grover_5 | P2 | 4 | 4000 | 218 | 0.8711 | 0.0053 | 0.8400 to 0.8728 |
-
-`[F]` vbe_adder_3 F_H(P2) - F_H(P0) +0.0108, sd 0.0045, z +2.38, p 0.017, predicted 0.0170, measured - predicted -1.38 sd. grover_5 F_H(P2) - F_H(P0) +0.0007, sd 0.0075, z +0.10, p 0.92, predicted 0.0229, measured - predicted -2.94 sd. Homogeneity p: vbe_adder_3 P0 0.80, vbe_adder_3 P2 0.70, grover_5 P0 0.91, grover_5 P2 0.68. H2-2E HQC estimate of the 18 completed jobs 5933.2, 59.3 % of 10000.
-<!-- /TABLE:E3_h22e_pooled -->
-
-`[F]` Pooled numbers. `submit/h22e_pooled.py` computes F_H of each run and of the summed counts. On vbe_adder_3 the per-run F_H lies between 0.9470 and 0.9560 under P0 and between 0.9590 and 0.9680 under P2. A chi-square test on the per-run success and failure counts gives p = 0.80 under P0 and p = 0.70 under P2. The pooled F_H is 0.9520 with sd 0.0034 under P0 and 0.9628 with sd 0.0030 under P2. On grover_5 the per-run F_H lies between 0.8482 and 0.8652 under P0 and between 0.8400 and 0.8728 under P2. The homogeneity test there is a chi-square test on the per-run counts of the 64 support outcomes plus one bin for all other outcomes. It gives p = 0.91 under P0 and p = 0.68 under P2. The pooled F_H is 0.8704 with sd 0.0053 under P0 and 0.8711 with sd 0.0053 under P2. No cell rejects homogeneity at the 0.05 level. The pooled F_H of grover_5 under P0 exceeds every single-run value. Finite sampling lowers the measured F_H of a spread distribution and the summed counts sample it more finely. F_H(P2) minus F_H(P0) is +0.0108 with sd 0.0045 on vbe_adder_3. Its z is +2.38 and its two-sided p is 0.017. On grover_5 the difference is +0.0007 with sd 0.0075. Its z is +0.10 and its two-sided p is 0.92. The two repeated circuits were chosen after Table E2. The Holm adjustment over these two circuits gives 0.035 on vbe_adder_3 and 0.92 on grover_5. The Holm adjustment over all three H2-2E circuits uses the single-run p of 0.23 for hwb6. It gives 0.052 on vbe_adder_3, 0.92 on grover_5 and 0.45 on hwb6. Applied to the pooled P0 value the slope a = 1.1801e-3 used above predicts a gain of 0.0170 on vbe_adder_3 from 15 fewer ZZ gates. It predicts 0.0229 on grover_5 from 22 fewer. The measured difference lies 1.38 sd below the prediction on vbe_adder_3 and 2.94 sd below it on grover_5.
-
-`[O]` On vbe_adder_3 at 4000 shots per pipeline P2 is above P0 by 0.0108 with z = +2.38. The difference is significant at 0.05 before correction. The measured difference lies within 2 sd of the gain predicted by the slope. On grover_5 the difference is not resolved at 4000 shots per pipeline. Its z is +0.10. The measured difference lies more than 2 sd below the gain predicted by the slope. After Holm adjustment over the two repeated circuits the difference on vbe_adder_3 stays below p = 0.05. After Holm adjustment over all three H2-2E circuits the difference on vbe_adder_3 is not below p = 0.05.
-
-`[F]` The single H2-2E runs do not resolve P2 against P0 at 1000 shots on any of the three circuits. At 4000 shots per pipeline the pooled vbe_adder_3 difference has z = +2.38 and a two-sided p of 0.017. The repeat circuits were chosen after Table E2. The Holm-adjusted p is 0.035 over the two repeated circuits and 0.052 over all three H2-2E circuits. The pooled runs do not resolve grover_5, where z is +0.10. They agree with the proxy within sampling error on hwb6 under P2 and not under P0. The emulator F_H lies above the proxy and above Selene on every row where either exists. At the predicted gains a 2-sd resolution needs 1147 shots per pipeline on vbe_adder_3 and 1974 on grover_5. On hwb6 it needs 20462. At 4000 shots the grover_5 difference lies 2.94 sd below its predicted gain.
-
-`[O]` The H2-2E runs confirm execution and HQC accounting on the Quantinuum H2-2E emulator. One reading is that H2-2E applies less error to these B1 circuits than the depolarising model at the published rates. This report does not test that reading. vbe_adder_3 is the one circuit on which the emulator measures a fidelity gain of P2 over P0. The gain is significant before correction and after correction over the two repeated circuits. It is not significant at 0.05 after correction over all three H2-2E circuits. On grover_5 the 22 fewer ZZ gates show no fidelity gain at 4000 shots and the slope prediction is not met.
-
-## 4. Learned cost model
-
-`[F]` Version 1 of this section was a protocol with no trained model. Version 2 trains the model on the local proxy fidelities of Section 3 and reports its validation. Every number in Tables M1 and M2 is produced by `report/make_tables.py` from `results/cost_model_metrics.csv` and `results/cost_model_coefficients.csv`, which are written by `model/cost_model.py`.
-
-`[F]` Data. The training set is the proxy output of `noise/run_proxy.py` with the published H2-2E emulator defaults p1 = 7.3e-5, p2 = 1.29e-3, readout flip rates 9e-4 and 1.8e-3 and p_init = 4e-5. Family A contributes 540 rows, the 108 Trotter circuits with n in {4, 6, 8} under the five pipelines P0ref, P0, P1, P2 and P3. Family B1 contributes 35 rows, the 7 benchmark circuits with n in {5, 7} under the same five pipelines. F_H is the Hellinger fidelity of the exact noisy output distribution against the ideal one, with no shot sampling. `[O]` These are proxy numbers from a density-matrix model that omits leakage, crosstalk and duration-based dephasing. The script reruns unchanged on emulator CSVs with the same columns. `[F]` The model was not refit on the 22 H2-Emulator rows or the six H2-2E rows of Sections 3.7 and 3.7.1.
-
-### 4.1 Target and features
-
-`[F]` The target is y = -ln F_H. For a product of independent small error channels F_H is close to exp(-sum_k p_k N_k), so y is linear in the gate counts to first order. The seven features are read from the compiled circuit.
-
-- `[F]` n_2q is the ZZPhase and ZZMax count. It carries the two-qubit fault probability p2.
-- `[F]` n_1q is the PhasedX count. It carries p1. Rz is virtual and noiseless and is not counted.
-- `[F]` n_qubits is the number of measured qubits. Each carries one readout and one initialisation fault.
-- `[F]` depth_2q is the two-qubit depth. It stands in for idle error because the proxy has no duration model.
-- `[F]` support_size is the number of bitstrings with ideal probability above 1e-12.
-- `[F]` log2_support is the base-2 logarithm of support_size.
-- `[F]` n_2q_offsupport = n_2q (1 - support_size / 2^n) is the interaction term.
-
-`[O]` The interaction is justified by the metric. A Pauli fault after a gate moves a fraction of the output mass to other bitstrings. When the ideal distribution covers most of the 2^n strings the displaced mass lands on strings that already carry ideal weight and the Hellinger overlap barely changes. When the ideal output is one string every fault removes its mass from the support and the full per-gate error appears in y. The factor (1 - support_size / 2^n) is the fraction of the output space outside the support and is the first-order estimate of the lost mass. `[F]` The two families sit at opposite ends of this factor. The mean support fraction support_size / 2^n is 0.758 in family A and 280 of its 540 rows have full support. In family B1 the mean support fraction is 0.088 and the three values that occur are 0.0078, 0.031 and 0.5.
-
-### 4.2 Models
-
-`[F]` Four models are fitted to y on the same feature matrix. The physics baseline y = p2 n_2q + p1 n_1q + (p_meas_avg + p_init) n_qubits has no fitted parameter, with p_meas_avg + p_init = 1.39e-3 the mean of the two readout flip rates plus the initialisation fault. The OLS model is least squares on the seven features without intercept, since an empty circuit has y = 0 and the n_qubits column carries the SPAM floor. The ridge model scales each column to unit RMS on the training set and applies penalty lambda = 1 to the scaled coefficients, again without intercept. The gradient-boosted model is sklearn `GradientBoostingRegressor` with 300 trees of depth 3, learning rate 0.05, subsample 0.8 and `random_state=0`. `[O]` The three fitted models are ordered by capacity. OLS tests whether a linear correction of the physics baseline is enough. Ridge tests whether the OLS coefficients are stable under shrinkage. The boosted model is the learned component and tests whether a nonlinear fit buys anything beyond the linear one.
-
-### 4.3 Validation splits
-
-`[F]` Three kinds of split are reported. Leave-one-family-out trains on A and tests on B1 and the reverse. Leave-one-model-out trains on two of the three Trotter models of A and tests on the third. Five-fold cross-validation on the pooled 575 rows is run twice. In the plain split cv5 the rows are shuffled into folds with seed 0. In the grouped split cv5g the folds are drawn over circuit classes, where a class is the file name with the disorder-seed suffix removed, so that all pipelines and all seeds of a class are in the same fold.
-
-`[F]` The grouped split exists because the seeds of one circuit class are near-duplicate rows. 27 of the 54 classes of A have three disorder seeds. Within one class and one pipeline the three seeds have identical n_2q, identical depth_2q and identical support_size in 130 of the 135 three-seed class-pipeline groups, and their F_H values lie within 0.0056 of each other. In these 130 groups a random fold puts a near-copy of a test row in the training set unless all three seeds fall in the same fold. Its score therefore measures interpolation between pipelines and seeds of a circuit already seen. `[F]` The effect is visible in Table M1. The boosted model scores R^2 0.990 on cv5 and 0.971 on cv5g on the pooled rows, and 0.923 against 0.830 on the B1 rows. `[O]` The grouped split is the one that answers the question a user asks, which is the fidelity of a circuit the model has not seen, and it is the split used for the calibration figure and the permutation importance.
-
-### 4.4 Results
-
-`[F]` Table M1. R^2 of y and mean absolute error of F_H on the test set of each split, one cell per model. R^2 is taken about the mean of the test y and is negative for a model worse than that mean. n is the number of test rows.
-
-<!-- TABLE:M1_cost_metrics -->
-| split | train | test | n | physics | ols | ridge | gbr |
-|---|---|---|---|---|---|---|---|
-| lofo | A | B1 | 35 | 0.785 / 0.0151 | 0.560 / 0.0252 | 0.840 / 0.0150 | 0.805 / 0.0083 |
-| lofo | B1 | A | 540 | -3.513 / 0.0430 | -261.894 / 0.1971 | -0.605 / 0.0259 | 0.326 / 0.0184 |
-| lomo | A minus ladder | A ladder | 180 | -34.797 / 0.0489 | 0.399 / 0.0058 | 0.410 / 0.0060 | 0.751 / 0.0030 |
-| lomo | A minus tfim | A tfim | 180 | -33.455 / 0.0424 | 0.637 / 0.0044 | 0.522 / 0.0047 | 0.843 / 0.0023 |
-| lomo | A minus xxz | A xxz | 180 | -2.061 / 0.0376 | -1.272 / 0.0350 | 0.541 / 0.0159 | -1.035 / 0.0353 |
-| cv5 | A+B1 (4/5) | A+B1 (1/5) | 575 | -2.739 / 0.0413 | 0.944 / 0.0050 | 0.944 / 0.0050 | 0.990 / 0.0009 |
-| cv5g | A+B1 (4/5) | A+B1 (1/5) | 575 | -2.739 / 0.0413 | 0.938 / 0.0051 | 0.938 / 0.0052 | 0.971 / 0.0017 |
-| cv5g | A+B1 (4/5) | A rows of fold | 540 | -3.513 / 0.0430 | 0.937 / 0.0049 | 0.935 / 0.0050 | 0.990 / 0.0014 |
-| cv5g | A+B1 (4/5) | B1 rows of fold | 35 | 0.785 / 0.0151 | 0.918 / 0.0090 | 0.926 / 0.0079 | 0.830 / 0.0074 |
-<!-- /TABLE:M1_cost_metrics -->
-
-`[F]` Table M2. Coefficients of y per unit of each feature. The physics column is fixed by the emulator parameters. The OLS columns give the coefficient and its t statistic for the three training sets. The ridge column is the shrunk coefficient on the pooled set. The last column is the permutation importance of the boosted model, the mean increase of out-of-fold mean squared error of y when that feature is shuffled in the test fold of cv5g, with the standard deviation over 5 folds times 10 shuffles. `[O]` The OLS standard errors assume independent homoscedastic residuals. The five pipeline rows of one circuit are not independent, so the t statistics are optimistic and only their ranking is used below.
-
-<!-- TABLE:M2_cost_coefficients -->
-| feature | physics | OLS A (t) | OLS B1 (t) | OLS A+B1 (t) | ridge A+B1 | GBR importance (sd) |
-|---|---|---|---|---|---|---|
-| n_2q | 1.29e-03 | 3.73e-04 (11.8) | -4.77e-05 (-0.2) | 2.89e-04 (8.2) | 2.56e-04 | 5.95e-05 (1.2e-05) |
-| n_1q | 7.30e-05 | 7.38e-06 (0.4) | 8.08e-05 (0.9) | 4.65e-05 (2.2) | 5.86e-05 | 2.91e-05 (4.0e-05) |
-| n_qubits | 1.39e-03 | 8.69e-03 (17.0) | -5.57e-05 (-0.1) | 3.81e-03 (15.0) | 3.49e-03 | 2.89e-06 (1.6e-06) |
-| depth_2q |  | -1.90e-04 (-6.2) | 1.68e-04 (1.0) | -1.40e-04 (-4.2) | -1.10e-04 | 4.13e-05 (2.2e-05) |
-| support_size |  | 2.85e-06 (0.6) | 4.57e-03 (1.4) | -5.03e-06 (-0.9) | -4.99e-06 | 2.70e-06 (2.3e-06) |
-| log2_support |  | -9.12e-03 (-16.2) | -1.71e-02 (-1.4) | -3.91e-03 (-13.6) | -3.57e-03 | 1.91e-06 (2.1e-06) |
-| n_2q_offsupport |  | 4.97e-04 (24.7) | 9.81e-04 (4.1) | 6.19e-04 (30.3) | 6.27e-04 | 1.47e-03 (7.0e-04) |
-<!-- /TABLE:M2_cost_coefficients -->
-
-![Cost model calibration and coefficients](figures/fig_cost_model.png)
-
-Figure 4. Learned cost model on the proxy data. Left, predicted F_H = exp(-y_hat) against actual F_H. Filled points are the out-of-fold cv5g predictions of the OLS model for family A in blue and family B1 in orange. Hollow squares are the B1 predictions of the OLS model trained on A only and hollow triangles those of the boosted model trained on A only. The dotted line is the identity. Right, the OLS coefficients on the pooled set multiplied by the standard deviation of each feature with 1 SE bars on the lower axis, and the permutation importance of the boosted model as diamonds on the upper axis. Data: Tables M1 and M2, `results/fig_cost_model.png`.
-
-`[F]` In the left panel 24 of the 29 hollow squares for the B1 rows with actual F_H between 0.94 and 0.98 lie below the identity line. The A-trained OLS model under-predicts the fidelity of those 24 rows. The hollow triangles of the A-trained boosted model lie closer to the line on the same circuits. The filled B1 points of the grouped cross-validation lie on or near the line over the full range from 0.80 to 0.98.
-
-### 4.5 What the data support
-
-`[F]` Across families the transfer is one-directional. Trained on A, the boosted model predicts B1 with R^2 0.805 and MAE(F_H) 0.0083. The unfitted physics baseline gives R^2 0.785 and MAE(F_H) 0.0151 on the same 35 rows. Ridge reaches R^2 0.840 with MAE(F_H) 0.0150 and OLS reaches 0.560 with 0.0252. Fitting on A lowers the B1 error of the best model by 0.0067 in MAE(F_H), a factor 1.81 below the baseline. Trained on B1, no model predicts A. The best R^2 in that direction is 0.326 for the boosted model and the other three are negative. `[O]` Seven circuits under five pipelines are 35 rows spanning three support fractions and cannot pin down seven coefficients, which the OLS B1 column of Table M2 shows directly. The only coefficient with |t| above 2 on B1 is n_2q_offsupport at 4.1. `[O]` The one direction that works rests on 7 test circuits and does not establish generalisation.
-
-`[F]` Within family A the models interpolate across circuit classes. On the grouped split the A rows score R^2 0.937 for OLS and 0.990 for the boosted model. Holding out a whole Trotter model is harder. The boosted model reaches R^2 0.751 on ladder and 0.843 on tfim and fails on xxz at -1.035, where ridge is the only model above zero at 0.541. `[F]` The xxz circuits have the largest mean n_2q of the three models, 60.7 against 37.3 for ladder and 31.0 for tfim, and 4 of the 180 xxz rows exceed the largest n_2q of the other two. `[O]` The cause of the failure on xxz is not identified.
-
-`[F]` The physics baseline fails on A in every split. Its R^2 on the 540 A rows is -3.513 with MAE(F_H) 0.0430, against 0.785 and 0.0151 on B1. `[O]` The baseline charges the full p2 per two-qubit gate. On A, where 280 of 540 rows have full support, a fault displaces mass onto strings that already carry ideal weight and the Hellinger fidelity loses far less than p2 per gate. On B1 the ideal output is one string on 6 of 7 circuits. There every fault that changes the output string leaves the support and the baseline is close to right.
-
-`[F]` The dominant term in every fitted model is n_2q_offsupport. On the pooled set its OLS t statistic is 30.3, the largest in Table M2, and the next are n_qubits at 15.0 and log2_support at -13.6. Its permutation importance for the boosted model is 1.47e-3, and the second largest is n_2q at 5.95e-5, a factor 24.6 lower. In the right panel of Figure 4 its bar is the longest and its diamond is the only one away from zero. `[F]` The pooled OLS coefficients give a per-gate cost of n_2q that moves from 2.89e-4 at full support to 2.89e-4 + 6.19e-4 = 9.08e-4 at a one-string output, against the emulator value p2 = 1.29e-3.
-
-`[O]` Verdict. What the data support across families is the physics baseline plus a support correction, not a learned model. The one quantity that transfers is the per-two-qubit-gate cost scaled by the fraction of the output space outside the ideal support. `[F]` The boosted model trained on A cuts the B1 error of the baseline by a factor 1.8 and OLS on the same features does worse than the baseline. `[O]` On these 35 rows the gain comes from the nonlinear fit and not from the feature set alone. `[F]` The gain does not survive the reverse direction. The grouped cross-validation ranks ridge above the boosted model on the B1 rows at 0.926 against 0.830 and the leave-one-model-out split on xxz ranks ridge first as well. The form these data support is y = a n_2q (1 - support_size / 2^n) + b n_2q + SPAM with two fitted parameters. The refit on emulator data will score that form beside the boosted model on held-out circuits, and the boosted model stays in the submission as the learned component only if it wins there.
-
-### 4.6 Status and use
-
-`[F]` All numbers in this section come from the local proxy with the published H2-2E parameters. The proxy has no shot noise, no leakage, no crosstalk and no duration-based dephasing. The emulator F_H of Sections 3.7 and 3.7.1 was measured at 1000 shots and does not enter this section. `[O]` Shot noise adds a floor to y that none of the seven features carries, so the refit on emulator data will need either an intercept or a shot-count term, and the coefficients of Table M2 will change.
-
-`[O]` The model has two uses in this submission. Before HQCs are spent it ranks the five pipelines of a circuit by predicted F_H from their compiled counts, so that only the pipeline the model prefers is run. The rank correlation between predicted and measured F_H across the pipelines of a circuit is the metric that matters for that use. `[F]` That rank correlation was not computed on the emulator rows of Sections 3.7 and 3.7.1. `[O]` After the run it predicts the fidelity of any further circuit from its compiled counts and support size, which is what a user who has not yet run the circuit can supply. The support size is computed from the ideal distribution and is available for every circuit in this benchmark because the ideal outputs are stored, and it is not available for a circuit too large to simulate. A cost signal for a rewriting search is future work and is not claimed here.
-
-### 4.7 Refit on Selene depolarising data
-
-[F] The cost model of Sections 4.1 to 4.3 was refitted without code changes on the Selene depolarising runs of Section 3.6. [F] The Selene layer has 432 family A rows with n = 4, 6, 8 and 10 and 36 B1 rows from 12 circuits. [F] The proxy fit used 540 A rows with n up to 8 and 35 B1 rows from 7 circuits. [F] The target is the depolarised sampled F_H divided by the noiseless sampled F_H at the same seed. [F] On the 345 rows with a proxy value this ratio differs from the exact proxy F_H by 0.0022 in mean absolute value, and the raw sampled F_H differs by 0.0058. [O] The ratio is the closest available match to the exact fidelity that the proxy fit used.
-
-[F] Under circuit-grouped cross-validation the refit matches the proxy fit, with pooled R^2 = 0.935 for OLS and 0.974 for GBR. [F] Training on A and testing on B1 gives R^2 = 0.859 for ridge and 0.848 for GBR. [F] The unfitted physics baseline drops on B1 from R^2 = 0.785 on the proxy to 0.216 on Selene. [F] Training on B1 and testing on A still fails, with R^2 = 0.327 for GBR and negative R^2 for all other models. [F] The largest OLS terms on A remain n_qubits, log2_support and n_2q_offsupport with t = 14.7, -14.9 and 15.9. [O] The Selene layer confirms the two proxy conclusions. Transfer runs from A to B1 only, and within a family the fitted models interpolate.
-
-| model | split | R^2 proxy | R^2 Selene | MAE(F_H) proxy | MAE(F_H) Selene |
+| Circuit | Pipeline | n_2q | HQC estimate | F_H | sd F_H |
 |---|---|---|---|---|---|
-| physics | A to B1 | 0.785 | 0.216 | 0.0151 | 0.0201 |
-| ols | A to B1 | 0.560 | 0.356 | 0.0252 | 0.0333 |
-| ridge | A to B1 | 0.840 | 0.859 | 0.0150 | 0.0154 |
-| gbr | A to B1 | 0.805 | 0.848 | 0.0083 | 0.0140 |
-| physics | B1 to A | -3.513 | -3.760 | 0.0430 | 0.0464 |
-| ols | B1 to A | -261.894 | -313.944 | 0.1971 | 0.6838 |
-| ridge | B1 to A | -0.605 | -98.831 | 0.0259 | 0.2673 |
-| gbr | B1 to A | 0.326 | 0.327 | 0.0184 | 0.0234 |
-| physics | cv5g pooled | -2.739 | -2.773 | 0.0413 | 0.0444 |
-| ols | cv5g pooled | 0.938 | 0.935 | 0.0051 | 0.0065 |
-| ridge | cv5g pooled | 0.938 | 0.936 | 0.0052 | 0.0065 |
-| gbr | cv5g pooled | 0.971 | 0.974 | 0.0017 | 0.0035 |
+| vbe_adder_3 | P0 | 56 | 151.6 | 0.9540 | 0.0066 |
+| vbe_adder_3 | P2 | 41 | 119.0 | 0.9590 | 0.0063 |
+| hwb6 | P0 | 99 | 243.0 | 0.9240 | 0.0084 |
+| hwb6 | P2 | 94 | 232.6 | 0.9090 | 0.0091 |
+| grover_5 | P0 | 240 | 565.6 | 0.8652 | 0.0114 |
+| grover_5 | P2 | 218 | 528.2 | 0.8728 | 0.0112 |
 
-[F] Test rows: A to B1 35 proxy and 36 Selene, B1 to A 540 and 432, cv5g pooled 575 and 468. Source: `results/cost_model_selene.md`.
+`[F]` All three single-run differences lie within two sd of zero. Their z values are +0.55, -1.21 and +0.48 in the row order above.
 
-[F] The refit is reproduced by the three Selene cost-model rows of the script table in Section 5. `model/cost_model.py --prefix selene_` writes `results/cost_model_selene_metrics.csv` and `results/cost_model_selene_coefficients.csv` directly. A rerun on 8 October 2026 reproduced both files byte for byte.
+`[F]` Table 3b. Pooled H2-2E runs at 4000 shots per pipeline (Appendix Table E3). F_H is the Hellinger fidelity of the summed counts to the ideal distribution.
 
-## 5. Reproducibility
+| Circuit | Pipeline | n_2q | Pooled F_H | sd | Per-run F_H range |
+|---|---|---|---|---|---|
+| vbe_adder_3 | P0 | 56 | 0.9520 | 0.0034 | 0.9470 to 0.9560 |
+| vbe_adder_3 | P2 | 41 | 0.9628 | 0.0030 | 0.9590 to 0.9680 |
+| grover_5 | P0 | 240 | 0.8704 | 0.0053 | 0.8482 to 0.8652 |
+| grover_5 | P2 | 218 | 0.8711 | 0.0053 | 0.8400 to 0.8728 |
 
-`[F]` Environment, confirmed with `pip show` on 7 October 2026 in the development container:
+- `[F]` vbe_adder_3. F_H(P2) minus F_H(P0) is +0.0108 with sd 0.0045. The z is +2.38 and the two-sided p is 0.017.
+- `[F]` Multiplicity. The two repeated circuits were chosen after the single runs. The Holm-adjusted p is 0.035 over the two repeated circuits and 0.052 over all three H2-2E circuits. `[O]` The gain is significant before correction and after correction over two circuits. It is not significant at 0.05 after correction over all three.
+- `[F]` grover_5. The difference is +0.0007 with sd 0.0075 and z = +0.10. It is not resolved. It lies 2.94 sd below the gain of 0.0229 predicted by the slope model.
+- `[F]` No cell rejects homogeneity of its four runs at the 0.05 level.
+- `[O]` The H2-2E runs confirm execution and HQC accounting on a Quantinuum emulator. They give one fidelity gain and one unmet prediction, and this report states both.
 
-| Package | Version |
+### 3.3 Selene
+
+`[F]` Quantinuum's local emulator Selene ran every compiled circuit of families A and B1 with n <= 10 under P0, P1 and P2 (Appendix 3.6). In 468 noiseless runs no shot landed outside the exact support and no run was flagged. In 468 depolarising runs at the H2-2E rates the mean F_H over 156 circuits is 0.9716 for P0, 0.9459 for P1 and 0.9702 for P2. `[O]` The compiled files run on Quantinuum's own toolchain and reproduce the distributions the local checks computed. Selene does not contain the full H2-2E noise model.
+
+## 4. Scientific contribution
+
+### 4.1 The certificate on real circuits
+
+`[F]` The certificate ran on 24 circuits. These are the 20 synthesised Haar circuits of B2 at n = 2 and 3 and the four B1 circuits at n = 5. The floor is at or below the T-count after ZX on all 24 rows.
+
+- `[F]` Synthesised circuits. On B2 the floor is at least 99.28 % of the T-count after ZX on every circuit. The pooled certified fraction is 0.997. Further exact T optimisation of these instances can gain at most 0.3 % of the remaining T-count. All four configuration means lie inside the range of 99.4 to 99.9 % stated in the manuscript.
+`[F]` Table 4a. Certificate on family B2 by configuration, 5 circuits each (Appendix Table C1).
+
+| n | eps | Mean T written | Mean floor / T after ZX % | Min floor / T after ZX % | Mean achieved by ZX % |
+|---|---|---|---|---|---|
+| 2 | 1e-03 | 638.4 | 99.84 | 99.67 | 2.19 |
+| 2 | 1e-05 | 1048.4 | 99.79 | 99.42 | 2.29 |
+| 3 | 1e-03 | 2571.6 | 99.57 | 99.28 | 3.14 |
+| 3 | 1e-05 | 4220.8 | 99.76 | 99.59 | 1.27 |
+
+- `[F]` Hand-written circuits. On barenco_tof_3, mod5_4, qft_4 and tof_3 the floor is 47 against 106 T gates after ZX, a fraction of 0.443.
+- `[O]` For a user the certificate turns the question whether a better optimiser can help into a number. The answer is no on synthesised words and open on Toffoli networks.
+
+### 4.2 Comparison with six published optimisers
+
+`[F]` Table 4b. Excerpt of Appendix Table C2 for the four certified circuits. "Best ancilla-free" is the smallest T-count on the same qubits in six papers fetched from arXiv on 8 October 2026. These are Amy, Maslov and Mosca 2014, Amy and Mosca 2016, Nam et al. 2018, TODD 2018, Kissinger and van de Wetering 2020 and AlphaTensor-Quantum 2024.
+
+| Circuit | T written | T after ZX | Best ancilla-free | Best with ancillas | Certified floor |
+|---|---|---|---|---|---|
+| barenco_tof_3 | 28 | 16 | 16 | 13 | 4 |
+| mod5_4 | 28 | 8 | 7 | 16 | 2 |
+| qft_4 | 69 | 67 | 67 | 53 | 37 |
+| tof_3 | 21 | 15 | 15 | 13 | 4 |
+
+- `[F]` On the 22 comparable circuits of B1 and B1x our T-count after ZX equals the best published ancilla-free value on 14. On four of the other eight TODD after PyZX is better. On the three Galois-field multipliers the best ancilla-free values in Table C2 come from AlphaTensor-Quantum. On hwb6 a T-par entry is better.
+- `[F]` On the four certified circuits the published optimisers close 1 of the 59 gates between our count and the floor. The other 58 gates lie between the best published count and the floor.
+- `[O]` What it shows. The floor is tight on synthesised circuits and loose on Toffoli networks. Published optimisers add one gate beyond PyZX on the certified circuits. What it does not show. The certificate cannot tell whether the 58 open gates are headroom for a better rewrite or slack in the bound. It covers no circuit with more than 5 qubits.
+- `[F]` Novelty. None of the six papers compares ZX rewriting against pytket's Quantinuum pass on the native H2 gate set. `[O]` This submission pairs that comparison in HQC with a per-instance lower bound on the T-count.
+
+## 5. Engineering and reproducibility
+
+`[F]` Repository layout (Appendix 5 and `README.md`).
+
+| Path | Content |
 |---|---|
-| Python | 3.13.16 |
-| pytket | 2.18.4 |
-| pytket-quantinuum | 0.59.3 |
-| pyzx (PyPI) | 0.10.7 |
-| Quantinuum pyzx fork (family B1 sources only, `third_party/pyzx-fork/`) | commit e695d6d7 |
-| qiskit | 2.5.2 |
-| pygridsynth | 2.0.0 |
-| selene-sim | 0.3.4 |
-| guppylang | 1.1.2 |
-| hugr | 0.18.8 |
-| numpy | 2.5.3 |
-| pandas | 2.3.3 |
-| scipy | 1.18.1 |
-| scikit-learn | 1.9.1 |
-| matplotlib | 3.11.2 |
-| aqora | 0.35.1 |
-| qnexus | 0.51.1 |
-| marimo | 0.25.1 |
+| `bench/` | Generators and builders of families A, B1, B1x, B2, C and the use case, with manifests |
+| `pipelines/` | Pipelines, metrics, exactness checks, PSEL and the official baseline comparison |
+| `barrier/` | Exact certificate with a line map to the manuscript in `barrier/NOTES.md` |
+| `noise/`, `selene/`, `submit/` | Density-matrix proxy, Selene runs, platform jobs and their statistics |
+| `value/` | Ledgers behind Sections 1, 3 and 6, each script with a test file |
+| `results/` | Every CSV, log, compiled QASM file, job payload and verification report |
 
-`[F]` Seeds. `numpy.random.default_rng(20261006)` generates the family A couplings (`bench/gen_trotter.py`, `SEED`) and the family B2 Haar targets (`bench/gen_haar_b2.py`, `SEED`), with `seed_transpiler=0` in the qiskit transpile call of B2. Each generator draws from one stream in a fixed order, so the instance set does not depend on the order of writing. `noise/run_proxy.py` uses `default_rng(0)` only to pick the circuits of its parser self-check. `selene/run_selene.py` seeds every Selene run with `sha256("<pipeline>/<file>/<tag>")[:4]` and stores the value in the column `seed`. `model/cost_model.py` uses seed 0 for the fold assignment and `random_state=0` for the gradient-boosting model.
-
-`[F]` Scripts, all run from the repository root. Inputs and outputs are the paths each script reads and writes.
-
-| Step | Command | Inputs | Outputs |
-|---|---|---|---|
-| Family A circuits | `python bench/gen_trotter.py` | none (seed 20261006) | `bench/family_A/*.qasm`, `*_meas.qasm`, `*.npy`, `manifest.csv` |
-| Family B1 circuits | `python bench/build_family_B1.py` | `third_party/pyzx-fork/circuits/` | `bench/family_B1/*.qasm`, `manifest.csv` |
-| Family B1x circuits | `python bench/build_family_B1x.py` (defaults `--min-qubits 13 --max-qubits 20 --max-gates 3000`) | `third_party/pyzx-fork/circuits/` | `bench/family_B1x/*.qasm`, `manifest.csv` |
-| Family B2 circuits | `python bench/gen_haar_b2.py` | none (seed 20261006) | `bench/family_B2/*.qasm`, `*_target.npy`, `manifest.csv` |
-| Family A compilation | `python pipelines/run_bench.py --workers 2` | `bench/family_A/` | `results/family_A_counts.csv`, `results/family_A_summary.csv`, `results/compiled/<pipeline>/*.qasm` |
-| Family B1 compilation | `python pipelines/run_bench_B.py --manifest bench/family_B1/manifest.csv --prefix family_B1 --workers 2 --timeout 900` | `bench/family_B1/` | `results/family_B1_counts.csv`, `results/family_B1_summary.csv`, `results/compiled/<pipeline>/*.qasm` |
-| hwb8 long run | `python pipelines/run_bench_B.py --manifest bench/family_B1/manifest.csv --files hwb8 --pipelines P1,P2 --prefix family_B1_hwb8_long --timeout 5400 --workers 2` | `bench/family_B1/hwb8.qasm` | `results/family_B1_hwb8_long_counts.csv`, `results/family_B1_hwb8_long_summary.csv`, `results/family_B1_hwb8_long_run.log` |
-| Family B1x compilation, count-only | `python pipelines/run_bench_B.py --manifest bench/family_B1x/manifest.csv --prefix family_B1x --pipelines P0ref,P0,P2 --no-check` | `bench/family_B1x/` | `results/family_B1x_counts.csv`, `results/family_B1x_summary.csv`, `results/family_B1x_run.log`, `results/compiled/{P0ref,P0,P2}/<file>.qasm` |
-| Family B2 compilation | `python pipelines/run_b2.py --workers 2` | `bench/family_B2/` | `results/family_B2_counts.csv` |
-| Noise proxy, family A | `python noise/run_proxy.py --noise h22e --family A --workers 2` | `results/compiled/{P0ref,P0,P1,P2,P3}/`, `bench/family_A/*.npy` | `results/family_A_proxy_h22e.csv` |
-| Noise proxy, family B1 | `python noise/run_proxy.py --noise h22e --family B1 --workers 2` | `results/compiled/{P0ref,P0,P1,P2,P3}/`, `bench/family_B1/manifest.csv` | `results/family_B1_proxy_h22e.csv` |
-| Proxy figure | `python noise/run_proxy.py --figure-h22e` | the two proxy CSVs | `results/fig_proxy_h22e.{pdf,png}`, `results/proxy_h22e_fits.log` |
-| Certificates | `python barrier/run_certificates.py` | `bench/family_B2/*.qasm`, `bench/family_B1/{barenco_tof_3,mod5_4,qft_4,tof_3}.qasm`, `results/family_B2_counts.csv`, `results/family_B1_counts.csv` | `results/certificates.csv`, `results/certificates.md` |
-| Selene runs | `HTTPS_PROXY= https_proxy= HTTP_PROXY= http_proxy= NO_PROXY= no_proxy= python selene/run_selene.py --mode both --procs 2 --shots 2000` | `results/compiled/{P0,P1,P2}/`, `bench/family_A/*.npy`, `bench/family_B1/manifest.csv`, the two proxy CSVs | `results/selene_noiseless.csv`, `results/selene_depolarizing.csv`, `results/selene_run.log` |
-| Selene summary | `python selene/make_summary.py` | the two Selene CSVs, `results/selene_calibration.txt`, `results/selene_recheck.txt` | `results/selene.md` |
-| Cost model | `python model/cost_model.py` | `results/family_A_proxy_h22e.csv`, `results/family_B1_proxy_h22e.csv` | `results/cost_model_metrics.csv`, `results/cost_model_coefficients.csv`, `results/cost_model.md`, `results/fig_cost_model.{pdf,png}` |
-| Selene cost-model inputs | `python model/build_selene_cost_inputs.py` | `results/selene_depolarizing_full.csv`, `results/family_A_counts.csv`, `results/family_B1_counts.csv` | `results/cost_model_selene_input_A.csv`, `results/cost_model_selene_input_B1.csv` |
-| Selene cost-model refit | `python model/cost_model.py --family-a results/cost_model_selene_input_A.csv --family-b results/cost_model_selene_input_B1.csv --prefix selene_` | the two Selene input CSVs | `results/cost_model_selene_metrics.csv`, `results/cost_model_selene_coefficients.csv`, `results/cost_model_selene_fig.{pdf,png}`, `results/cost_model_selene_autoreport.md` |
-| Selene cost-model summary | `python model/report_selene_cost.py` | the Selene and proxy metric and coefficient CSVs, the two Selene input CSVs, `results/selene_depolarizing_full.csv` | `results/cost_model_selene.md` |
-| Published T-counts of Table C2 | `python report/build_literature_tcounts.py results/literature_tcounts.csv` | `results/family_B1_counts.csv`, `results/family_B1x_counts.csv`, values copied from the six papers of Section 3.4 | `results/literature_tcounts.csv` |
-| Pass selector | `python pipelines/pass_select.py [--shots N] [--candidates P0,P2] <qasm files>` | QASM files of the input circuits | one row per file with the chosen pipeline and the HQC and n_2q of each candidate, printed |
-| Selector ledger, Table 1.1a | `python value/selector_ledger.py` | `value/value_ledger.csv`, `results/family_B2_counts.csv` | `value/selector_ledger.md`, `value/selector_ledger.csv`, `value/selector_ledger_circuits.csv` |
-| Finals hardware plan, Section 6 | `python value/finals_plan.py` | the H2-2E counts of Tables E2 and E3, `results/compiled/P0/` and `results/compiled/P2/` | `value/finals_plan.md` |
-| Tables and figures | `python report/make_tables.py` | `results/*.csv` | `report/tables/*.md`, `report/figures/*.png`, injected into the report |
-| Emulator jobs | `python3 submit/syntax_check.py` and `python3 submit/run_emulator.py`, with platform, shots and options of each job recorded in `results/emulator_jobs.csv` | `results/compiled/<pipeline>/` | `results/emulator_jobs.csv`, `results/emulator_nexus_H2-Emulator.csv`, `results/emulator/<platform>/<pipeline>/<file>.json` |
-
-`[F]` The Selene command clears every proxy variable because Selene streams its results over a local TCP socket that the container proxy intercepts (`results/selene.md`, section 1).
-
-`[F]` Tests. Each file was run once with the versions above, on 7 October 2026 unless the table gives 8 or 9 October. Seven files run as scripts. Eight files run under pytest. These are `selene/test_selene.py`, `submit/test_submit.py`, `submit/test_h22e_stats.py`, `submit/test_h22e_pooled.py`, `value/test_value_ledger.py`, `value/test_value_by_application.py`, `value/test_selector_ledger.py` and `value/test_finals_plan.py`.
-
-| File | Command | Result | Wall time |
-|---|---|---|---|
-| `bench/test_gen_trotter.py` | `python bench/test_gen_trotter.py` | 12 of 12 passed | 58 s |
-| `noise/test_dm_sim.py` | `python noise/test_dm_sim.py` | 17 of 17 passed | 3 s |
-| `barrier/test_certificate.py` | `python barrier/test_certificate.py` | 69 of 69 checks passed | 29 s (44 s in `results/verification_2026-10-07.md`) |
-| `pipelines/test_compile.py` | `python pipelines/test_compile.py` | 6 of 6 passed | 2 s |
-| `pipelines/test_pass_select.py` | `python pipelines/test_pass_select.py` | 3 of 3 passed, 9 October | 5.9 s |
-| `selene/test_selene.py` | proxy variables cleared, `python -m pytest selene/test_selene.py -q` | 6 of 6 passed (5 functions, one parametrised twice) | 7 s |
-| `model/test_cost_model.py` | `python model/test_cost_model.py` | 7 of 7 passed, rerun 8 October after the `--prefix` change | under 1 s |
-| `submit/test_submit.py` | `python -m pytest submit/test_submit.py -q` | 11 of 11 passed, 8 October, offline with no credentials | 4 s |
-| `submit/test_h22e_stats.py` | `python -m pytest submit/test_h22e_stats.py -q` | 7 of 7 passed, 8 October | 4.2 s |
-| `submit/test_h22e_pooled.py` | `python -m pytest submit/test_h22e_pooled.py -q` | 10 of 10 passed, 9 October | 6.2 s |
-| `value/test_value_ledger.py` | `python -m pytest value/test_value_ledger.py -q` | 5 of 5 passed, 8 October | 2.9 s |
-| `value/test_value_by_application.py` | `python -m pytest value/test_value_by_application.py -q` | 5 of 5 passed, 8 October | 1.1 s |
-| `value/test_selector_ledger.py` | `python -m pytest value/test_selector_ledger.py -q` | 4 of 4 passed, 9 October | 1.6 s |
-| `value/test_finals_plan.py` | `python -m pytest value/test_finals_plan.py -q` | 5 of 5 passed, 9 October | 7.0 s |
-| `report/test_c2_literature.py` | `python report/test_c2_literature.py` | all checks passed (12 assert statements), 8 October | 0.6 s |
-
-`[F]` The compile tests check every pipeline against the unitary of the input and check that the measured QASM encodes the implicit qubit permutation left by `allow_swaps=True`. The certificate tests reproduce the finite verifications of the barrier manuscript (the counts 24, 1536 and 18384). The Selene tests check the bit order of the returned array with a permuted measure map and check that a seed reproduces the counts. The cost-model tests check that OLS recovers a known law without noise and that the physics baseline is exact on its own law. The pass selector tests rerun PSEL on six circuits of families A and B1 and compare its choice and HQC with the stored P0 and P2 rows. They also check that PSEL never costs more than P0 and test the tie-break rule. The selector ledger tests check the same two properties on all 223 circuits and check the family totals. The submit tests run offline. They check the native gate set, the HQC formula, the bit order of returned counts, F_H and TVD, the job ledger, the job plans, the credential detection and the rubric rendering.
-
-`[F]` Checks recorded per row in every counts CSV: `check_kind` and `check_dev`, `dist_maxdiff` and `qasm_dist_maxdiff`, `check_ok` and `status`, `pyzx_angle_err`, and the timings `t_zx`, `t_tket` and `t_total`. `[F]` The flag `--no-check` of `pipelines/run_bench_B.py` skips the unitary, statevector and distribution checks and keeps the gate-set check. Under it `check_kind` is `none`, the check columns are NaN and `status` is `ok-unchecked` for a native circuit and `FLAGGED-unchecked` otherwise. Family B1x is the only family compiled under it, and all 24 of its rows are `ok-unchecked` with a total wall time of 36.8 s.
-
-`[F]` Timeouts. `pipelines/run_bench.py` and `pipelines/run_bench_B.py` default to 600 s per (circuit, pipeline) and `pipelines/run_b2.py` to 900 s. The family B1 run used 900 s, under which hwb8 timed out under P1 and P2, so the first `results/family_B1_counts.csv` carried `status = timeout` on those two rows (103 of 105 rows `ok`). A rerun with `--timeout 5400` on P1 and P2 only started on 7 October at 21:37 and completed both. P1 finished in 885.6 s wall with 8305 ZZPhase gates and P2 in 843.8 s wall with 5587 ZZPhase gates. Both rows have `status = ok` with `check_dev` at most 1.7e-13 and a T-count after the ZX stage of 3517 (`results/family_B1_hwb8_long_run.log`, `results/family_B1_hwb8_long_counts.csv`). `[F]` The two rows replaced the timeout rows in `results/family_B1_counts.csv`, `results/family_B1_summary.csv` was regenerated with `summarise` from `pipelines/run_bench_B.py` and `python report/make_tables.py` was rerun, so every table built from the main CSV shows hwb8 under all seven pipelines and all 105 rows are `ok`. The file before the merge is kept as `results/family_B1_counts_before_hwb8_merge.csv`. `[O]` Both wall times lie under the earlier 900 s limit, so the earlier timeouts came from two workers sharing the two cores with the other 13 circuits, not from the circuit itself.
-
-`[F]` Verification. Ten verification reports by agents that did not produce the results are in `results/verification_2026-10-0*.md`. `results/verification_2026-10-07.md` recomputed the seven claims of `claude/status-2026-10-06.md` from the raw CSVs and QASM files. Six were confirmed and one mismatched: the status document said P2 beats P0 on 13 of 14 completed B1 circuits and the recomputation gives 12 of 14 with two ties. One figure was unverifiable, a 1064-gate SK word length that depends on an unstated approximation depth. `results/verification_2026-10-07b.md` recomputed six further claims (family A files and manifest, `family_A_counts.csv`, the H2-2E proxy CSVs and their no-intercept fits, four proxy rows rerun, `certificates.csv` against a direct recomputation, ten report table cells): all confirmed, none mismatched. That report also diagnosed the crash of the first hwb8 rerun, in which `--files hwb8` matched against `hwb8.qasm` selected zero jobs, and fixed `pipelines/run_bench_B.py` before the 5400 s run above was started.
-
-- `[F]` `results/verification_2026-10-07c.md` rechecked report v2 item by item, from Sections 1 and 2 to the prose rules.
-- `[F]` `results/verification_2026-10-08a.md` rechecked the family B1x numbers of report v3 and recompiled tof_10 and rc_adder_6.
-- `[F]` `results/verification_2026-10-08b.md` checked Section 1, Section 3.7.1, the hardware sentence of the Limitations section (now Section 7), the scoring map and the v5 changelog.
-- `[F]` `results/verification_2026-10-08c.md` checked Table C2 and the overclaim fixes.
-- `[F]` `results/verification_2026-10-08d.md` checked the report from the title to the References. Its fixes F2 to F31 are applied in this draft. F32 is not applied because the generated captions it names are shared with drafts v1 to v4.
-- `[F]` `results/verification_2026-10-09a.md` checked the pooled H2-2E results of Section 3.7.1.
-- `[F]` `results/verification_2026-10-09b.md` checked the pass selector PSEL, Table 1.1a and the PSEL statements of Sections 1, 2.2, 5 and 7 (then numbered 6) and of `submission/SUMMARY.md`.
-- `[F]` `results/verification_2026-10-09c.md` checked the H2 hardware plan of Section 6 and the notebook execution stated in Section 7 and `README.md`.
+- `[F]` Tests. The test table of Appendix 5 lists 18 test files with their commands, results and dates. Examples are `pipelines/test_pass_select.py` with 3 of 3 passed and `value/test_selector_ledger.py` with 4 of 4 passed. Family C and the use case have their own test files `value/test_family_C_selector.py` and `value/test_usecase.py`.
+- `[F]` Generated numbers. Every results table of the full report is produced by `report/make_tables.py` from `results/*.csv`. The value tables are produced by the scripts under `value/` and carry no number typed by hand.
+- `[F]` Clean-clone run. On 8 October the repository was cloned into a scratch directory and the pipeline was rerun with reduced variants of the long compilation steps (`results/repro_2026-10-08/repro_log.md`). The log reports no change in any count, T-count, HQC, fidelity or table cell. The run found two gaps. A fits log was ignored by git and the pyzx fork had no fetch command. `README.md` now gives the fetch command with the commit hash.
+- `[F]` Independent verification. Eleven verification reports by agents that did not produce the results are in `results/verification_2026-10-0*.md`. Each recomputes claims from the raw files and lists mismatches.
+- `[F]` Notebook. The submission cell of `report/notebook_skeleton.py` was executed against the free H2-2SC syntax checker. It compiled tof_3 with PSEL and returned job `AFByb3ZpZGVySm9iAaEdzTywfrOWhGbnlXxd-w` with status COMPLETED. The executed export is `report/notebook_executed.html`. The cell refuses any platform whose name does not end in SC.
+- `[F]` Seeds and versions. The circuit generators use seed 20261006. The environment table of Appendix 5 pins pytket 2.18.4, pytket-quantinuum 0.59.3 and pyzx 0.10.7.
 
 ## 6. Plan for H2 hardware in the finals
 
-`[F]` The team plan records hardware access at the Grand Finale on 21 October 2026. The shortlist is announced on 20 October. Submission 2 is due on 14 November and the finals are on 19 November. These dates come from the organisers' timeline email of 25 August 2026 as recorded in the team plan. No copy of the email is in the repository.
+`[F]` `value/finals_plan.py` sizes the runs from the measured H2-2E gain and not from the model prediction (`value/finals_plan.md`, Appendix 6).
 
-`[F]` No HQC budget for finalists on H2 hardware is published in the sources the team holds. The quota of Section 3.7 covers the H2-1E and H2-2E emulators only. The H2 hardware user guide limits a job to 10,000 shots and a shot to 50 HQC (`docs/platform_notes.md`, section 3.4). `[O]` The plan is priced with the HQC formula of Reference 6 applied to the compiled circuits. That H2 hardware charges by this formula is inferred from the Helios costing page.
+| Test | Circuit | Shots per pipeline | Power | HQC |
+|---|---|---|---|---|
+| Primary | vbe_adder_3, P0 and P2 | 2900 | 0.65 | 765.7 |
+| Secondary | grover_5, P0 and P2 | 1900 | 0.65 | 2069.2 |
+| Total | four jobs | | | 2835.0 |
 
-`[F]` `value/finals_plan.py` computes the numbers below from Table E3 and the compiled QASM files in `results/compiled/`. It writes `value/finals_plan.md`. `value/test_finals_plan.py` checks the inputs against Tables E2 and E3 and the shot counts by brute force. It also recomputes each HQC value from the gate counts of the QASM file. The sd of F_H(P2) - F_H(P0) is scaled from its pooled value at 4000 shots per pipeline as one over the square root of the shot count.
-
-`[O]` Primary test. vbe_adder_3 runs under P0 and P2 on H2 hardware. `[F]` PSEL picks P2 on this circuit (`value/selector_ledger_circuits.csv`). `[O]` The alternative hypothesis is F_H(P2) > F_H(P0) because P2 has 15 fewer ZZPhase gates. The test is one-sided at alpha 0.05 with critical z 1.645. It is the only confirmatory test of the plan and needs no multiplicity correction.
-
-`[F]` The shot count uses the measured H2-2E gain of Table E3 and not the slope prediction. The measured gain is +0.0108 with sd 0.0045 at 4000 shots per pipeline. It equals 2 sd of the difference at 2823 shots per pipeline. `[O]` The plan rounds this up to 2900. `[F]` At 2900 shots the sd of the difference is 0.0053 and the expected z at the measured gain is 2.03. The power at the measured gain is 0.65. The smallest difference that reaches z = 1.645 is 0.0087. A power of 0.80 would need 4364 shots per pipeline.
-
-`[O]` Primary decision rule, stated before any hardware data. A z of 1.645 or more confirms that P2 raises F_H over P0 on vbe_adder_3 on H2 hardware. A z of -1.645 or less refutes it. Any other z leaves the comparison unresolved. The report then makes no hardware claim for P2. The z is the hardware difference F_H(P2) - F_H(P0) divided by its binomial sd, the square root of F_0 (1 - F_0) / N + F_2 (1 - F_2) / N at N shots per pipeline.
-
-`[O]` Secondary test. grover_5 runs under P0 and P2. It tests whether the shortfall of Section 3.7.1 recurs on hardware. `[F]` On H2-2E the measured gain lies 2.94 sd below the slope prediction. `[O]` The secondary test does not enter the primary decision.
-
-`[F]` The measured H2-2E shortfall is 0.02289 - 0.00075 = 0.02214 with sd 0.0075 at 4000 shots per pipeline. It equals 2 sd of the difference at 1854 shots per pipeline. `[O]` The plan rounds this up to 1900. `[F]` There the sd of the difference is 0.0109 and the power at the measured shortfall is 0.65. Section 3.7.1 gives 1974 shots for a 2-sd resolution of the predicted gain from the single runs of Table E2.
-
-`[O]` Secondary decision rule, stated before any hardware data. The hardware prediction is F_H(P0) (exp(22 a) - 1) with a = 1.1801e-3 and F_H(P0) measured on hardware. The statistic is z_short = (prediction - measured difference) / sd. A z_short of 1.645 or more refutes the slope model on grover_5. A z_short below 1.645 together with a gain z of 1.645 or more is consistent with the model. Any other outcome is unresolved. The sd is that of the hardware difference from 4000 multinomial bootstrap resamples of the counts of each pipeline with seed 20261008. The sampling error of the prediction is neglected.
-
-`[O]` The plan has four jobs, one per circuit and pipeline. `[F]` vbe_adder_3 costs 430.1 HQC under P0 and 335.6 HQC under P2 at 2900 shots. grover_5 costs 1070.1 HQC under P0 and 999.1 HQC under P2 at 1900 shots. The primary test costs 765.7 HQC and the secondary test 2069.2 HQC. The total is 2835.0 HQC. Every job stays within the H2 limits per job and per shot. The remaining H2-2E emulator quota is 4066.8 HQC by the same formula, 10,000 minus the 5933.2 of Section 3.7.1.
-
-`[O]` If the finals budget is below 2835.0 HQC the primary test runs alone at 765.7 HQC.
+- `[O]` Primary rule, fixed before any hardware data. The test is one-sided at alpha 0.05. A z of 1.645 or more confirms that P2 raises F_H over P0 on H2 hardware. A z of -1.645 or less refutes it. Any other z gives no hardware claim.
+- `[O]` Secondary rule. grover_5 tests whether the shortfall against the slope model recurs on hardware. It does not enter the primary decision.
+- `[O]` If the finals budget is below 2835.0 HQC the primary test runs alone at 765.7 HQC.
 
 ## 7. Limitations
 
-`[F]` ZX extraction worsens the ZZPhase count. On family A the pipelines P1, P3 and P4 are above P0 on 180 of 180 circuits, with ZZ ratios from 1.28 to 10.32 (P1), 1.31 to 7.91 (P3) and 1.44 to 10.36 (P4). On family B1 (`results/family_B1_counts.csv`) P1 is above P0 on 14 of 15, P3 on 14 of 15 and P4 on 15 of 15. Only teleport reduction, which does not extract, helps on H2.
-
-`[F]` On the Trotter family no pipeline goes below P0 in ZZPhase count. Under P0 alone the ZZPhase count equals one gate per two-body term on 180 of 180 circuits, where `n_2q` equals `n_cx / 2` of the manifest. No pipeline has fewer ZZPhase gates than P0 on any family A circuit, 0 of 180 for each of P0ref, P0L1, P1, P2, P3 and P4. The family measures the cost of a rewrite instead of its benefit. `[O]` The Trotter family is the right control, because a Trotter circuit is what an H2 user runs most, and a method that damages it has to be caught. `[F]` PSEL keeps P0 on all 60 XXZ circuits and on 123 of the 180 family A circuits (`value/selector_ledger.md`).
-
-`[F]` PSEL compiles every circuit twice. Its family totals in Section 1.2 come from the stored P0 and P2 rows and not from a rerun of `pipelines/pass_select.py`. `pipelines/test_pass_select.py` reruns the selector on six circuits and checks that its choice and HQC equal those derived from the stored rows.
-
-`[F]` A single-qubit T gate is an Rz on H2, which is free in HQC and absent from the gate-noise model. The T-count layer of the ledger has no effect on any H2 number in this report. Its value is for a fault-tolerant target.
-
-`[F]` The noise proxy is a density-matrix simulation with the published H2-2E default parameters (p1 = 7.3e-5, p2 = 1.29e-3, p_meas = (9e-4, 1.8e-3), p_init = 4e-5) and depolarising gate channels only. The published H2-2E model has in addition a spontaneous-emission branch that applies leakage half of the time, measurement and initialisation crosstalk, quadratic and linear dephasing during transport and idling, and a two-qubit fault probability that scales with the RZZ angle (`docs/platform_notes.md`, section 3.2). The proxy has none of these. The Selene cross-check in `results/selene.md` compares two depolarising models that share the same per-gate convention, so the agreement of 32 of 34 runs within two standard deviations for the like-for-like variant confirms the implementation of the proxy and its measure-map handling, not its fidelity to H2-2E. `[F]` In the compiled P0 and P2 circuits of the 14 B1 circuits other than hwb8, 1421 of the 1661 ZZPhase gates have angle pi/2, where the scaling gives p2. Another 238 have angle pi/4, where it gives 0.62 p2. Two have angle 0.375 pi. `[O]` The angles of family A are small, so the published scaling lowers the two-qubit fault probability below p2 and the proxy is pessimistic there.
-
-`[F]` Nothing in this report has run on hardware. Section 6 gives the plan for H2 hardware in the finals. The 22 H2-Emulator rows of Section 3.7 and the 18 H2-2E jobs of Section 3.7.1 are emulator runs. vbe_adder_3 at 4000 shots per pipeline is the only emulator comparison of P2 against P0 with z above 2. Its z is +2.38 and its two-sided p is 0.017. The repeat circuits were chosen after Table E2. The Holm-adjusted p is 0.035 over the two repeated circuits and 0.052 over all three H2-2E circuits. `[O]` The vbe_adder_3 gain is significant before correction and after correction over the two repeated circuits. It is not significant at 0.05 after correction over all three H2-2E circuits. `[F]` No other emulator comparison of P2 against P0 is resolved. The 468 noiseless, the 68 depolarising and the 468 full depolarising Selene runs are local. They use the Quest statevector backend and do not contain the H2-2E noise model. The submission cell of `report/notebook_skeleton.py` was executed once on 9 October 2026 (CEST, ledger time 2026-10-08T23:15Z) against the free H2-2SC syntax checker. It compiled tof_3 with PSEL and returned job `AFByb3ZpZGVySm9iAaEdzTywfrOWhGbnlXxd-w` with status COMPLETED and no cost field. The executed export is `report/notebook_executed.html`. The cell refuses any platform whose name does not end in SC (`report/test_notebook_submit.py`). The emulator jobs of Sections 3.7 and 3.7.1 were submitted by `submit/syntax_check.py` and `submit/run_emulator.py`.
-
-`[F]` The cost model is fitted on proxy fidelities, not on emulator output. Under gradient boosting with the grouped split `cv5g` held-out whole circuit classes give R^2 = 0.990 on family A rows and 0.830 on family B1 rows. This measures interpolation within the families. Across families the evidence runs in one direction. Trained on family A the boosted model predicts the 7 family B1 circuits with R^2 = 0.805 and MAE(F_H) 0.0083. Ridge reaches R^2 = 0.840 and the unfitted physics baseline 0.785. Trained on the 35 family B1 rows no model predicts family A and the best R^2 is 0.326. `[O]` Seven B1 circuits do not establish generalisation, and learned rewriting itself is not attempted in this submission.
-
-`[F]` The certificate bounds the T-count of exact rewrites and is computed on the channel of size 4^n x 4^n. It is applied to family B2 at n = 2 and n = 3 and to four family B1 circuits at n = 5. On family B2 the floor is at least 99.28 % of the post-ZX T-count on every instance. On the four B1 circuits the floor is 25.0 % (barenco_tof_3), 25.0 % (mod5_4), 55.2 % (qft_4) and 26.7 % (tof_3) of the post-ZX T-count, so there the certificate leaves most of the remaining T-count unaccounted for. `[O]` The B1 floors are loose because those circuits are hand-written with many Clifford collapses, not synthesised words, and the manuscript's near-rigidity result covers synthesised words only. An approximate resynthesis to a new precision is outside the scope of the certificate.
-
-`[F]` hwb8 under P1 and P2 completed only in the 5400 s run of Section 5 (P1 8305, P2 5587 ZZPhase gates), and those two rows are the ones in `results/family_B1_counts.csv` and Table B1. P2 is below P0 on hwb8 by 5.50 % (5912 to 5587) and P2 is below P0 on 13 of 15 family B1 circuits with two ties. `[F]` The 8 circuits of family B1x (Section 3.2.1) were compiled with `--no-check` and have no unitary, statevector or distribution check. Their counts are not evidence of exactness and are kept apart from the family B1 totals.
-
-`[F]` The implementation of the per-step bookkeeping of Lemma mqval(b) of the barrier manuscript found that the "reduction fires exactly once" half of that lemma fails on the word T T (`barrier/NOTES.md`, section 8), and the floor of Corollary cert does not use that half.
-
-`[F]` Table B2 has five circuits per row against 50 and 8 in the manuscript. The agreement of the means is a consistency check, not a statistical result.
-
-## 8. Team and roles
-
-`[F]` Members, affiliations and academic status follow the team registration table circulated by F. Cadet on 19 and 31 August 2026. Kam's affiliations follow his registration email of 20 August 2026. Contributions follow the arXiv author lists of References 1 and 2 and the team emails of July and August 2026. No copy of these emails is in the repository.
-
-| Member | Affiliation | Recorded academic status | Recorded contribution |
-|---|---|---|---|
-| Chon-Fai Kam | Université de La Réunion and Università degli Studi di Palermo | | Team lead. Registered the team and owns the Aqora organisation `learned_zx_rewriting`. First author of arXiv:2608.22801 and co-author of arXiv:2608.22810. |
-| Anuradha Mahasinghe | University of Colombo | Professor in Computational Mathematics | Co-author of arXiv:2608.22801 and arXiv:2608.22810. Supervises D. De Silva. |
-| Dulari De Silva | University of Colombo | BSc (Hons) in Computational Mathematics | First author of arXiv:2608.22810. Wrote the Solovay-Kitaev and ZX implementation of that study. |
-| Nethmini Karunarathne | University of Colombo | BSc student in Computer Engineering | |
-| Frédéric Cadet | PEACCEL, Paris | | Proposed the entry and assembled the team. Prepared the mentor-discussion notes. Co-author of arXiv:2608.22801 and arXiv:2608.22810. |
-| Miloud Bessafi | PEACCEL, Paris | | |
-| Kaushika De Silva | QUISA, The University of Western Australia | | Co-author of arXiv:2608.22801 and arXiv:2608.22810. |
-
-`[F]` An empty cell means that none of these sources records the entry.
+- `[F]` Nothing in this report has run on H2 hardware. All platform results are emulator runs.
+- `[F]` The vbe_adder_3 fidelity gain is not significant at 0.05 after Holm correction over all three H2-2E circuits. grover_5 shows no gain at 4000 shots.
+- `[F]` Family C is count-only. 6 of its 20 circuits have no check and four of them are P2 picks. The other 14 are spot-checked on 64 random basis inputs. Family B1x has no check.
+- `[F]` The 16.7 % family C saving rests on two multipliers with continuous rotation angles. Without continuous-angle circuits the saving is 7.47 %.
+- `[F]` hwb8 carries 84.5 % of the B1 saving and has no sourced algorithm role.
+- `[F]` The certificate covers 24 circuits with n at most 5. On the four B1 circuits it leaves most of the remaining T-count unaccounted for.
+- `[F]` No user interview or survey supports the need. No value is stated in currency.
+- `[F]` The learned component of this submission is a cost model fitted on proxy fidelities (Appendix 4). This submission contains no learned rewriting.
 
 ## References
 
-1. C.-F. Kam et al., An Exactness Barrier for ZX-Calculus Optimization of Synthesized Clifford+T Circuits, arXiv:2608.22801. The TeX source is not distributed. `[F]` arXiv:2608.22801 resolves to this title with Kam as first author (`results/verification_2026-10-08b.md`, claim 15).
-2. D. De Silva et al., Numerical Evaluation of ZX Calculus Optimization for Solovay Kitaev Quantum Circuit Synthesis, arXiv:2608.22810. The TeX source is not distributed. `[F]` arXiv:2608.22810 resolves to this title with D. De Silva as first author, fetched 8 October 2026.
-3. A. Kissinger and J. van de Wetering, Reducing the number of non-Clifford gates in quantum circuits, Phys. Rev. A 102, 022406 (2020), arXiv:1903.10477. Table 1 checked on 7 October 2026 (results/literature_tcount_check.md).
-4. Quantinuum, H2 Product Data Sheet, version 4.00, 17 September 2025, https://docs.quantinuum.com/systems/_static/assets/data_sheets/Quantinuum%20H2%20Product%20Data%20Sheet.pdf.
-5. Quantinuum, H2 emulators (H2-2E default noise parameters), https://docs.quantinuum.com/systems/user_guide/emulator_user_guide/emulators/h2_emulators.html, and the emulator noise model page, https://docs.quantinuum.com/systems/user_guide/emulator_user_guide/noise_model.html.
-6. Quantinuum, Helios costing (HQC formula, equation 1), https://docs.quantinuum.com/systems/trainings/helios/getting_started/costing.html. `[O: the H2 form of the formula is inferred from this page, docs/platform_notes.md section 3.4]`
-7. Quantinuum, Singapore Grand Challenge code samples, https://github.com/Quantinuum/sg_grand_challenge.
-8. Quantinuum, Selene emulation framework, https://docs.quantinuum.com/selene/ and https://github.com/quantinuum/selene.
-9. pytket-quantinuum 0.59.3, `QuantinuumBackend.default_compilation_pass`, reproduced in `pipelines/compile.py:quantinuum_default_pass` with line references.
-10. PyZX 0.10.7 and the Quantinuum pyzx fork, commit e695d6d7, for the family B1 sources.
+1. C.-F. Kam et al., An Exactness Barrier for ZX-Calculus Optimization of Synthesized Clifford+T Circuits, arXiv:2608.22801.
+2. D. De Silva et al., Numerical Evaluation of ZX Calculus Optimization for Solovay Kitaev Quantum Circuit Synthesis, arXiv:2608.22810.
+3. A. Kissinger and J. van de Wetering, Reducing the number of non-Clifford gates in quantum circuits, Phys. Rev. A 102, 022406 (2020), arXiv:1903.10477.
+4. M. Amy, D. Maslov and M. Mosca, arXiv:1303.2042. M. Amy and M. Mosca, arXiv:1601.07363. Y. Nam et al., arXiv:1710.07345. L. Heyfron and E. Campbell, arXiv:1712.01557. AlphaTensor-Quantum, arXiv:2402.14396.
+5. L. K. Grover, arXiv:quant-ph/9605043. A. Barenco et al., arXiv:quant-ph/9503016. D. Litinski, Quantum 3, 128 (2019), arXiv:1808.02892.
+6. Quantinuum, Helios costing (HQC formula), https://docs.quantinuum.com/systems/trainings/helios/getting_started/costing.html, and Singapore Grand Challenge code samples, https://github.com/Quantinuum/sg_grand_challenge.
+7. Quantinuum, H2 emulators and noise model, https://docs.quantinuum.com/systems/user_guide/emulator_user_guide/emulators/h2_emulators.html. Selene, https://github.com/quantinuum/selene.
+8. pytket-quantinuum 0.59.3 and PyZX 0.10.7.

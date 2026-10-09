@@ -5,48 +5,73 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 OUT=submission
 LOG=$OUT/build_logs
-SRC=report/report_v5.md
+SRC_MAIN=report/report_short.md
+SRC_FULL=report/report_v5.md
 mkdir -p "$LOG"
 : > "$LOG/build.log"
 log() { echo "[$(date -u +%FT%TZ)] $*" | tee -a "$LOG/build.log"; }
 
-# 1. report.md = report_v5.md without the changelog sections (judges flagged them as noise).
-# The filter writes a stripped copy and leaves report/report_v5.md untouched.
-# Figures are copied next to report.md so the markdown renders on its own.
-python3 "$OUT/strip_changelog.py" "$SRC" "$OUT/report.md" | tee -a "$LOG/build.log"
-mkdir -p "$OUT/figures"
-for f in $(grep -o '](figures/[^)]*)' "$OUT/report.md" | sed 's/^](//; s/)$//'); do cp "report/$f" "$OUT/$f"; done
-if grep -n -E '\[PENDING|TBD' "$OUT/report.md"; then log "PENDING/TBD CHECK FAILED in report.md"; exit 1; fi
-log "report.md: no [PENDING or TBD"
+# 0. every number of the short report must occur in its sources
+if ! python3 report/check_short_numbers.py "$SRC_MAIN" | tee -a "$LOG/build.log"; then
+  log "SHORT REPORT NUMBER CHECK FAILED"; exit 1
+fi
+log "check_short_numbers.py: every number of $SRC_MAIN found in its sources"
 
-# 2. report.pdf from report.md (pandoc -> HTML -> wkhtmltopdf).
+# 1. markdown sources of the two PDFs.
+# report.md = report_short.md, the main judge-facing report (copied unchanged).
+# report_full.md = report_v5.md without the changelog sections (judges flagged them as noise),
+# attached as the technical appendix. The filter leaves report/report_v5.md untouched.
+# Figures are copied next to the markdown so each file renders on its own.
+cp "$SRC_MAIN" "$OUT/report.md"
+log "report.md copied from $SRC_MAIN"
+python3 "$OUT/strip_changelog.py" "$SRC_FULL" "$OUT/report_full.md" | tee -a "$LOG/build.log"
+mkdir -p "$OUT/figures"
+for md in "$OUT/report.md" "$OUT/report_full.md"; do
+  for f in $(grep -o '](figures/[^)]*)' "$md" | sed 's/^](//; s/)$//'); do cp "report/$f" "$OUT/$f"; done
+  if grep -n -E '\[PENDING|TBD' "$md"; then log "PENDING/TBD CHECK FAILED in $md"; exit 1; fi
+  log "$(basename "$md"): no [PENDING or TBD"
+done
+
+# 2. PDFs from the markdown (pandoc -> HTML -> wkhtmltopdf).
 # pandoc runs with --resource-path=$OUT and --embed-resources, which inlines every image into the intermediate HTML.
 log "pandoc $(pandoc --version | head -1 | cut -d' ' -f2), wkhtmltopdf $(wkhtmltopdf --version | cut -d' ' -f2)"
-HTML="$LOG/report_v5.html"
-pandoc "$OUT/report.md" -f gfm -t html5 --standalone --embed-resources \
-  --resource-path="$OUT" --css="$OUT/report.css" \
-  --metadata title="A pass selector keeps ZX rewriting only where it lowers the cost of a circuit on Quantinuum H2" \
-  --metadata pagetitle="report_v5" \
-  -o "$HTML" 2>>"$LOG/build.log"
-# drop the duplicated H1 that --metadata title adds
-python3 - "$HTML" <<'PY'
+# build_pdf <md> <pdf> <table set of check_pdf_tables.py>
+build_pdf() {
+  local md="$1" pdf="$2" set="$3"
+  local title stem html txt
+  title=$(grep -m1 '^# ' "$md" | sed 's/^# //')
+  stem=$(basename "$pdf" .pdf)
+  html="$LOG/$stem.html"
+  pandoc "$md" -f gfm -t html5 --standalone --embed-resources \
+    --resource-path="$OUT" --css="$OUT/report.css" \
+    --metadata title="$title" --metadata pagetitle="$stem" \
+    -o "$html" 2>>"$LOG/build.log"
+  # drop the duplicated H1 that --metadata title adds
+  python3 - "$html" <<'PY'
 import re, sys
 p = sys.argv[1]; s = open(p, encoding="utf-8").read()
 s = re.sub(r'<header id="title-block-header">.*?</header>', '', s, flags=re.S)
 open(p, "w", encoding="utf-8").write(s)
 PY
-wkhtmltopdf --quiet --enable-local-file-access --page-size A4 \
-  --margin-top 15mm --margin-bottom 15mm --margin-left 14mm --margin-right 14mm \
-  "$HTML" "$OUT/report.pdf" 2>>"$LOG/build.log" || true
-rm -f "$HTML"
-test -s "$OUT/report.pdf"
-log "report.pdf written ($(stat -c %s $OUT/report.pdf) bytes, $(pdfinfo $OUT/report.pdf | awk '/^Pages:/{print $2}') pages)"
-PDFTXT=$(mktemp)
-pdftotext -layout "$OUT/report.pdf" "$PDFTXT"
-if grep -n -E '\[PENDING|TBD|Changelog' "$PDFTXT"; then log "PDF TEXT CHECK FAILED ([PENDING, TBD or Changelog in report.pdf)"; rm -f "$PDFTXT"; exit 1; fi
-log "report.pdf text: no [PENDING, TBD or Changelog"
-python3 "$OUT/check_pdf_tables.py" "$OUT/report.md" "$PDFTXT" | tee -a "$LOG/build.log"
-rm -f "$PDFTXT"
+  wkhtmltopdf --quiet --enable-local-file-access --page-size A4 \
+    --margin-top 15mm --margin-bottom 15mm --margin-left 14mm --margin-right 14mm \
+    "$html" "$pdf" 2>>"$LOG/build.log" || true
+  rm -f "$html"
+  test -s "$pdf"
+  log "$(basename "$pdf") written from $(basename "$md"), title \"$title\" ($(stat -c %s "$pdf") bytes, $(pdfinfo "$pdf" | awk '/^Pages:/{print $2}') pages)"
+  txt=$(mktemp)
+  pdftotext -layout "$pdf" "$txt"
+  if grep -n -E '\[PENDING|TBD|Changelog' "$txt"; then
+    log "PDF TEXT CHECK FAILED ([PENDING, TBD or Changelog in $(basename "$pdf"))"; rm -f "$txt"; exit 1
+  fi
+  log "$(basename "$pdf") text: no [PENDING, TBD or Changelog"
+  if ! python3 "$OUT/check_pdf_tables.py" "$md" "$txt" --set "$set" | tee -a "$LOG/build.log"; then
+    log "TABLE ROW CHECK FAILED in $(basename "$pdf")"; rm -f "$txt"; exit 1
+  fi
+  rm -f "$txt"
+}
+build_pdf "$OUT/report.md" "$OUT/report.pdf" short
+build_pdf "$OUT/report_full.md" "$OUT/report_full.pdf" full
 
 # 3. code.zip = git archive of HEAD (tracked files only, so ignored paths such as
 # third_party/, papers/ and any local credentials are excluded).
@@ -54,10 +79,12 @@ rm -f "$OUT/code.zip"
 # submission/ itself is excluded so a rerun after this folder is committed does not nest the old package
 git archive --format=zip HEAD -o "$OUT/code.zip" -- . ':(exclude)submission'
 log "code.zip from HEAD $(git rev-parse HEAD), $(stat -c %s $OUT/code.zip) bytes, $(unzip -Z1 $OUT/code.zip | wc -l) entries"
-if ! grep -q "$(git rev-parse HEAD)" "$OUT/REPRODUCE.md"; then
-  log "REPRODUCE.md does not name HEAD $(git rev-parse HEAD), update its first paragraph"; exit 1
+# the code.zip commit is the hash right after "`git archive` of commit" (not the pyzx fork hash)
+REPRO_HASH=$(grep -o -E '`git archive` of commit `[0-9a-f]{40}`' "$OUT/REPRODUCE.md" | head -1 | grep -o -E '[0-9a-f]{40}' || true)
+if [[ "$REPRO_HASH" != "$(git rev-parse HEAD)" ]]; then
+  log "REPRODUCE.md names code.zip commit '${REPRO_HASH}', HEAD is $(git rev-parse HEAD), update its first paragraph"; exit 1
 fi
-log "REPRODUCE.md names HEAD"
+log "REPRODUCE.md names HEAD as the code.zip commit"
 if unzip -Z1 "$OUT/code.zip" | grep -E -i '(^|/)credentials\.json$|\.token$|aqora-home|\.local/share/aqora|\.env$|(^|/)\.env' ; then
   log "CREDENTIAL CHECK FAILED (file names)"; exit 1
 fi
@@ -86,14 +113,17 @@ rm -f "$LOG/token_grep_count.txt"
 if [[ "${1:-}" == "--tests" ]]; then bash "$OUT/run_tests.sh"; log "tests rerun, see $LOG/tests_summary.txt"; fi
 
 # 5. SUMMARY.md number check
-python3 "$OUT/check_summary_numbers.py" | tail -3 | tee -a "$LOG/build.log"
+RC=0; python3 "$OUT/check_summary_numbers.py" > "$LOG/summary_check.txt" || RC=$?
+tail -3 "$LOG/summary_check.txt" | tee -a "$LOG/build.log"; rm -f "$LOG/summary_check.txt"
+if [[ $RC -ne 0 ]]; then log "SUMMARY NUMBER CHECK FAILED"; exit 1; fi
 
 TMPM=$(mktemp)
 # 6. manifest (every file under submission/ except MANIFEST.txt itself)
 ( cd "$OUT" && find . -type f ! -name MANIFEST.txt | sed 's|^\./||' | LC_ALL=C sort | while read -r f; do
     printf '%s  %10d  %s\n' "$(sha256sum "$f" | cut -d' ' -f1)" "$(stat -c %s "$f")" "$f"; done ) > "$TMPM"
 { echo "# code.zip = git archive of commit $(git rev-parse HEAD) (submission/ excluded)"
-  echo "# report.pdf and report.md built from $SRC at that commit, changelog sections removed"
+  echo "# report.pdf and report.md (main report) built from $SRC_MAIN at that commit"
+  echo "# report_full.pdf and report_full.md (technical appendix) built from $SRC_FULL at that commit, changelog sections removed"
   echo "# sha256  size_bytes  path (relative to submission/), generated $(date -u +%FT%TZ)"
   cat "$TMPM"; } > "$OUT/MANIFEST.txt"
 rm -f "$TMPM"

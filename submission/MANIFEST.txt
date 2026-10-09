@@ -1,34 +1,42 @@
-# code.zip = git archive of commit 1a3185b799eee911cf6ffc3ae89f1a8ed568cf90 (submission/ excluded)
-# report.pdf and report.md built from report/report_v5.md at that commit, changelog sections removed
-# sha256  size_bytes  path (relative to submission/), generated 2026-10-08T23:26:21Z
-cbb76f70672bdc9ef384f5750c5f96cc1d0fec6ce878063ba7209a982b1d29e2        8262  REPRODUCE.md
-8f518bd187bc6e55e8d74f42bc8d4d1c56795a6b3aa1d52e6c7092e61f7ce1b3        7022  SUMMARY.md
-6f53cf1cccde049c983ea34cb2ff66e5d3a1928bd37195b544c40f813a57bb85        5716  build.sh
-98a6a6d84b2e7808fde8ee342bab9a6973ba9f6bed59a6e66eec82ccbd0fbf52        1809  build_logs/build.log
+# code.zip = git archive of commit fffac06316520bdeb203caed33df5ffd580eed58 (submission/ excluded)
+# report.pdf and report.md (main report) built from report/report_short.md at that commit
+# report_full.pdf and report_full.md (technical appendix) built from report/report_v5.md at that commit, changelog sections removed
+# sha256  size_bytes  path (relative to submission/), generated 2026-10-09T01:32:59Z
+4d8b3076af6a089b44141db68243aeac7426aa23bfe760a8cef4544275e82724        9911  REPRODUCE.md
+97ebf96c2e2b890931a173374fcec15b4aaa67d6093b3849226b7dc23de72bdf        9827  SUMMARY.md
+5c206f91e3655d6314dfe2ac4fab93e3ce8e5418518ae23dca18c0109e06ba87        7197  build.sh
+33e7a2b9554e6a2ec7c917dc0f1d6f3d3a1700faaaf606403e1c4a6788f4b807        3259  build_logs/build.log
 99ff932482879ebad38314fe15549919401cc08cfbec703d54490de9bc9fe5bb          38  build_logs/test_c2_literature.log
-9b44e58a1eeebdd41a41de3be2165ef89a3f8f0a6c09e21c0aeb8485ff62b5fe        3730  build_logs/test_certificate.log
+89d5952f7c900dcd5648ddc31167e058b7e213747220c78bf3ffb1d6289863e6        3730  build_logs/test_certificate.log
 8985b89300693d482a193858eff53dd1aab96b462abe94440cf76462837a822b         168  build_logs/test_compile.log
 290a02ff356c0ae53f19ea09789ff5f2cb6fe7131b810bfbdc4100176c68f242         256  build_logs/test_cost_model.log
-ccda2c9c4af7cba55603eba12c7a7cccbe3a5ebb01aaf935f8a9add7be7efa13         567  build_logs/test_dm_sim.log
+4ab6c6cd9a803e4bf3c4cd6914a7393798464ea45418abf9e0e3e5b96e96496d         567  build_logs/test_dm_sim.log
+c7925eb2e311d15d85295f1800bb4c1a4615e92948d29ec254aaddfce0d83e98          98  build_logs/test_family_C_selector.log
+23638876b728c16ec6753889a7abebaba8db69d7a74b70ca2a6ac6ea83413fc6          98  build_logs/test_finals_plan.log
 8c02563cb19847cf2ce9d074b4be0e1a686e35fcbacfcfb77b2380114c80541c         468  build_logs/test_gen_trotter.log
-2c58238f0acd307a64bb34797426094e8967a5811705d5f9206c860d260e247e          99  build_logs/test_h22e_pooled.log
-1139705b40b40556c51cbe36b4d3dea46db5c7e0491fd1f91943dd8d50df99a4          98  build_logs/test_h22e_stats.log
+25317d54d91596d4b4795e071d1539e13f95a22834cc17897488de70fe47c762          99  build_logs/test_h22e_pooled.log
+b7a9e28c17a8913cf9a8554d854bb731e011ac945e720c72b0e6abdd1319fb13          98  build_logs/test_h22e_stats.log
+0757d787e7e2ee6b85d51305b375c646d63009d03430cdbb192da8a6b149c8d1          99  build_logs/test_notebook_submit.log
+5d9f263dfcebaa1590cf7e0cdb32a1dfe7b297a59715cb1cef9f06c5c3e76717         100  build_logs/test_official_baseline.log
 140fcc7fe1252b4dc55df90bb5cf94df68081d5cf11917e9cda280c3893defe5         481  build_logs/test_pass_select.log
-2102d38ffd7465ec193a5b388d923f270e086c0be7c111dacafd72a1e1549e58          98  build_logs/test_selector_ledger.log
-30f1a0e904a4aedac23d91c34dce3a6f9a2fbe180627c73c8eeea4289502930e          98  build_logs/test_selene.log
-d0fc9847de06804a4ca98823e0cb104c240cf7bc72f31fb9fee6115075b33073          99  build_logs/test_submit.log
-50f58ac0ec6d19174107e8aee7cf056cbb76ae70a0f92357e59525f21eee28a4          98  build_logs/test_value_by_app.log
-3720f0a7a4b5c38074c0042e0020fcc07e518fb7bbbe8e480dc154f5e238b141          98  build_logs/test_value_ledger.log
-d95277267cd423c08640722e88d19f2f0003d29b2e102fe6a839eca3e4d85675        1136  build_logs/tests_summary.txt
-ce4ff06b546a97900f62e248e5e84d7508549be13d81661a13a45dda919af6ad        1927  check_pdf_tables.py
+43a36e062be95387a02fc672c2fac66982bc81772d78a1ef5851f7874b809966          98  build_logs/test_selector_ledger.log
+300903bfdfe1cdb3cf7e0b79a11c4240b1be00887864ee42bf8360cf2b9de176          99  build_logs/test_selene.log
+4363783db6d10dd1309db4197335d99b153e251b464abfb0ee0e61eb6afc3570          99  build_logs/test_submit.log
+38ed47b09158d659468b9d252df16910138fa998d273211df9287aac3c54e979          99  build_logs/test_usecase.log
+e819659de90e12fb3211cb456e852f09b2e31050c8dda99a8d3db5109b2ab840          98  build_logs/test_value_by_app.log
+752e1e2df154ba0ec296a925a71963b3cbd6e2803c0d7d7e7fa3d5c7d613a8cd          98  build_logs/test_value_ledger.log
+a318cd77f637eba44133ad7e14e123bb561214b9d3a2a123997da396282bcc6e        1577  build_logs/tests_summary.txt
+1f7ce1717153fa5b21c0bc5c41b33c812f9afaa923e5363b31c46524e3f85f57        3267  check_pdf_tables.py
 2cdca3d67ff873d16d0d96fe1fe503653fbc2b1864060ac8208dafda3541613b        3179  check_summary_numbers.py
-ed56c771d89d3a8be72ce59d1709274570516efdfb61ef8a2cf06ef1c1a12035     5952494  code.zip
+0378f8c931f27cd9b64e57fc98bd6af1e8791bd3741917628e704c8f5b879764     6272925  code.zip
 64674c19f8310d3d9fa78ba40465f41bf2ee17ec20bc6199bb2dddaf9dbcaa9a       94548  figures/fig_A_zz_ratio.png
 6e4ee395255f144a39b88d298dd49770e7dab2eb70516dc7cda3caee80a102a4       73781  figures/fig_B1_zz.png
 f45283b15f906701203d2eb56cb560256c39ae4b7a087d5df18e45ec5d1bb8d1       53399  figures/fig_B2_t.png
 85e649a98882d2ead44ba9853fd165b2829a1c49b04889e74d5a3929b918b19c      160224  figures/fig_cost_model.png
 3985303b5dc002f24e2231aea37bc65d94328a8923526a9b022040df2fea8893         812  report.css
-cf069f91aa44fb42be9005673f35b8383d653ae22f00459de4788029aaeb9d56      137112  report.md
-acffd6551445911f8294e364932c2e2c77662d48ae6777b02408d7a1937d8d0d      777600  report.pdf
-20a38eb7d97f530998d43fcd4e1dd000cba414d3604adb0aefb635369d53057c        1591  run_tests.sh
+c92889c8c176eea7e78c222bbe4fd03363c507b8526acef06f6024ce86eacb7e       30091  report.md
+64d0d5889a178ced1278ab353d549cdd2e27a2205a66d9cc7104222ed4ef6f22      328577  report.pdf
+de03bf2bebfed957fb0b48d2af94494e56dd6be2a8f1013f9f6183f1ab291048      159799  report_full.md
+86da521d960cb1673b63db08642870837c0a961e2ad2344419e619c267a3e6df      814728  report_full.pdf
+6d645b2c10594ce2c0250bf2af7bbf39d3bff45c8d215f1e96f136508e8923f6        1804  run_tests.sh
 64eb4118118c3135c32a82a5f3badbd74eb41cf6d01ffe99229b29f06b286a0a        1247  strip_changelog.py

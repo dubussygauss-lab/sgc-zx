@@ -1,6 +1,8 @@
 # Summary for the judges
 
-Team Learned ZX Rewriting. Report title: "A pass selector keeps ZX rewriting only where it lowers the cost of a circuit on Quantinuum H2". Quantinuum Singapore Grand Challenge, submission 1. Built on 9 October 2026 from `report/report_v5.md` and aligned with its Section 1.
+The main report is `report.pdf` and the technical appendix is `report_full.pdf`.
+
+Team Learned ZX Rewriting. Report title: "A pass selector keeps ZX rewriting only where it lowers the cost of a circuit on Quantinuum H2". Quantinuum Singapore Grand Challenge, submission 1. `report.pdf` is built from `report/report_short.md`. `report_full.pdf` is the full report v5 built from `report/report_v5.md` without its changelog sections. This page was built on 9 October 2026 and is aligned with Section 1 of the full report.
 
 `[F]` marks a statement copied from the report or from the `value/` outputs. `[O]` marks a judgement. The script `check_summary_numbers.py` finds every number of this page in `report/report_v5.md` or in `value/`.
 
@@ -62,7 +64,9 @@ Team Learned ZX Rewriting. Report title: "A pass selector keeps ZX rewriting onl
 
 | File | Content |
 |---|---|
-| `report.pdf`, `report.md` | Report v5 without its changelog sections, `figures/` holds its images |
+| `report.pdf`, `report.md` | Main report, built from `report/report_short.md` |
+| `report_full.pdf`, `report_full.md` | Technical appendix, report v5 without its changelog sections |
+| `figures/` | Images of both reports |
 | `code.zip` | `git archive` of the commit named in `MANIFEST.txt` |
 | `REPRODUCE.md` | Environment, commands, tests and seeds |
 | `SUMMARY.md`, `check_summary_numbers.py` | This page and the script that checks its numbers |
