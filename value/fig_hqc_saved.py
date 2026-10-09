@@ -40,6 +40,8 @@ def main():
     ref = 100 * (sub["hqc_P0"].sum() - sub["hqc_PSEL"].sum()) / sub["hqc_P0"].sum()
     print(f"circuits {len(d)}, without continuous angles {len(sub)}, pooled saving {ref:.2f} %")
 
+    assert ((d["pct"] == 0) == (d["pick"] == "P0")).all()
+
     rows = []  # (y, name, pct, colour)
     ticks = []  # (y, label) for group headers
     y = 0.0
@@ -61,20 +63,15 @@ def main():
             ax.text(0.6, yy, "0, PSEL keeps P0", va="center", ha="left", fontsize=8.6, color=MUTED,
                     bbox=dict(facecolor="white", edgecolor="none", pad=0.6))
         else:
-            txt = f"{pct:.1f}"  # one decimal, as in value/family_C_selector.md
+            # One decimal, as in value/family_C_selector.md, except a nonzero saving that
+            # rounds to 0.0 (mcx_b95_54), which gets two decimals so it does not read as zero.
+            txt = f"{pct:.1f}" if round(pct, 1) != 0 else f"{pct:.2f}"
             ax.text(pct + 0.6, yy, txt, va="center", ha="left", fontsize=8.6, color=INK,
                     bbox=dict(facecolor="white", edgecolor="none", pad=0.6))
     for yy, label, col in ticks:
         ax.add_patch(plt.Rectangle((0, yy - 0.3), 1.2, 0.6, color=col, lw=0))
         ax.text(1.8, yy, label, va="center", ha="left", fontsize=9.6, color=INK, fontweight="bold",
                 bbox=dict(facecolor="white", edgecolor="none", pad=0.6))
-
-    # The reference line spans only the groups it pools (adders and MCX oracles).
-    y_end = ticks[2][0] - 0.5
-    ax.plot([ref, ref], [-1.0, y_end], color=MUTED, lw=1.2, ls=(0, (4, 3)), zorder=0)
-    ax.text(ref + 0.6, -1.0,
-            f"{ref:.2f} % pooled over the {len(sub)} circuits without continuous angles",
-            va="bottom", ha="left", fontsize=8.6, color=MUTED)
 
     ax.set_yticks([r[0] for r in rows])
     ax.set_yticklabels([r[1] for r in rows], fontsize=10, color=INK)
@@ -89,6 +86,33 @@ def main():
         ax.spines[s].set_visible(False)
     ax.spines["bottom"].set_color(MUTED)
     fig.tight_layout()
+
+    # The reference line spans the groups it pools (adders and MCX oracles) but stops above
+    # the first "PSEL keeps P0" label, and it is cut around any group header whose text it
+    # would cross, so no text lies on the line.
+    fig.canvas.draw()
+    rend = fig.canvas.get_renderer()
+    inv = ax.transData.inverted()
+    pooled = {label for app, label, _ in GROUPS if app in NO_CONTINUOUS}
+    y_end = min(yy for yy, _, pct, col in rows
+                if pct == 0 and col in {c for a, _, c in GROUPS if a in NO_CONTINUOUS}) - 0.7
+    cuts = []
+    for t in ax.texts:
+        if t.get_text() in pooled:
+            (x0, ya), (x1, yb) = inv.transform(t.get_window_extent(rend).get_points())
+            if x0 <= ref <= x1:
+                cuts.append((min(ya, yb) - 0.08, max(ya, yb) + 0.08))
+    y_top, segs = -1.0, []
+    for c0, c1 in sorted(cuts):
+        segs.append((y_top, c0))
+        y_top = c1
+    segs.append((y_top, y_end))
+    for a, b in segs:
+        ax.plot([ref, ref], [a, b], color=MUTED, lw=1.2, ls=(0, (4, 3)), zorder=0)
+    ax.text(ref + 0.6, -1.0,
+            f"{ref:.2f} % pooled over the {len(sub)} circuits without continuous angles",
+            va="bottom", ha="left", fontsize=8.6, color=MUTED)
+
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     fig.savefig(OUT + ".png", dpi=200)
     fig.savefig(OUT + ".pdf")

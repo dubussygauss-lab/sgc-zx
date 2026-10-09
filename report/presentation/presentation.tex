@@ -45,7 +45,7 @@
   \vfill
   {\color{accent}\LARGE\bfseries PSEL keeps ZX rewriting only where it lowers the cost of a circuit on Quantinuum H2\par}
   \vspace{0.5cm}
-  {\large PSEL is a drop-in pytket pass selector. It never costs more HQC than pytket's default pass when that pass passes its checks. Against that default it saves 7.47\,\% on 15 arithmetic and oracle circuits. On top of pytket level 3 the ZX stage saves 2.34\,\% on family C.\par}
+  {\large PSEL is a drop-in pytket pass selector. It never costs more HQC than pytket's default pass when that pass passes its checks. Its level-3-aware form PSEL4 never costs more than pytket level 2 or level 3. On family C it saves 25.85\,\% against level 2 and 3.50\,\% against level 3.\par}
   \vspace{0.7cm}
   {\large Team Learned ZX Rewriting\par}
   \vspace{0.2cm}
@@ -285,7 +285,7 @@
         \item Family C is count-only apart from one H2-2E run. Its PSEL output is proven on 18 of 20 circuits.
         \item Nothing has run on H2 hardware. All platform results are emulator runs.
         \item This submission contains no learned rewriting.
-        \item Savings are against pytket level 2, the default. Against level 3 PSEL costs 8.37\,\% more on family C. teleport\_reduce before level 3 saves 2.34\,\%.
+        \item PSEL costs 8.37\,\% more than pytket level 3 on family C. PSEL4 adds level 3 as a candidate and saves 3.50\,\% against it.
       \end{itemize}
     \end{column}
     \begin{column}{0.54\textwidth}
@@ -317,7 +317,7 @@
   \begin{itemize}\setlength{\itemsep}{3pt}
     \item \textbf{\code{code.zip}.} The source of the repository. \code{README.md} gives the run instructions.
     \item \textbf{\code{requirements.txt}.} Pins 20 packages, among them pytket 2.18.4, pytket-quantinuum 0.59.3 and pyzx 0.10.7.
-    \item \textbf{\code{run\_tests.sh}.} Runs 24 test files, seven as scripts and seventeen under pytest. All 24 return rc=0 from a fresh unzip of \code{code.zip}.
+    \item \textbf{\code{run\_tests.sh}.} Runs 26 test files, eight as scripts and eighteen under pytest. All 26 return rc=0 from a fresh unzip of \code{code.zip}.
     \item \textbf{\code{EVIDENCE.md}.} Lists every emulator job with its job ID, shots, HQC estimate and stored payload.
     \item \textbf{Generated tables.} \code{report/make\_tables.py} builds the results tables from \code{results/*.csv}. The circuit generators use seed 20261006.
     \item \textbf{Independent checks.} Verification reports by agents that did not produce the results are in \code{results/}.

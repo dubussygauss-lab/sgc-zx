@@ -1,0 +1,12 @@
+file,n,pick,hqc,n_2q,hqc_csv,hqc_match,method,verdict,max_snap_halfturns,grid,seconds,t_compile,spot_check,spot_check_dev,notes
+cdkm_adder_27.qasm,56,L3,840.4,309,840.4,True,pyzx-miter,proven,0.0,2^-4,22.42,3.95,,,
+draper_adder_28.qasm,56,P2L3,2336.2,1090,2336.2,True,pyzx-miter,timeout,,,300.13,200.67,,,killed after 300 s
+vbe_adder_18.qasm,55,L3,604.0,211,604.0,True,pyzx-miter,proven,0.0,2^-4,15.22,7.84,,,
+cdkm_adder_20.qasm,42,L3,632.2,232,632.2,True,pyzx-miter,proven,0.0,2^-4,12.96,4.72,,,
+modadd_2n_20.qasm,40,P2L3,771.8,302,771.8,True,pyzx-miter,proven,0.0,2^-4,25.41,7.66,,,
+vbe_adder_11.qasm,34,L3,367.4,127,367.4,True,pyzx-miter,proven,0.0,2^-4,7.83,2.91,,,
+cdkm_adder_15.qasm,32,L3,484.0,177,484.0,True,pyzx-miter,proven,0.0,2^-4,9.7,2.98,,,
+rgqft_mult_6.qasm,24,L3,1540.4,698,1540.4,True,pyzx-miter,timeout,,,300.13,54.22,,,killed after 300 s
+cdkm_adder_10.qasm,22,L3,325.4,118,325.4,True,pyzx-miter,proven,0.0,2^-4,2.15,0.73,,,
+vbe_adder_7.qasm,22,L3,232.2,79,232.2,True,pyzx-miter,proven,0.0,2^-4,1.44,0.55,,,
+modadd_2n_10.qasm,20,P2L3,367.8,142,367.8,True,pyzx-miter,proven,0.0,2^-4,3.48,1.31,,,
