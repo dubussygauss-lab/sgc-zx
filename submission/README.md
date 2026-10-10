@@ -2,9 +2,10 @@
 
 Team Learned ZX Rewriting, Quantinuum Singapore Grand Challenge. PSEL4 compiles each H2 circuit four ways and keeps the cheapest. The four candidates are pytket-quantinuum level 2 (P0), level 3 (L3), PyZX teleport_reduce then level 2 (P2) and teleport_reduce then level 3 (P2L3). Over 217 circuits PSEL4 needs 15.7 % less HQC than pytket-quantinuum's default level 2 (`value/policy_compare.md`).
 
-- Cost. PSEL4 totals 49,580.6 HQC against 58,837.2 for always level 2. It costs more than level 2 on none of the 217 circuits (`value/policy_compare.md`).
+- Cost: the savings of level 3 without its regressions. PSEL4 totals 49,580.6 HQC against 58,837.2 for always level 2 (15.7 % less) and 50,632.2 for always level 3 (2.08 % less). It costs more than level 2 or level 3 on none of the 217 circuits. Always level 3 costs more than level 2 on 45 of them and loses 372.0 HQC there (`value/policy_compare.md`, `value/usd_psel4.md`).
+- Cheaper per correct answer on the H2-2E emulator. The lower-HQC compile of each pair delivered each correct answer for fewer HQC in 6 of 6 comparisons, 17.4 % fewer pooled (R = 0.8262, bootstrap 95 % interval 0.8189 to 0.8335). In three pairs it is the PSEL4 pick and in three it is P2 of the earlier two-candidate selector PSEL. On cdkm_adder_10 the PSEL4 pick L3 returns the correct sum less often than P0 (0.8267 against 0.8692, z = -2.90) and still costs 8.0 % fewer HQC per correct sum (R = 0.9203). Accuracy-bound users need a fidelity-aware choice, which is the finals goal (`value/hqc_per_correct.md`, `results/h22e_multi.md`).
 - Mechanism. Level 3 wins mainly through two-qubit resynthesis by GreedyPauliSimp. ZX phase teleportation adds little on top of level 3 (`value/mechanism_zx_l3.md`).
-- Cost is not fidelity on the H2-2E emulator. On cdkm_adder_10 the PSEL4 pick L3 returns the correct sum less often than P0, 0.8267 against 0.8692 with z = -2.90 (`results/h22e_multi.md`).
+- Value. At the Azure plan averages of USD 10.29 to 12.50 per HQC the saving of 9,256.6 HQC against level 2 is worth USD 95,289 to 115,707. A team that spends the Standard Plan's 10,000 HQC a month on this mix (an assumption) frees 1573.3 HQC a month, worth USD 19,666 at the Standard average (`value/usd_psel4.md`).
 
 The main submission report is `report/report_short.md` (`submission/report.pdf`). The full report `report/report_v5.md` is its technical appendix (`submission/report_full.pdf`). The executable companion is `report/notebook_skeleton.py`.
 
@@ -16,7 +17,7 @@ A secondary component is a per-instance certified T-count floor for the 24 circu
 pip install -r requirements.txt                                   # Python 3.13, pinned versions
 python3 pipelines/pass_select.py --psel4 bench/family_B1/vbe_adder_3.qasm  # PSEL4 on one circuit: P0, P2, L3, P2L3 and the pick with HQC
 python3 pipelines/pass_select.py bench/family_B1/vbe_adder_3.qasm          # the earlier two-candidate selector PSEL (P0, P2)
-bash run_tests.sh                                                 # all 33 test files (8 scripts, 25 pytest), about 5 to 7 min, logs in submission/build_logs/
+bash run_tests.sh                                                 # all 35 test files (8 scripts, 27 pytest), about 5 to 7 min, logs in submission/build_logs/
 marimo edit report/notebook_skeleton.py                           # notebook: tables, figures, live compilation
 python3 submit/evidence_index.py                                  # rebuilds results/EVIDENCE.md from the stored job payloads
 ```
@@ -97,7 +98,7 @@ Status on 10 October 2026:
 - PSEL4 policy comparison done. `python3 value/policy_compare.py` writes `value/policy_compare.md`. Over 217 circuits PSEL4 needs 15.7 % less HQC than always using level 2 and costs more than level 2 on 0 circuits. Always using level 3 saves 13.9 % and costs more than level 2 on 45 circuits. Report Section 3.8.4.
 - Level 3 equivalence on family C done. `python3 pipelines/equiv_L3_C.py` writes `results/family_C_equivalence_L3.md`. The PyZX miter proves the level 3 output equal to its input on 18 of 20 circuits. Report Section 3.8.3.
 - Mechanism done. `python3 value/mechanism_zx_l3.py report` writes `value/mechanism_zx_l3.md`. Level 3 wins mainly through two-qubit resynthesis by GreedyPauliSimp. Six circuits are missing because their level 3 or P2L3 compile did not fit the CPU budget. Report Section 3.8.5.
-- Tests done. All 33 test files (8 as scripts, 25 under pytest) returned rc=0 in the run of 10 October (`submission/build_logs/tests_summary.txt`).
+- Tests. `run_tests.sh` lists 35 test files (8 as scripts, 27 under pytest). The logged run of 10 October covered 33 of them and all returned rc=0 (`submission/build_logs/tests_summary.txt`). `value/test_hqc_per_correct.py` and `value/test_usd_psel4.py` were added after that run.
 - Independent verification. 24 reports `results/verification_2026-10-*.md`, 7 to 10 October.
 - The submission cell of `report/notebook_skeleton.py` was executed once on the free H2-2SC syntax checker (job `AFByb3ZpZGVySm9iAaEdzTywfrOWhGbnlXxd-w`, export `report/notebook_executed.html`). It refuses any platform whose name does not end in SC. The emulator jobs were submitted by the `submit/` scripts.
 
@@ -108,7 +109,7 @@ python value/value_ledger.py
 python value/value_by_application.py
 ```
 
-Tests. `bash run_tests.sh` runs all 33 test files: eight as scripts and twenty-five under pytest, with the Selene tests run with the proxy variables cleared (see the proxy note below). One log per file and `tests_summary.txt` go to `submission/build_logs/` or to `$TEST_LOG_DIR`. The list of files and the results of the last run are in `submission/REPRODUCE.md`.
+Tests. `bash run_tests.sh` runs all 35 test files: eight as scripts and twenty-seven under pytest, with the Selene tests run with the proxy variables cleared (see the proxy note below). One log per file and `tests_summary.txt` go to `submission/build_logs/` or to `$TEST_LOG_DIR`. The list of files and the results of the last run are in `submission/REPRODUCE.md`.
 
 ## Notebook
 
