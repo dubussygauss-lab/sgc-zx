@@ -19,7 +19,7 @@ The baseline is pytket-quantinuum at optimisation level 3. On the 20 family C ci
 <small>Figure 1. Family C per circuit, two-candidate PSEL against level 2. A zero bar means PSEL keeps level 2. Data `value/family_C_selector.csv`, script `value/fig_hqc_saved.py`.</small>
 
 - **Against level 3, proven outputs.** PSEL4 saves 0.80 % on the 17 family C circuits whose output is proven.
-- **Against level 3, all of family C.** PSEL4 saves 3.50 % on all 20 circuits. 87.6 % of that saving comes from 3 picks whose output is not proven.
+- **Against level 3, all of family C.** PSEL4 saves 3.50 % on all 20 circuits. 87.6 % of that saving comes from 2 unproven picks, hrs_mult_5 and draper_adder_28.
 - **Against level 3, other families.** PSEL4 saves 0.73 % on 15 Clifford+T benchmarks (family B1) and 0.44 % on the Grover use case. On 180 Trotter circuits (family A) it saves 1.74 % by choosing between the two levels only.
 - **Guard.** The same per-circuit choice removes the blind ZX losses of 6.27 % and 22.1 % stated above.
 - **Emulator.** 20 H2-2E jobs and 3 H2-Emulator jobs ran, with job IDs in `EVIDENCE.md`.
