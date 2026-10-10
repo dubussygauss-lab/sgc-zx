@@ -76,7 +76,7 @@ git -C third_party/pyzx-fork checkout e695d6d711e67b2b7223417c4714b6b1fcc09191
 
 ## Tests (logs in `build_logs/`)
 
-Rerun all twenty-eight with `bash run_tests.sh` (repository root, also inside an unzipped `code.zip`). Eight run as scripts and twenty under pytest. The results below are from the runs of 9 October 2026. Wall times vary between runs; those of the latest run are in `build_logs/tests_summary.txt`.
+Rerun all thirty-three with `bash run_tests.sh` (repository root, also inside an unzipped `code.zip`). Eight run as scripts and twenty-five under pytest. The results below are from the runs of 9 and 10 October 2026. Wall times vary between runs; those of the latest run are in `build_logs/tests_summary.txt`.
 
 | File | Command | Result | Wall |
 |---|---|---|---|
@@ -108,6 +108,11 @@ Rerun all twenty-eight with `bash run_tests.sh` (repository root, also inside an
 | `pipelines/test_equiv_psel4_C.py` | `python -m pytest pipelines/test_equiv_psel4_C.py -q` | 3 passed | see `build_logs/tests_summary.txt` |
 | `value/test_zx_classifier.py` | `python -m pytest value/test_zx_classifier.py -q` | 5 passed | see `build_logs/tests_summary.txt` |
 | `submit/test_h22e_famC_nz.py` | `python -m pytest submit/test_h22e_famC_nz.py -q` | 6 passed | see `build_logs/tests_summary.txt` |
+| `pipelines/test_equiv_L3_C.py` | `python -m pytest pipelines/test_equiv_L3_C.py -q` | 4 passed | see `build_logs/tests_summary.txt` |
+| `value/test_policy_compare.py` | `python -m pytest value/test_policy_compare.py -q` | 6 passed | see `build_logs/tests_summary.txt` |
+| `value/test_mechanism_zx_l3.py` | `python -m pytest value/test_mechanism_zx_l3.py -q` | 7 passed | see `build_logs/tests_summary.txt` |
+| `submit/test_h22e_multi.py` | `python -m pytest submit/test_h22e_multi.py -q` | 9 passed | see `build_logs/tests_summary.txt` |
+| `submit/test_h22e_multi_depth.py` | `python -m pytest submit/test_h22e_multi_depth.py -q` | 2 passed | see `build_logs/tests_summary.txt` |
 
 ## Rebuilding this package
 

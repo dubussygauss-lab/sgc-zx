@@ -2,7 +2,7 @@
 # Runs every test file once from the repository root and writes one log per file
 # plus a summary to submission/build_logs/ (or $TEST_LOG_DIR). Rerunnable from the repository root or from an unzipped code.zip.
 cd "$(dirname "$0")"
-# 28 test files: 8 run as scripts, 20 under pytest. See REPRODUCE.md (Tests).
+# 33 test files: 8 run as scripts, 25 under pytest. See REPRODUCE.md (Tests).
 LOG="${TEST_LOG_DIR:-submission/build_logs}"
 mkdir -p "$LOG"
 : > "$LOG/tests_summary.txt"
@@ -42,4 +42,9 @@ run psel4         python pipelines/test_psel4.py
 run equiv_psel4_C python -m pytest pipelines/test_equiv_psel4_C.py -q
 run zx_classifier python -m pytest value/test_zx_classifier.py -q
 run h22e_famC_nz python -m pytest submit/test_h22e_famC_nz.py -q
+run equiv_L3_C   python -m pytest pipelines/test_equiv_L3_C.py -q
+run policy_compare python -m pytest value/test_policy_compare.py -q
+run mechanism_zx_l3 python -m pytest value/test_mechanism_zx_l3.py -q
+run h22e_multi   python -m pytest submit/test_h22e_multi.py -q
+run h22e_multi_depth python -m pytest submit/test_h22e_multi_depth.py -q
 echo done >> "$LOG/tests_summary.txt"
