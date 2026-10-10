@@ -1,0 +1,80 @@
+{
+ "F_H": 0.8725000000000002,
+ "TVD": 0.1275,
+ "cost_fields": {
+  "duration": 3
+ },
+ "counts": {
+  "0001011": 1,
+  "0010101": 1,
+  "0011111": 1,
+  "0100111": 1,
+  "0101001": 1,
+  "0101011": 1,
+  "0101101": 1,
+  "0110011": 1,
+  "0111001": 1,
+  "0111011": 2,
+  "0111111": 1,
+  "1000001": 1,
+  "1000111": 1,
+  "1001000": 1,
+  "1001001": 2,
+  "1001010": 3,
+  "1001011": 349,
+  "1001101": 1,
+  "1001111": 2,
+  "1010001": 1,
+  "1011011": 3,
+  "1011100": 1,
+  "1011110": 1,
+  "1011111": 2,
+  "1100101": 1,
+  "1101011": 2,
+  "1101100": 1,
+  "1110010": 1,
+  "1110011": 1,
+  "1110111": 2,
+  "1111010": 2,
+  "1111011": 1,
+  "1111100": 3,
+  "1111101": 4,
+  "1111110": 1,
+  "1111111": 1
+ },
+ "family": "B1",
+ "fetched_by_id": true,
+ "file": "hwb6_i1.qasm",
+ "hqc_estimate": 86.28,
+ "index": 0,
+ "job": {
+  "attributes": {
+   "client": "<aqora.Client object at 0x7fae8d154170>",
+   "job_id": "AFByb3ZpZGVySm9iAaEloCE_duGK0TiKLUKBdA",
+   "serialization_format": null
+  },
+  "payload": {
+   "__typename": "ProviderJob",
+   "createdAt": "2026-10-10T11:43:33.695917+00:00",
+   "duration": 3,
+   "error": null,
+   "id": "AFByb3ZpZGVySm9iAaEloCE_duGK0TiKLUKBdA",
+   "platform": {
+    "id": "AFByb3ZpZGVyUGxhdGZvcm0BoEjlejN5IpHinxZkQMVy",
+    "name": "H2-2E",
+    "provider": "NEXUS"
+   },
+   "provider": "nexus",
+   "resultCount": 1,
+   "status": "COMPLETED"
+  }
+ },
+ "job_id": "AFByb3ZpZGVySm9iAaEloCE_duGK0TiKLUKBdA",
+ "options": {
+  "noisy_simulation": true
+ },
+ "pipeline": "P2L3",
+ "platform": "nexus:H2-2E",
+ "shots": 400,
+ "t_wait": 1.1363464979999662
+}

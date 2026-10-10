@@ -1,0 +1,58 @@
+{
+ "F_H": 0.9524999999999999,
+ "TVD": 0.0475,
+ "cost_fields": {
+  "duration": 35
+ },
+ "counts": {
+  "0010000001": 1,
+  "0010000010": 1,
+  "0010000100": 2,
+  "0010000101": 381,
+  "0010001110": 1,
+  "0010010101": 1,
+  "0010011101": 1,
+  "0010100101": 2,
+  "0010101101": 1,
+  "0010110101": 1,
+  "0011000101": 2,
+  "0100000101": 3,
+  "0110000101": 1,
+  "1010000101": 2
+ },
+ "family": "B1",
+ "fetched_by_id": true,
+ "file": "vbe_adder_3_i1.qasm",
+ "hqc_estimate": 63.88,
+ "index": 0,
+ "job": {
+  "attributes": {
+   "client": "<aqora.Client object at 0x7fae88db3af0>",
+   "job_id": "AFByb3ZpZGVySm9iAaEloA67eYOKd0KQg6fUBw",
+   "serialization_format": null
+  },
+  "payload": {
+   "__typename": "ProviderJob",
+   "createdAt": "2026-10-10T11:43:28.955961+00:00",
+   "duration": 35,
+   "error": null,
+   "id": "AFByb3ZpZGVySm9iAaEloA67eYOKd0KQg6fUBw",
+   "platform": {
+    "id": "AFByb3ZpZGVyUGxhdGZvcm0BoEjlejN5IpHinxZkQMVy",
+    "name": "H2-2E",
+    "provider": "NEXUS"
+   },
+   "provider": "nexus",
+   "resultCount": 1,
+   "status": "COMPLETED"
+  }
+ },
+ "job_id": "AFByb3ZpZGVySm9iAaEloA67eYOKd0KQg6fUBw",
+ "options": {
+  "noisy_simulation": true
+ },
+ "pipeline": "P0",
+ "platform": "nexus:H2-2E",
+ "shots": 400,
+ "t_wait": 338.83479394200003
+}

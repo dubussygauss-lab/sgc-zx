@@ -1,28 +1,32 @@
 # HQC per correct output on the H2-2E emulator
 
-`[F]` Source: every H2-2E payload under `results/emulator/nexus_H2-2E*/` (34 payloads, 26 used). Script: `value/hqc_per_correct.py`. HQC is the formula estimate `hqc_estimate` stored with each job, not a billed amount. All runs are on the H2-2E emulator, not hardware.
+`[F]` Source: every H2-2E payload under `results/emulator/nexus_H2-2E*/` (48 payloads, 40 used). Script: `value/hqc_per_correct.py`. HQC is the formula estimate `hqc_estimate` stored with each job, not a billed amount. All runs are on the H2-2E emulator, not hardware.
 
 `[F]` Success probability p = count of the ideal bitstring / shots. The ideal bitstring comes from the repository code (`common.reference_probs`, `h22e_famC_nz.expected_bits`, `h22e_multi_run.expected_bits`). On every used payload p equals the stored F_H (max |p - F_H| = 9.0e-15).
 
 `[F]` Pooled per circuit and pipeline over repeats or inputs. Cost per correct output C = sum HQC / sum correct. R = C_alt / C_P0. The interval is the delta method on log R. The bootstrap column is a parametric bootstrap (10,000 resamples, seed 20261010). z is the pooled two-proportion statistic of p_alt - p_P0.
 
-| Circuit | Runs | Alt | Shots per arm | p_P0 | p_alt | z | HQC per 1000 correct, P0 | HQC per 1000 correct, alt | R | 95 % interval (delta) | 95 % interval (bootstrap) |
-|---|---|---|---:|---:|---:|---:|---:|---:|---:|---|---|
-| vbe_adder_3 | H2-2E+H2-2E_r2+H2-2E_r3+H2-2E_r4 | P2 | 4000 | 0.9520 | 0.9627 | +2.38 | 159.2 | 123.6 | 0.7762 | [0.7690, 0.7834] | [0.7689, 0.7835] |
-| hwb6 | H2-2E | P2 | 1000 | 0.9240 | 0.9090 | -1.21 | 263.0 | 255.9 | 0.9730 | [0.9476, 0.9991] | [0.9488, 0.9992] |
-| vbe_adder_7 | H2-2E_famC | P2 | 1000 | 0.8860 | 0.8970 | +0.79 | 418.1 | 328.2 | 0.7851 | [0.7614, 0.8095] | [0.7612, 0.8093] |
-| vbe_adder_7_nz | H2-2E_famC_nz | L3 | 1000 | 0.8830 | 0.9010 | +1.30 | 421.5 | 257.7 | 0.6114 | [0.5930, 0.6303] | [0.5930, 0.6302] |
-| cdkm_adder_10 | H2-2E_famC_multi | L3 | 1200 | 0.8692 | 0.8267 | -2.90 | 437.5 | 402.6 | 0.9203 | [0.8896, 0.9521] | [0.8892, 0.9522] |
-| modadd_2n_10 | H2-2E_famC_multi | P2L3 | 1200 | 0.8417 | 0.8383 | -0.22 | 470.1 | 447.8 | 0.9526 | [0.9199, 0.9864] | [0.9199, 0.9857] |
+| Circuit | Runs | Alt | PSEL4 pick | Shots per arm | p_P0 | p_alt | z | HQC per 1000 correct, P0 | HQC per 1000 correct, alt | R | 95 % interval (delta) | 95 % interval (bootstrap) |
+|---|---|---|---|---:|---:|---:|---:|---:|---:|---:|---|---|
+| vbe_adder_3 | H2-2E+H2-2E_r2+H2-2E_r3+H2-2E_r4 | P2 | no | 4000 | 0.9520 | 0.9627 | +2.38 | 159.2 | 123.6 | 0.7762 | [0.7690, 0.7834] | [0.7689, 0.7835] |
+| hwb6 | H2-2E | P2 | no | 1000 | 0.9240 | 0.9090 | -1.21 | 263.0 | 255.9 | 0.9730 | [0.9476, 0.9991] | [0.9488, 0.9992] |
+| vbe_adder_7 | H2-2E_famC | P2 | no | 1000 | 0.8860 | 0.8970 | +0.79 | 418.1 | 328.2 | 0.7851 | [0.7614, 0.8095] | [0.7612, 0.8093] |
+| vbe_adder_7_nz | H2-2E_famC_nz | L3 | yes | 1000 | 0.8830 | 0.9010 | +1.30 | 421.5 | 257.7 | 0.6114 | [0.5930, 0.6303] | [0.5930, 0.6302] |
+| cdkm_adder_10 | H2-2E_famC_multi | L3 | yes | 1200 | 0.8692 | 0.8267 | -2.90 | 437.5 | 402.6 | 0.9203 | [0.8896, 0.9521] | [0.8892, 0.9522] |
+| modadd_2n_10 | H2-2E_famC_multi | P2L3 | yes | 1200 | 0.8417 | 0.8383 | -0.22 | 470.1 | 447.8 | 0.9526 | [0.9199, 0.9864] | [0.9199, 0.9857] |
+| vbe_adder_3 | H2-2E_famB1_multi | L3 | yes | 1600 | 0.9531 | 0.9569 | +0.51 | 167.8 | 112.7 | 0.6713 | [0.6613, 0.6815] | [0.6612, 0.6815] |
+| hwb6 | H2-2E_famB1_multi | P2L3 | yes | 1200 | 0.9200 | 0.8883 | -2.64 | 272.6 | 242.9 | 0.8909 | [0.8679, 0.9144] | [0.8674, 0.9144] |
 
 ## Headline
 
-- `[F]` The alternative costs fewer HQC per correct output than P0 (R < 1) in 6 of 6 pairs.
-- `[F]` The upper 95 % bound of R is below 1 in 6 of 6 pairs by the delta method and in 6 of 6 by the bootstrap.
+- `[F]` The alternative costs fewer HQC per correct output than P0 (R < 1) in 8 of 8 pairs.
+- `[F]` The upper 95 % bound of R is below 1 in 8 of 8 pairs by the delta method and in 8 of 8 by the bootstrap.
+- `[F]` Restricted to the 5 pairs whose alternative is the PSEL4 pick: R < 1 in 5, upper 95 % bound below 1 in 5 (delta) and 5 (bootstrap).
 - `[F]` cdkm_adder_10 (L3, three inputs pooled): R = 0.9203, delta interval [0.8896, 0.9521].
 - `[F]` In percent: cdkm_adder_10 needs 8.0 % fewer HQC per correct output than P0 (95 % interval 4.8 to 11.0 %).
-- `[F]` Pooled over the 6 pairs: R = (2085.12 / 8556) / (2523.12 / 8554) = 0.8262, bootstrap interval [0.8189, 0.8335].
-- `[F]` In percent: pooled over the 6 pairs the alternative needs 17.4 % fewer HQC per correct output (bootstrap 95 % interval 16.7 to 18.1 %).
-- `[F]` Decomposition of the pooled R: HQC ratio alt / P0 = 2085.12 / 2523.12 = 0.8264, divided by the accuracy ratio p_alt / p_P0 = (8556 / 9400) / (8554 / 9400) = 1.0002. The per-answer gain is the HQC saving with no average loss of accuracy over the pairs.
+- `[F]` Pooled over the 8 pairs: R = (2516.52 / 11153) / (3080.04 / 11183) = 0.8192, bootstrap interval [0.8132, 0.8254].
+- `[F]` In percent: pooled over the 8 pairs the alternative needs 18.1 % fewer HQC per correct output (bootstrap 95 % interval 17.5 to 18.7 %).
+- `[F]` Decomposition of the pooled R: HQC ratio alt / P0 = 2516.52 / 3080.04 = 0.8170, divided by the accuracy ratio p_alt / p_P0 = (11153 / 12200) / (11183 / 12200) = 0.9973. The per-answer gain is the HQC saving divided by the pooled accuracy ratio; hwb6 (P2L3, famB1_multi) has a significant accuracy loss, see results/h22e_b1.md.
 - `[F]` grover_5 is excluded. Its ideal distribution (`common.reference_probs`) has 64 outcomes with largest probability 0.015625, so it has no unique marked item. Its HQC ratio alt / P0 over 4 runs is 0.9339.
-- `[O]` Pooling the three inputs of cdkm_adder_10 and modadd_2n_10 treats them as one binomial. The intervals ignore variation between inputs and between emulator runs.
+- `[O]` Pooling the inputs of cdkm_adder_10, modadd_2n_10, vbe_adder_3 (famB1_multi) and hwb6 (famB1_multi) treats them as one binomial. The intervals ignore variation between inputs and between emulator runs.
+- `[F]` vbe_adder_3 and hwb6 appear twice: the zero-input P0 vs P2 runs of 2026-10-08 (1000 shots) and the non-zero-input P0 vs PSEL4-pick run `nexus_H2-2E_famB1_multi` (400 shots per input, pre-registered in `results/h22e_b1_prereg.md`).
