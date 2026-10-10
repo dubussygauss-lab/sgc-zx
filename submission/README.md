@@ -7,7 +7,7 @@ Team Learned ZX Rewriting, Quantinuum Singapore Grand Challenge. A resource-cert
 ```
 pip install -r requirements.txt                                   # Python 3.13, pinned versions
 python3 pipelines/pass_select.py bench/family_B1/vbe_adder_3.qasm # PSEL on one circuit: P0, P2 and the pick with HQC
-bash run_tests.sh                                                 # all 28 test files, about 5 to 7 min, logs in submission/build_logs/
+bash run_tests.sh                                                 # all 33 test files, about 5 to 7 min, logs in submission/build_logs/
 marimo edit report/notebook_skeleton.py                           # notebook: tables, figures, live compilation
 python3 submit/evidence_index.py                                  # rebuilds results/EVIDENCE.md from the stored job payloads
 ```
@@ -79,12 +79,15 @@ python report/make_tables.py
 
 Table A1 to A3 and the family A figure come from `results/family_A_counts.csv`. Table A4 comes from `results/family_A_proxy_h22e.csv`. Table B1 and its figure come from `results/family_B1_counts.csv`. Table B2 and its figure come from `results/family_B2_counts.csv`.
 
-Status on 9 October 2026:
+Status on 10 October 2026:
 
 - Certificates done. `python barrier/run_certificates.py` writes `results/certificates.csv` with 24 rows (20 family B2 circuits at n = 2 and 3, four family B1 circuits at n = 5). Report Table C1.
 - Selene done. 468 noiseless and 468 full depolarising runs plus a 68-run comparison. Report Tables S1 and S2 and `results/selene.md`.
 - H2-Emulator done. Three jobs with 22 circuit rows. Report Table E1, `results/emulator_nexus_H2-Emulator.csv`.
-- H2-2E done. 22 jobs with an HQC estimate of 7202.4 in total. The two jobs of 10 October ran vbe_adder_7 on the non-zero input a = 28, b = 111 under P0 and L3 (`results/h22e_famC_nz.md`, Table E5). The two jobs of 9 October ran the 22-qubit family C adder vbe_adder_7 (`results/h22e_famC.md`, Table E4, `submit/h22e_famC.py`). The first 18 jobs total 5933.2. Six single runs are in Report Table E2 and `results/emulator_nexus_H2-2E.csv`. Three repeat runs of vbe_adder_3 and grover_5 under P0 and P2 are in `results/emulator_nexus_H2-2E_r2.csv` to `_r4.csv`, pooled by `submit/h22e_pooled.py` into Table E3. Repeat runs set `EMU_RUN_TAG` so they do not overwrite the first run.
+- H2-2E done. 34 jobs with an HQC estimate of 8983.4 in total, which leaves 1016.6 of the 10,000 HQC quota. The twelve pre-registered jobs of 10 October ran cdkm_adder_10 (P0 against L3) and modadd_2n_10 (P0 against P2L3) on three non-zero inputs each (`results/h22e_multi_prereg.md`, `results/h22e_multi.md`, Table E6, `submit/h22e_multi_run.py` submits and `submit/h22e_multi.py` scores). On cdkm_adder_10 the PSEL4 pick L3 succeeds less often than P0, 0.8267 against 0.8692 pooled with z = -2.90. On modadd_2n_10 the difference has z = -0.22. Two earlier jobs of 10 October ran vbe_adder_7 on the non-zero input a = 28, b = 111 under P0 and L3 (`results/h22e_famC_nz.md`, Table E5). The two jobs of 9 October ran the 22-qubit family C adder vbe_adder_7 (`results/h22e_famC.md`, Table E4, `submit/h22e_famC.py`). The first 18 jobs total 5933.2. Six single runs are in Report Table E2 and `results/emulator_nexus_H2-2E.csv`. Three repeat runs of vbe_adder_3 and grover_5 under P0 and P2 are in `results/emulator_nexus_H2-2E_r2.csv` to `_r4.csv`, pooled by `submit/h22e_pooled.py` into Table E3. Repeat runs set `EMU_RUN_TAG` so they do not overwrite the first run.
+- PSEL4 policy comparison done. `python3 value/policy_compare.py` writes `value/policy_compare.md`. Over 217 circuits PSEL4 needs 15.7 % less HQC than always using level 2 and costs more than level 2 on 0 circuits. Always using level 3 saves 13.9 % and costs more than level 2 on 45 circuits. Report Section 3.8.4.
+- Level 3 equivalence on family C done. `python3 pipelines/equiv_L3_C.py` writes `results/family_C_equivalence_L3.md`. The PyZX miter proves the level 3 output equal to its input on 18 of 20 circuits. Report Section 3.8.3.
+- Mechanism done. `python3 value/mechanism_zx_l3.py report` writes `value/mechanism_zx_l3.md`. Level 3 wins mainly through two-qubit resynthesis by GreedyPauliSimp. Six circuits are missing because their level 3 or P2L3 compile did not fit the CPU budget. Report Section 3.8.5.
 - The submission cell of `report/notebook_skeleton.py` was executed once on the free H2-2SC syntax checker (job `AFByb3ZpZGVySm9iAaEdzTywfrOWhGbnlXxd-w`, export `report/notebook_executed.html`). It refuses any platform whose name does not end in SC. The emulator jobs were submitted by the `submit/` scripts.
 
 Value ledger, run after the compilation steps:
@@ -94,7 +97,7 @@ python value/value_ledger.py
 python value/value_by_application.py
 ```
 
-Tests. `bash run_tests.sh` runs all 28 test files: eight as scripts and twenty under pytest, with the Selene tests run with the proxy variables cleared (see the proxy note below). One log per file and `tests_summary.txt` go to `submission/build_logs/` or to `$TEST_LOG_DIR`. The list of files and the results of the last run are in `submission/REPRODUCE.md`.
+Tests. `bash run_tests.sh` runs all 33 test files: eight as scripts and twenty-five under pytest, with the Selene tests run with the proxy variables cleared (see the proxy note below). One log per file and `tests_summary.txt` go to `submission/build_logs/` or to `$TEST_LOG_DIR`. The list of files and the results of the last run are in `submission/REPRODUCE.md`.
 
 ## Notebook
 
