@@ -26,9 +26,11 @@ def _(mo):
     This notebook is the executable companion of `report/report_v5.md`. It
 
     1. loads the result tables from `results/*.csv` and shows them with the figures,
-    2. compiles one chosen circuit live through the baseline P0 (pytket level 2)
-       and through P2 (PyZX `teleport_reduce` followed by P0),
-    3. compiles `tof_3` (family B1) with the pass selector and submits it to the
+    2. compiles one chosen circuit live with the four-candidate pass selector
+       PSEL4 (`pipelines/pass_select.py`, candidates P0, L3, P2 and P2L3, lowest
+       HQC estimate kept) and compares each candidate with
+       `value/psel4_ledger.csv`,
+    3. compiles `tof_3` (family B1) with PSEL4 and submits the pick to the
        free H2-2SC syntax checker through `aqora.QPU`, behind a gate that is
        closed by default.
 
@@ -76,8 +78,8 @@ def _(mo):
     - `[F]` The submission cell of Section 3 submits only to the free H2-2SC
       syntax checker and refuses any platform whose name does not end in `SC`.
       `report/notebook_executed.html` is an export of this notebook with that
-      gate open. That export was executed on 9 October 2026 at 01:15 CEST and
-      predates the text change of this cell to tables E1 to E3 and Section 6.
+      gate open. It was executed on 10 October 2026 with PSEL4 in Sections 2
+      and 3.
     - `[F]` Tables E1 and E2 below are read from the emulator CSVs. Nothing is
       submitted to show them.
 
@@ -422,10 +424,17 @@ def _(mo):
     mo.md(r"""
     ## 2. Live compilation of one circuit
 
-    Pick a circuit from family A or B1. The cell below compiles it through P0
-    (pytket-quantinuum level 2, reproduced in `pipelines/compile.py`) and through
-    P2 (PyZX `teleport_reduce`, then P0), checks both against the rebased input,
-    and reports the metrics.
+    Pick a circuit from family A or B1. The cell below compiles it with PSEL4,
+    `pass_select.compile_select(..., candidates=pass_select.PSEL4_CANDIDATES)`.
+    The four candidates are P0 (pytket-quantinuum level 2, reproduced in
+    `pipelines/compile.py`), L3 (pytket-quantinuum level 3), P2 (PyZX
+    `teleport_reduce`, then P0) and P2L3 (PyZX `teleport_reduce`, then L3).
+    Each candidate is checked against the input circuit by `compile.check`. A
+    candidate that fails the check or leaves the native gate set is dropped.
+    PSEL4 keeps the surviving candidate with the lowest HQC estimate at 1000
+    shots, then the lowest ZZ count, then the order P0, L3, P2, P2L3. The rows
+    are listed in that tie order. The ledger columns are read from
+    `value/psel4_ledger.csv` for the same file.
     """)
     return
 
@@ -444,30 +453,77 @@ def _(ROOT, mo, os):
     return (circuit_choice,)
 
 
-@app.cell
-def _(ROOT, circuit_choice, mo, os, pd):
-    import compile as C  # pipelines/compile.py
+@app.function
+def psel4_demo(root, family_dir, file, shots=1000):
+    """Compile bench/<family_dir>/<file> with PSEL4
+    (pass_select.compile_select with candidates PSEL4_CANDIDATES) and compare
+    each candidate with the row of value/psel4_ledger.csv for the same family
+    and file. Returns (compiled circuit of the pick or None, record, table,
+    ledger row as a dict or None). The table has one row per candidate in the
+    tie order P0, L3, P2, P2L3."""
+    import os
+    import sys
+
+    import pandas as pd
+
+    _pip = os.path.join(root, "pipelines")
+    if _pip not in sys.path:
+        sys.path.insert(0, _pip)
+    import pass_select  # pipelines/pass_select.py
     from pytket.qasm import circuit_from_qasm
 
-    mo.stop(circuit_choice.value is None, mo.md("No benchmark circuits found under `bench/`."))
-    _path = os.path.join(ROOT, "bench", circuit_choice.value)
-    input_circuit = circuit_from_qasm(_path)
-    ref_circuit, _ = C.compile_pipeline("P0ref", input_circuit)
+    circ = circuit_from_qasm(os.path.join(root, "bench", family_dir, file))
+    comp, record = pass_select.compile_select(
+        circ, shots=shots, candidates=pass_select.PSEL4_CANDIDATES)
 
-    compiled = {}
-    _rows = []
-    for _pl in ["P0", "P2"]:
-        _c, _times = C.compile_pipeline(_pl, input_circuit)
-        _m = C.metrics(_c, n_measure=_c.n_qubits)
-        _ck = C.check(_c, ref_circuit)
-        compiled[_pl] = _c
-        _rows.append({"pipeline": _pl, **{k: _m[k] for k in ["n_qubits", "n_2q", "depth_2q", "n_phasedx", "n_rz", "hqc"]},
-                      "check_kind": _ck["check_kind"], "check_dev": _ck["check_dev"],
-                      "check_ok": _ck["check_ok"], "t_total_s": round(_times["t_total"], 3)})
-    live_table = pd.DataFrame(_rows)
-    mo.vstack([mo.md(f"Live compilation of `{circuit_choice.value}`"),
-               mo.ui.table(live_table, selection=None)])
-    return C, compiled, input_circuit, live_table, ref_circuit
+    ledger_row = None
+    _lp = os.path.join(root, "value", "psel4_ledger.csv")
+    if os.path.exists(_lp):
+        _led = pd.read_csv(_lp)
+        _m = _led[(_led["family"] == family_dir.replace("family_", "")) & (_led["file"] == file)]
+        if len(_m) == 1:
+            ledger_row = _m.iloc[0].to_dict()
+
+    rows = []
+    for name in sorted(pass_select.PSEL4_CANDIDATES, key=pass_select.TIE_ORDER.get):
+        r = record["candidates"][name]
+        row = {"candidate": name,
+               "hqc": round(r["hqc"], 1),
+               "n_2q": r["n_2q"],
+               "check_status": r["status"],
+               "check_dev": r["check_dev"],
+               "PSEL4_pick": name == record["chosen"]}
+        if ledger_row is not None:
+            row["ledger_hqc"] = float(ledger_row[f"hqc_{name}"])
+            row["hqc_matches_ledger"] = abs(row["hqc"] - row["ledger_hqc"]) < 0.05
+            row["ledger_pick"] = name == ledger_row["pick_PSEL4"]
+        if r["error"]:
+            row["error"] = r["error"]
+        rows.append(row)
+    return comp, record, pd.DataFrame(rows), ledger_row
+
+
+@app.cell
+def _(ROOT, circuit_choice, mo):
+    import compile as C  # pipelines/compile.py
+
+    mo.stop(circuit_choice.value is None, mo.md("No benchmark circuits found under `bench/`."))
+    _fam, _file = circuit_choice.value.split("/")
+    _comp, live_record, live_table, _led = psel4_demo(ROOT, _fam, _file, shots=1000)
+    _chosen = live_record["chosen"]
+    _head = (f"Live PSEL4 compilation of `{circuit_choice.value}` at 1000 shots: "
+             f"pick **{_chosen}**")
+    if _chosen is not None:
+        _head += f", HQC {live_record['candidates'][_chosen]['hqc']:.1f}"
+    if _led is None:
+        _head += ". No row for this file in `value/psel4_ledger.csv`."
+    else:
+        _agree = (_led["pick_PSEL4"] == _chosen) and bool(live_table["hqc_matches_ledger"].all())
+        _head += (f". `value/psel4_ledger.csv`: pick **{_led['pick_PSEL4']}**, "
+                  f"HQC {float(_led['hqc_PSEL4']):.1f}. Live run and ledger agree on every "
+                  f"candidate HQC and on the pick: **{_agree}**.")
+    mo.vstack([mo.md(_head), mo.ui.table(live_table, selection=None)])
+    return C, live_record, live_table
 
 
 @app.function
@@ -552,9 +608,10 @@ def _(mo):
     mo.md(r"""
     ## 3. Submission to the free H2-2SC syntax checker
 
-    The cells below compile `bench/family_B1/tof_3.qasm` with the pass selector
-    `pipelines/pass_select.py` (candidates P0 and P2, lowest HQC estimate kept),
-    append measure-all and submit the measured circuit to `nexus:H2-2SC` as the
+    The cells below compile `bench/family_B1/tof_3.qasm` with PSEL4
+    (`pipelines/pass_select.py`, candidates P0, L3, P2 and P2L3, lowest HQC
+    estimate kept, ties in the order P0, L3, P2, P2L3), append measure-all
+    to the pick and submit the measured circuit to `nexus:H2-2SC` as the
     team organization (`AQORA_TEAM_ORG`), by the route of
     `submit/syntax_check.py`. The syntax checker costs no HQC
     (`docs/platform_notes.md` 3.4). `require_free_checker` refuses any platform
@@ -563,28 +620,29 @@ def _(mo):
 
     The gate is closed by default. It opens on the button, or when the notebook
     is run with the environment variable `SGC_NOTEBOOK_SUBMIT_SC=1`. The job is
-    appended to `results/emulator_jobs.csv` (pipeline `select:<chosen>`) and its
+    appended to `results/emulator_jobs.csv` (pipeline `psel4:<pick>`) and its
     raw dump is saved under `results/emulator/nexus_H2-2SC/notebook_select/`.
     """)
     return
 
 
 @app.cell
-def _(C, ROOT, mo, os, pd):
-    import pass_select  # pipelines/pass_select.py
-    from pytket.qasm import circuit_from_qasm as _from_qasm
-
+def _(C, ROOT, mo):
     SC_FAMILY, SC_FILE = "B1", "tof_3.qasm"
     sc_shots = 1000
-    _input = _from_qasm(os.path.join(ROOT, "bench", "family_B1", SC_FILE))
-    _comp, sc_record = pass_select.compile_select(_input, shots=sc_shots)
-    mo.stop(_comp is None, mo.callout(mo.md(f"The pass selector kept no candidate for `{SC_FILE}`."), kind="danger"))
+    _comp, sc_record, sc_table, _led = psel4_demo(ROOT, "family_B1", SC_FILE, shots=sc_shots)
+    mo.stop(_comp is None, mo.callout(mo.md(f"PSEL4 kept no candidate for `{SC_FILE}`."), kind="danger"))
     sc_circuit = C.add_measure_all(_comp)
-    _sel = pd.DataFrame([{"candidate": k, **v} for k, v in sc_record["candidates"].items()])
-    mo.vstack([mo.md(f"Pass selector on `bench/family_B1/{SC_FILE}` at {sc_shots} shots: "
-                     f"chosen **{sc_record['chosen']}**, {sc_circuit.n_qubits} qubits."),
-               mo.ui.table(_sel, selection=None)])
-    return SC_FAMILY, SC_FILE, sc_circuit, sc_record, sc_shots
+    _ledger = ("No row for this file in `value/psel4_ledger.csv`." if _led is None else
+               f"`value/psel4_ledger.csv`: pick **{_led['pick_PSEL4']}**, HQC "
+               f"{float(_led['hqc_PSEL4']):.1f}. Live run and ledger agree on every candidate "
+               f"HQC and on the pick: **{(_led['pick_PSEL4'] == sc_record['chosen']) and bool(sc_table['hqc_matches_ledger'].all())}**.")
+    mo.vstack([mo.md(f"PSEL4 on `bench/family_B1/{SC_FILE}` at {sc_shots} shots: "
+                     f"pick **{sc_record['chosen']}**, HQC "
+                     f"{sc_record['candidates'][sc_record['chosen']]['hqc']:.1f}, "
+                     f"{sc_circuit.n_qubits} qubits. {_ledger}"),
+               mo.ui.table(sc_table, selection=None)])
+    return SC_FAMILY, SC_FILE, sc_circuit, sc_record, sc_shots, sc_table
 
 
 @app.cell
@@ -608,7 +666,7 @@ def _(PLATFORM, ROOT, SC_FAMILY, SC_FILE, TEAM_ORG, mo, os, pd, sc_circuit, sc_r
     mo.stop(TEAM_ORG is None, mo.callout(mo.md("`AQORA_TEAM_ORG` is not set. Nothing was submitted."), kind="warn"))
 
     sc_job = submit_free_check(PLATFORM, sc_circuit, sc_shots, ROOT, SC_FAMILY, SC_FILE,
-                               "select:" + sc_record["chosen"])
+                               "psel4:" + sc_record["chosen"])
 
     # HQC estimate recomputed here from the gate counts of the submitted circuit.
     _n1 = sc_circuit.n_gates_of_type(_Op.PhasedX)
@@ -621,7 +679,7 @@ def _(PLATFORM, ROOT, SC_FAMILY, SC_FILE, TEAM_ORG, mo, os, pd, sc_circuit, sc_r
     _items = [mo.md(
         f"Job id **`{sc_job['job_id']}`** on `{PLATFORM}` (reported platform "
         f"`{sc_job.get('platform_reported')}`) as `{TEAM_ORG}`, status **{sc_job['status']}**, "
-        f"{sc_shots} shots, pipeline `{'select:' + sc_record['chosen']}`.\n\n"
+        f"{sc_shots} shots, pipeline `{'psel4:' + sc_record['chosen']}`.\n\n"
         f"HQC estimate from the formula 5 + (N_1q + 10 N_2q + 5 N_spam) C / 5000 with "
         f"N_1q = {_n1}, N_2q = {_n2}, N_spam = {_spam} (qubits {sc_circuit.n_qubits} + measures {_nm}), "
         f"C = {sc_shots}: **{_hqc:.2f}**. This is what H2-2E would charge by the formula. "

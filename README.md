@@ -44,7 +44,7 @@ Configuration. No configuration file is needed to compile or to rebuild tables. 
 | `value/value_by_application.py` | Regroups the ledger by application area from `docs/applications.md`. Writes `value/value_by_application.csv` and `value/value_by_application.md`, the sources of Section 1. |
 | `submit/syntax_check.py`, `submit/run_emulator.py`, `submit/fetch_job.py` | Platform jobs through `aqora`. Every job is recorded in `results/emulator_jobs.csv`. |
 | `submit/h22e_stats.py` | Recomputes the H2-2E statistics of Table E2 from the stored counts. |
-| `report/notebook_skeleton.py` | Marimo notebook: tables, figures, live compilation of one circuit through P0 and P2 (the earlier two-candidate selector PSEL), gated submission to the free syntax checker `nexus:H2-2SC` through `aqora.QPU`. |
+| `report/notebook_skeleton.py` | Marimo notebook: tables, figures, live compilation of one circuit with the four-candidate selector PSEL4 (P0, L3, P2, P2L3) checked against `value/psel4_ledger.csv`, gated submission to the free syntax checker `nexus:H2-2SC` through `aqora.QPU`. |
 | `report/tables/`, `report/figures/` | Outputs of `make_tables.py`. |
 | `results/` | All CSVs, logs and compiled QASM (hqslib1 header, measure-all appended). |
 | `docs/platform_notes.md` | aqora API, emulator tiers, H2-2E noise parameters, HQC formula, with sources. |
@@ -100,7 +100,7 @@ Status on 10 October 2026:
 - Mechanism done. `python3 value/mechanism_zx_l3.py report` writes `value/mechanism_zx_l3.md`. Level 3 wins mainly through two-qubit resynthesis by GreedyPauliSimp. Six circuits are missing because their level 3 or P2L3 compile did not fit the CPU budget. Report Section 3.8.5.
 - Tests. `run_tests.sh` lists 35 test files (8 as scripts, 27 under pytest). The logged run of 10 October covered 33 of them and all returned rc=0 (`submission/build_logs/tests_summary.txt`). `value/test_hqc_per_correct.py` and `value/test_usd_psel4.py` were added after that run.
 - Independent verification. 24 reports `results/verification_2026-10-*.md`, 7 to 10 October.
-- The submission cell of `report/notebook_skeleton.py` was executed once on the free H2-2SC syntax checker (job `AFByb3ZpZGVySm9iAaEdzTywfrOWhGbnlXxd-w`, export `report/notebook_executed.html`). It refuses any platform whose name does not end in SC. The emulator jobs were submitted by the `submit/` scripts.
+- The submission cell of `report/notebook_skeleton.py` was executed on the free H2-2SC syntax checker twice: on 9 October 2026 with the earlier two-candidate selector PSEL (job `AFByb3ZpZGVySm9iAaEdzTywfrOWhGbnlXxd-w`) and on 10 October 2026 with PSEL4 (pick L3 for tof_3, job `AFByb3ZpZGVySm9iAaElTNS7cyOY831oDA3xZg`, export `report/notebook_executed.html`). It refuses any platform whose name does not end in SC. The emulator jobs were submitted by the `submit/` scripts.
 
 Value ledger, run after the compilation steps:
 
@@ -118,7 +118,7 @@ marimo edit report/notebook_skeleton.py          # interactive
 marimo export html report/notebook_skeleton.py -o notebook.html   # runs every cell up to the submission gate
 ```
 
-Before submitting, set the environment variable `AQORA_TEAM_ORG` to the team's aqora organization username (read into `TEAM_ORG` in the setup cell). The submission cell is gated behind its **Submit to the H2-2SC syntax checker** button and sends nothing until it is pressed, or until the notebook is run with `SGC_NOTEBOOK_SUBMIT_SC=1`. It submits the pick of the earlier two-candidate selector PSEL for the chosen circuit to the free syntax checker `nexus:H2-2SC` only; any platform whose name does not end in `SC` raises an error. Emulator jobs on H2-2E and H2-Emulator were submitted with `submit/run_emulator.py` and are listed in `results/EVIDENCE.md`.
+Before submitting, set the environment variable `AQORA_TEAM_ORG` to the team's aqora organization username (read into `TEAM_ORG` in the setup cell). The submission cell is gated behind its **Submit to the H2-2SC syntax checker** button and sends nothing until it is pressed, or until the notebook is run with `SGC_NOTEBOOK_SUBMIT_SC=1`. It submits the pick of the four-candidate selector PSEL4 for tof_3 to the free syntax checker `nexus:H2-2SC` only; any platform whose name does not end in `SC` raises an error. Emulator jobs on H2-2E and H2-Emulator were submitted with `submit/run_emulator.py` and are listed in `results/EVIDENCE.md`.
 
 ## Environment
 
