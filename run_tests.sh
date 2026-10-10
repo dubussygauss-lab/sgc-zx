@@ -2,7 +2,7 @@
 # Runs every test file once from the repository root and writes one log per file
 # plus a summary to submission/build_logs/ (or $TEST_LOG_DIR). Rerunnable from the repository root or from an unzipped code.zip.
 cd "$(dirname "$0")"
-# 38 test files: 8 run as scripts, 30 under pytest. See REPRODUCE.md (Tests).
+# 39 test files: 8 run as scripts, 31 under pytest. See REPRODUCE.md (Tests).
 LOG="${TEST_LOG_DIR:-submission/build_logs}"
 mkdir -p "$LOG"
 : > "$LOG/tests_summary.txt"
@@ -52,4 +52,5 @@ run hqc_per_correct python -m pytest value/test_hqc_per_correct.py -q
 run usd_psel4    python -m pytest value/test_usd_psel4.py -q
 run psel4_conservative python -m pytest value/test_psel4_conservative.py -q
 run psel4_basis_check python -m pytest value/test_psel4_basis_check.py -q
+run fig_policy    python -m pytest value/test_fig_policy.py -q
 echo done >> "$LOG/tests_summary.txt"
