@@ -161,10 +161,10 @@
     \textbf{Pooled per answer, 8 pairs} & & & & & \textbf{0.8192} \\
     \bottomrule
   \end{tabular}}
-  \src{Pre-registered H2-2E runs of the PSEL4 pick against level 2 on non-zero inputs, 3 to 4 each at 400 shots per program. $p$: share of correct shots. $z$: pooled two-proportion statistic. $R$: HQC per correct output, pick over level 2. The pooled row adds three earlier P2 pairs. Source \code{value/hqc\_per\_correct.md}.}
+  \src{Pre-registered H2-2E runs of the PSEL4 pick against level 2 on non-zero inputs, one to four inputs each at 400 shots per program (vbe_adder_7 one input at 1000 shots). $p$: share of correct shots. $z$: pooled two-proportion statistic. $R$: HQC per correct output, pick over level 2. The pooled row adds three earlier P2 pairs. Source \code{value/hqc\_per\_correct.md}.}
   \raggedright\footnotesize
   \begin{itemize}\setlength{\itemsep}{0pt}
-    \item The pick was significantly less accurate on 2 of 5 (hwb6 Holm $p = 0.0168$), not different on 2, not significantly better on 1. No pick was significantly more accurate.
+    \item The pick was significantly less accurate on 2 of 5 (hwb6 Holm $p = 0.0168$), not significantly different on 2, not significantly better on 1. No pick was significantly more accurate.
     \item On cdkm\_adder\_10 the less accurate pick has fewer two-qubit gates (118 against 141) and lower two-qubit depth (65 against 122, post hoc), so neither HQC nor gate counts order fidelity.
     \item HQC per correct answer is lower for the pick in 5 of 5 pairs, 8 of 8 with the earlier pairs. Pooled 18.1\,\% lower (bootstrap 95\,\% interval 0.8132 to 0.8254), HQC ratio 0.8170 over accuracy ratio 0.9973.
     \item \Otag\ PSEL4 serves cost-bound users. Accuracy-bound users need the fidelity-aware finals selector.
@@ -200,7 +200,7 @@
   \src{Totals after each pipeline. 6 circuits did not fit the compile budget. Source \code{value/mechanism\_zx\_l3.md}.}
   \raggedright\footnotesize
   \begin{itemize}\setlength{\itemsep}{1pt}
-    \item \textbf{Mechanism.} HQC charges no Rz gate and bills every PhasedX at the same rate, so the T-count reduction ZX is best at has no HQC value on H2, and ZX can pay only through two-qubit gates, which level 3 already resynthesises.
+    \item \textbf{Mechanism.} HQC charges no Rz gate and bills every PhasedX at the same rate, so the T-count reduction ZX is best at has no HQC value on H2, and ZX can pay mainly through two-qubit gates, which level 3 already resynthesises.
     \item GreedyPauliSimp in level 3 lowers the two-qubit count on 180 of 180 A, 13 of 14 B1 and 9 of 15 C circuits.
     \item teleport\_reduce leaves fewer non-Clifford gates on B1 (656 against 746 for level 3). A two-qubit gate costs 2 HQC at 1000 shots and a PhasedX 0.2.
     \item ZX on top of the cheaper pytket level saves 3.21\,\% on all 20 family C circuits (0.26\,\% on the 17 proven), 0.49\,\% on B1 and 0 on Trotter circuits. Its gain anticorrelates with the level 3 gain, $\rho = -0.64$.
