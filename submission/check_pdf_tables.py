@@ -4,7 +4,7 @@
 Usage: python3 submission/check_pdf_tables.py <report md> <pdftotext -layout output> [--set full|short]
 
 --set full (default) checks Tables 1.1a, 1.1, C2, E1 and E2 of the full report
-(submission/report_full.md). --set short checks Tables 1, 1b, 1c, 2, 2b, 3a, 3b, 4a and 4b,
+(submission/report_full.md). --set short checks Tables PC, 1c, 3a, 3b, HPC, 4a and 4b,
 the official-baseline table, the use-case table and the finals-plan table of the short
 report (submission/report.md).
 
@@ -38,17 +38,15 @@ SETS = {
         "E2": ("<!-- TABLE:E2_h22e -->", range(1, 7)),
     },
     "short": {
-        "1": ("`[F]` Table 1.", range(2, 9)),
-        "1b": ("`[F]` Table 1b.", range(1, 6)),
+        "PC": ("`[F]` Table PC.", range(0, 9)),
         "1c": ("`[F]` Table 1c.", range(1, 5)),
         "official baseline": ("`[F]` Our P0 reproduces the pass", range(0, 3)),
-        "2": ("`[F]` Table 2.", range(5, 10)),
-        "2b": ("`[F]` Table 2b.", range(3, 9)),
         "3a": ("`[F]` Table 3a.", range(0, 6)),
         "3b": ("`[F]` Table 3b.", range(0, 5)),
+        "HPC": ("`[F]` Table HPC.", range(3, 10)),
         "4a": ("`[F]` Table 4a.", range(0, 6)),
         "4b": ("`[F]` Table 4b.", range(0, 6)),
-        "use case": ("`[F]` Two complete Grover searches", range(0, 9)),
+        "use case": ("`[F]` Two complete Grover searches", range(0, 7)),
         "finals plan": ("`[O]` Secondary item. A hardware test", range(2, 5)),
     },
 }

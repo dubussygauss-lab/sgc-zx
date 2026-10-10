@@ -200,9 +200,14 @@ def render_md(r: dict) -> str:
     c = T.set_index("circuit").loc["cdkm_adder_10"]
     L.append("- `[F]` cdkm_adder_10 (L3, three inputs pooled): R = %.4f, delta interval [%.4f, %.4f]."
              % (c.R, c.R_lo_delta, c.R_hi_delta))
+    L.append("- `[F]` In percent: cdkm_adder_10 needs %.1f %% fewer HQC per correct output than P0 (95 %% interval %.1f to %.1f %%)."
+             % (100 * (1 - c.R), 100 * (1 - c.R_hi_delta), 100 * (1 - c.R_lo_delta)))
     L.append("- `[F]` Pooled over the %d pairs: R = (%.2f / %d) / (%.2f / %d) = %.4f, bootstrap interval [%.4f, %.4f]."
              % (h["n_pairs"], h["sum_H_alt"], h["sum_K_alt"], h["sum_H_P0"], h["sum_K_P0"], h["R_pooled"],
                 h["R_pooled_lo_boot"], h["R_pooled_hi_boot"]))
+    L.append("- `[F]` In percent: pooled over the %d pairs the alternative needs %.1f %% fewer HQC per correct output "
+             "(bootstrap 95 %% interval %.1f to %.1f %%)."
+             % (h["n_pairs"], 100 * (1 - h["R_pooled"]), 100 * (1 - h["R_pooled_hi_boot"]), 100 * (1 - h["R_pooled_lo_boot"])))
     for e in r["excluded"]:
         L.append("- `[F]` %s is excluded. Its ideal distribution (`common.reference_probs`) has %d outcomes with "
                  "largest probability %.6f, so it has no unique marked item. Its HQC ratio alt / P0 over %d runs is %.4f."

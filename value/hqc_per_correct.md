@@ -20,6 +20,8 @@
 - `[F]` The alternative costs fewer HQC per correct output than P0 (R < 1) in 6 of 6 pairs.
 - `[F]` The upper 95 % bound of R is below 1 in 6 of 6 pairs by the delta method and in 6 of 6 by the bootstrap.
 - `[F]` cdkm_adder_10 (L3, three inputs pooled): R = 0.9203, delta interval [0.8896, 0.9521].
+- `[F]` In percent: cdkm_adder_10 needs 8.0 % fewer HQC per correct output than P0 (95 % interval 4.8 to 11.0 %).
 - `[F]` Pooled over the 6 pairs: R = (2085.12 / 8556) / (2523.12 / 8554) = 0.8262, bootstrap interval [0.8189, 0.8335].
+- `[F]` In percent: pooled over the 6 pairs the alternative needs 17.4 % fewer HQC per correct output (bootstrap 95 % interval 16.7 to 18.1 %).
 - `[F]` grover_5 is excluded. Its ideal distribution (`common.reference_probs`) has 64 outcomes with largest probability 0.015625, so it has no unique marked item. Its HQC ratio alt / P0 over 4 runs is 0.9339.
 - `[O]` Pooling the three inputs of cdkm_adder_10 and modadd_2n_10 treats them as one binomial. The intervals ignore variation between inputs and between emulator runs.

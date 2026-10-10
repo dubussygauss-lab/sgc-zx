@@ -71,6 +71,8 @@ git -C third_party/pyzx-fork checkout e695d6d711e67b2b7223417c4714b6b1fcc09191
 | Table 1.1a, totals of the earlier two-candidate selector PSEL | `python value/selector_ledger.py` (reads `value/value_ledger.csv` and `results/family_B2_counts.csv`) |
 | PSEL4 ledger, `value/psel4_ledger.csv` and `.md` | `python3 value/psel4_ledger.py run`, then `python3 value/psel4_ledger.py report` |
 | PSEL4 policy comparison, `value/policy_compare.md` | `python3 value/policy_compare.py` |
+| HQC per correct answer on H2-2E, `value/hqc_per_correct.md` (report Table HPC, appendix Table E7) | `python3 value/hqc_per_correct.py` (offline, reads the stored H2-2E payloads) |
+| USD value of the PSEL4 saving, `value/usd_psel4.md` (appendix Tables 1.5a and 1.5b) | `python3 value/usd_psel4.py` (reads `value/psel4_ledger.csv`) |
 | PSEL4 (the submitted tool) on new circuits | `python pipelines/pass_select.py --psel4 [--shots N] <qasm files>` |
 | The earlier two-candidate selector PSEL on new circuits | `python pipelines/pass_select.py [--shots N] [--candidates P0,P2] <qasm files>` |
 | Table E2 statistics | `python submit/h22e_stats.py` (offline, reads the stored counts) |
@@ -79,7 +81,7 @@ git -C third_party/pyzx-fork checkout e695d6d711e67b2b7223417c4714b6b1fcc09191
 
 ## Tests (logs in `build_logs/`)
 
-Rerun all 33 test files with `bash run_tests.sh` (repository root, also inside an unzipped `code.zip`). Eight run as scripts and twenty-five under pytest. All 33 returned rc=0 in the run of 10 October 2026 (`build_logs/tests_summary.txt`). The per-file results below are from the runs of 9 and 10 October 2026. Wall times vary between runs; those of the latest run are in `build_logs/tests_summary.txt`.
+Rerun all 35 (thirty-five) test files with `bash run_tests.sh` (repository root, also inside an unzipped `code.zip`). Eight run as scripts and twenty-seven under pytest. The logged run of 10 October 2026 covers the first 33, all with rc=0 (`build_logs/tests_summary.txt`). `value/test_hqc_per_correct.py` and `value/test_usd_psel4.py` were added after that run and passed when run on their own on 10 October 2026. The per-file results below are from the runs of 9 and 10 October 2026. Wall times vary between runs. Those of the latest run are in `build_logs/tests_summary.txt`.
 
 | File | Command | Result | Wall |
 |---|---|---|---|
@@ -116,10 +118,12 @@ Rerun all 33 test files with `bash run_tests.sh` (repository root, also inside a
 | `value/test_mechanism_zx_l3.py` | `python -m pytest value/test_mechanism_zx_l3.py -q` | 7 passed | see `build_logs/tests_summary.txt` |
 | `submit/test_h22e_multi.py` | `python -m pytest submit/test_h22e_multi.py -q` | 9 passed | see `build_logs/tests_summary.txt` |
 | `submit/test_h22e_multi_depth.py` | `python -m pytest submit/test_h22e_multi_depth.py -q` | 2 passed | see `build_logs/tests_summary.txt` |
+| `value/test_hqc_per_correct.py` | `python -m pytest value/test_hqc_per_correct.py -q` | 6 passed | 44 s |
+| `value/test_usd_psel4.py` | `python -m pytest value/test_usd_psel4.py -q` | 4 passed | under 1 s |
 
 ## Rebuilding this package
 
-`bash submission/build.sh` (add `--tests` to rerun the tests with `run_tests.sh`). The script first runs `report/check_short_numbers.py` on `report/report_short.md`. It copies that file to `report.md` and renders `report.pdf`. It writes `report_full.md` from `report/report_v5.md` without the changelog sections and renders `report_full.pdf`. For each PDF it checks that no `[PENDING`, `TBD` or `Changelog` remains and that the main tables render every row (`check_pdf_tables.py --set short` for Tables 1 to 4b, the official-baseline, use-case and finals-plan tables, `--set full` for Tables 1.1a, 1.1, C2, E1 and E2). It rebuilds `code.zip` with `git archive HEAD` and checks that this page names HEAD as the `code.zip` commit. It checks the archive for credential files and token strings, runs `check_summary_numbers.py`, builds `one_page_summary.pdf` from `report/one_page_summary.md` (number check, exactly one page), copies `README.md`, `requirements.txt` and `EVIDENCE.md` (job IDs, from `submit/evidence_index.py`) and writes `MANIFEST.txt`. Nothing is uploaded.
+`bash submission/build.sh` (add `--tests` to rerun the tests with `run_tests.sh`). The script first runs `report/check_short_numbers.py` on `report/report_short.md`. It copies that file to `report.md` and renders `report.pdf`. It writes `report_full.md` from `report/report_v5.md` without the changelog sections and renders `report_full.pdf`. For each PDF it checks that no `[PENDING`, `TBD` or `Changelog` remains and that the main tables render every row (`check_pdf_tables.py --set short` for Tables PC, 1c, 3a, 3b, HPC, 4a and 4b, the official-baseline, use-case and finals-plan tables, `--set full` for Tables 1.1a, 1.1, C2, E1 and E2). It rebuilds `code.zip` with `git archive HEAD` and checks that this page names HEAD as the `code.zip` commit. It checks the archive for credential files and token strings, runs `check_summary_numbers.py`, builds `one_page_summary.pdf` from `report/one_page_summary.md` (number check, exactly one page), copies `README.md`, `requirements.txt` and `EVIDENCE.md` (job IDs, from `submit/evidence_index.py`) and writes `MANIFEST.txt`. Nothing is uploaded.
 
 ## Rubric evidence map (Engineering and Reproducibility)
 
