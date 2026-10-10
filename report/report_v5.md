@@ -764,7 +764,7 @@ Nexus H2-Emulator, noisy_simulation = True, 1000 shots per row. F_H is the Helli
 | vbe_adder_7 | 22 | P0 | 142 | 370.4 | 0.886 | 0.0101 | `AFByb3ZpZGVySm9iAaEhmeKbc_OjVQOEHS-ddA` |
 | vbe_adder_7 | 22 | P2 | 107 | 294.4 | 0.897 | 0.0096 | `AFByb3ZpZGVySm9iAaEho9Ofd-OloWOVOFZbIw` |
 
-`[F]` F_H(P2) minus F_H(P0) is +0.0110 with sd 0.0139 and z = 0.79. P2 has 35 fewer two-qubit gates and costs 76.0 HQC less at 1000 shots. The two jobs used 664.8 HQC by the formula. All H2-2E jobs with valid counts now total 20 jobs and 6598.0 HQC, which leaves 3402.0 of the 10,000 HQC quota.
+`[F]` F_H(P2) minus F_H(P0) is +0.0110 with sd 0.0139 and z = 0.79. P2 has 35 fewer two-qubit gates and costs 76.0 HQC less at 1000 shots. The two jobs used 664.8 HQC by the formula. After these two jobs the H2-2E jobs with valid counts totalled 20 jobs and 6598.0 HQC, which left 3402.0 of the 10,000 HQC quota. Section 3.7.3 gives the current total.
 
 `[O]` The run shows that a 22-qubit PSEL output of family C executes on a Quantinuum emulator. At 1000 shots it does not resolve P2 against P0. The all-zero input executes every gate of the circuit but tests the adder on one input only.
 
