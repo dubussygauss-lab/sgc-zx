@@ -1,0 +1,16 @@
+HQC total 988.32 over 14 programs (limit 990)
+submitted job AFByb3ZpZGVySm9iAaEloA67eYOKd0KQg6fUBw (vbe_adder_3_i1.qasm P0) at 2026-10-10T11:43:28.986494Z
+submitted job AFByb3ZpZGVySm9iAaEloBcSdjO15SfctcsXYA (vbe_adder_3_i1.qasm L3) at 2026-10-10T11:43:31.120978Z
+submitted job AFByb3ZpZGVySm9iAaEloBxAfoO-eqtE-cMd8Q (hwb6_i1.qasm P0) at 2026-10-10T11:43:32.451284Z
+submitted job AFByb3ZpZGVySm9iAaEloCE_duGK0TiKLUKBdA (hwb6_i1.qasm P2L3) at 2026-10-10T11:43:33.726833Z
+submitted job AFByb3ZpZGVySm9iAaEloCZdeyK_QKmfBRWv5g (vbe_adder_3_i2.qasm P0) at 2026-10-10T11:43:35.042319Z
+submitted job AFByb3ZpZGVySm9iAaEloCtHdyOTgH8dXqENZg (vbe_adder_3_i2.qasm L3) at 2026-10-10T11:43:36.288214Z
+submitted job AFByb3ZpZGVySm9iAaEloDAwflOUIQSgtx538g (hwb6_i2.qasm P0) at 2026-10-10T11:43:37.545559Z
+submitted job AFByb3ZpZGVySm9iAaEloDZrepG0gfOWswRyOg (hwb6_i2.qasm P2L3) at 2026-10-10T11:43:39.141204Z
+submitted job AFByb3ZpZGVySm9iAaEloDtPe0GFQnJkMAE70A (vbe_adder_3_i3.qasm P0) at 2026-10-10T11:43:40.394938Z
+submitted job AFByb3ZpZGVySm9iAaEloEBCcAG-8xJk1md_Qg (vbe_adder_3_i3.qasm L3) at 2026-10-10T11:43:41.662336Z
+submitted job AFByb3ZpZGVySm9iAaEloEU1duCKFtebUzC-oA (hwb6_i3.qasm P0) at 2026-10-10T11:43:42.928431Z
+submitted job AFByb3ZpZGVySm9iAaEloEondBOhj2uIkKrPhw (hwb6_i3.qasm P2L3) at 2026-10-10T11:43:44.192445Z
+submitted job AFByb3ZpZGVySm9iAaEloE8KeXKcb9DjlDawJA (vbe_adder_3_i4.qasm P0) at 2026-10-10T11:43:45.446557Z
+submitted job AFByb3ZpZGVySm9iAaEloFPFfTKnGChZciK00w (vbe_adder_3_i4.qasm L3) at 2026-10-10T11:43:46.654095Z
+all jobs submitted; collect with --fetch-all
