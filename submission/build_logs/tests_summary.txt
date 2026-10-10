@@ -1,36 +1,38 @@
-gen_trotter | rc=0 | wall=57s | cmd: python bench/test_gen_trotter.py
+gen_trotter | rc=0 | wall=59s | cmd: python bench/test_gen_trotter.py
 dm_sim | rc=0 | wall=4s | cmd: python noise/test_dm_sim.py
 certificate | rc=0 | wall=35s | cmd: python barrier/test_certificate.py
-compile | rc=0 | wall=2s | cmd: python pipelines/test_compile.py
-pass_select | rc=0 | wall=5s | cmd: python pipelines/test_pass_select.py
-selene | rc=0 | wall=23s | cmd: env HTTPS_PROXY= https_proxy= HTTP_PROXY= http_proxy= NO_PROXY= no_proxy= python -m pytest selene/test_selene.py -q
-cost_model | rc=0 | wall=0s | cmd: python model/test_cost_model.py
-submit | rc=0 | wall=5s | cmd: python -m pytest submit/test_submit.py -q
-h22e_stats | rc=0 | wall=5s | cmd: python -m pytest submit/test_h22e_stats.py -q
+compile | rc=0 | wall=3s | cmd: python pipelines/test_compile.py
+pass_select | rc=0 | wall=6s | cmd: python pipelines/test_pass_select.py
+selene | rc=0 | wall=8s | cmd: env HTTPS_PROXY= https_proxy= HTTP_PROXY= http_proxy= NO_PROXY= no_proxy= python -m pytest selene/test_selene.py -q
+cost_model | rc=0 | wall=1s | cmd: python model/test_cost_model.py
+submit | rc=0 | wall=4s | cmd: python -m pytest submit/test_submit.py -q
+h22e_stats | rc=0 | wall=4s | cmd: python -m pytest submit/test_h22e_stats.py -q
 h22e_pooled | rc=0 | wall=8s | cmd: python -m pytest submit/test_h22e_pooled.py -q
 value_ledger | rc=0 | wall=3s | cmd: python -m pytest value/test_value_ledger.py -q
 value_by_app | rc=0 | wall=1s | cmd: python -m pytest value/test_value_by_application.py -q
 selector_ledger | rc=0 | wall=2s | cmd: python -m pytest value/test_selector_ledger.py -q
 c2_literature | rc=0 | wall=0s | cmd: python report/test_c2_literature.py
-notebook_submit | rc=0 | wall=3s | cmd: python -m pytest report/test_notebook_submit.py -q
-finals_plan | rc=0 | wall=7s | cmd: python -m pytest value/test_finals_plan.py -q
+notebook_submit | rc=0 | wall=7s | cmd: python -m pytest report/test_notebook_submit.py -q
+finals_plan | rc=0 | wall=8s | cmd: python -m pytest value/test_finals_plan.py -q
 official_baseline | rc=0 | wall=13s | cmd: python -m pytest pipelines/test_official_baseline.py -q
 family_C_selector | rc=0 | wall=2s | cmd: python -m pytest value/test_family_C_selector.py -q
-usecase | rc=0 | wall=41s | cmd: python -m pytest value/test_usecase.py -q
+usecase | rc=0 | wall=42s | cmd: python -m pytest value/test_usecase.py -q
 equiv_family_C | rc=0 | wall=2s | cmd: python -m pytest pipelines/test_equiv_family_C.py -q
 evidence_index | rc=0 | wall=1s | cmd: python -m pytest submit/test_evidence_index.py -q
-famC_h22e | rc=0 | wall=24s | cmd: python -m pytest submit/test_famC_h22e.py -q
+famC_h22e | rc=0 | wall=25s | cmd: python -m pytest submit/test_famC_h22e.py -q
 h22e_confirmatory | rc=0 | wall=11s | cmd: python -m pytest submit/test_h22e_confirmatory.py -q
-strong_baselines | rc=0 | wall=9s | cmd: python -m pytest pipelines/test_strong_baselines.py -q
+strong_baselines | rc=0 | wall=8s | cmd: python -m pytest pipelines/test_strong_baselines.py -q
 psel4 | rc=0 | wall=4s | cmd: python pipelines/test_psel4.py
 equiv_psel4_C | rc=0 | wall=3s | cmd: python -m pytest pipelines/test_equiv_psel4_C.py -q
 zx_classifier | rc=0 | wall=3s | cmd: python -m pytest value/test_zx_classifier.py -q
-h22e_famC_nz | rc=0 | wall=34s | cmd: python -m pytest submit/test_h22e_famC_nz.py -q
+h22e_famC_nz | rc=0 | wall=37s | cmd: python -m pytest submit/test_h22e_famC_nz.py -q
 equiv_L3_C | rc=0 | wall=5s | cmd: python -m pytest pipelines/test_equiv_L3_C.py -q
 policy_compare | rc=0 | wall=1s | cmd: python -m pytest value/test_policy_compare.py -q
 mechanism_zx_l3 | rc=0 | wall=3s | cmd: python -m pytest value/test_mechanism_zx_l3.py -q
 h22e_multi | rc=0 | wall=6s | cmd: python -m pytest submit/test_h22e_multi.py -q
-h22e_multi_depth | rc=0 | wall=2s | cmd: python -m pytest submit/test_h22e_multi_depth.py -q
-hqc_per_correct | rc=0 | wall=24s | cmd: python -m pytest value/test_hqc_per_correct.py -q
-usd_psel4 | rc=0 | wall=0s | cmd: python -m pytest value/test_usd_psel4.py -q
+h22e_multi_depth | rc=0 | wall=3s | cmd: python -m pytest submit/test_h22e_multi_depth.py -q
+hqc_per_correct | rc=0 | wall=23s | cmd: python -m pytest value/test_hqc_per_correct.py -q
+usd_psel4 | rc=0 | wall=1s | cmd: python -m pytest value/test_usd_psel4.py -q
+psel4_conservative | rc=0 | wall=4s | cmd: python -m pytest value/test_psel4_conservative.py -q
+psel4_basis_check | rc=0 | wall=8s | cmd: python -m pytest value/test_psel4_basis_check.py -q
 done

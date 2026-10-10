@@ -1,10 +1,11 @@
 % Submission 1 presentation, Quantinuum Singapore Grand Challenge, team Learned ZX Rewriting.
-% Framing 3. Content and numbers are taken only from value/policy_compare.md, value/usd_psel4.md,
+% Framing 4. Content and numbers are taken only from value/policy_compare.md, value/usd_psel4.md,
 % value/hqc_per_correct.md, value/psel4_zx_only.md, value/mechanism_zx_l3.md, value/zx_classifier.md,
+% value/psel4_basis_check.md, value/psel4_conservative.md, results/family_C_equivalence_qcec.md,
 % results/h22e_confirmatory.md, results/family_C_equivalence_L3.md, results/strong_baselines.md,
 % results/EVIDENCE.md and report/report_v5.md.
-% Story: cost (level 3's savings without its regressions), cheaper per correct answer, value in USD,
-% mechanism, correctness.
+% Story: customer value (drop-in auto level, never costlier than the default), level 3 adoption made
+% safe, H2-2E emulator results, value in USD, mechanism, correctness.
 % Build: pdflatex presentation.tex (twice).
 \documentclass[aspectratio=169,11pt]{beamer}
 \usepackage[utf8]{inputenc}
@@ -52,13 +53,13 @@
 % ---------------------------------------------------------------- 1
 \begin{frame}[plain]
   \vfill
-  {\color{accent}\LARGE\bfseries PSEL4 gives H2 users level 3's HQC savings without its regressions\par}
+  {\color{accent}\LARGE\bfseries PSEL4 is a drop-in auto level for pytket-quantinuum\par}
   \vspace{0.4cm}
   \begin{itemize}\setlength{\itemsep}{3pt}\large
-    \item 15.7\,\% less HQC than pytket-quantinuum's default level 2 over 217 circuits.
-    \item 0 circuits costlier than level 2 or level 3.
-    \item The lower-HQC compile (the PSEL4 pick in 3 of 6 pairs) needs 17.4\,\% fewer HQC per correct answer on the H2-2E emulator.
-    \item USD 95,289 to 115,707 saved on the benchmark ledger at Azure plan averages.
+    \item PSEL4 is a cost-aware auto level. It compiles each circuit four ways and keeps the cheapest checked result.
+    \item It is never costlier than the default compile (0 of 217 circuits).
+    \item It needs 15.7\,\% less HQC than the default level 2 on our 217-circuit benchmark.
+    \item \Otag\ Workload assumption: a team spends the Standard Plan's 10,000 HQC a month on this mix. PSEL4 then frees 1,573.3 HQC, worth USD 19,666 a month.
   \end{itemize}
   \vspace{0.35cm}
   {\large Team Learned ZX Rewriting\par}
@@ -91,7 +92,8 @@
     \begin{column}{0.55\textwidth}
       \begin{itemize}\setlength{\itemsep}{4pt}
         \item \textbf{Candidates.} L2 (default), L3, and PyZX teleport\_reduce followed by L2 (P2) or L3 (P2L3).
-        \item \textbf{Check.} Full unitary up to 8 qubits, all-zero input state from 9 to 20 qubits. Failed candidates are dropped.
+        \item \textbf{Check.} Each candidate is checked against its input as a full unitary up to 8 qubits and on 64 random computational basis inputs (including all-zero) from 9 to 20 qubits. Failed candidates are dropped.
+        \item Above 20 qubits family C relies on PyZX miter proofs.
         \item \textbf{Guarantee.} L2 and L3 are always candidates, so PSEL4 never costs more than either where both pass the check.
       \end{itemize}
     \end{column}
@@ -119,7 +121,7 @@
 \end{frame}
 
 % ---------------------------------------------------------------- 4
-\begin{frame}{Finding 1. Level 3's savings without its regressions}
+\begin{frame}{Finding 1. Level 3 adoption made safe}
   \centering\small
   \begin{tabular}{@{}lrrrr@{}}
     \toprule
@@ -132,16 +134,17 @@
   \end{tabular}
   \src{217 circuits (A 180, B1 15, C 20, Grover use case 2), HQC at 1000 shots. Source \code{value/policy\_compare.md}, \code{value/usd\_psel4.md}.}
   \raggedright\small
-  \begin{itemize}\setlength{\itemsep}{4pt}
-    \item PSEL4 keeps every level 3 saving and adds ZX where it pays. It is 2.08\,\% below always level 3.
-    \item Always level 3 loses up to 12.95\,\% on a single circuit (gf2\_pow\_4\_mult). PSEL4 avoids all 45 losses.
+  \begin{itemize}\setlength{\itemsep}{2pt}
+    \item Split of the 15.73\,\% saving: always level 3 gives 13.95 points, per-circuit selection plus ZX give 1.79 points.
+    \item Against the per-circuit cheaper of level 2 and level 3, PSEL4 saves 679.6 HQC (1.35\,\%).
+    \item Always level 3 costs more than level 2 on 45 circuits, up to 12.95\,\% on one (gf2\_pow\_4\_mult). PSEL4 on none.
     \item The largest saving is on family C (arithmetic and oracles), 25.8\,\% below level 2.
     \item Four compilations take 5.08 times the wall time of level 2 (215 timed circuits), or 3.03 HQC saved per extra second.
   \end{itemize}
 \end{frame}
 
 % ---------------------------------------------------------------- 5
-\begin{frame}{Finding 2. 17.4\,\% fewer HQC per correct answer}
+\begin{frame}{H2-2E emulator results}
   \centering\small
   \begin{tabular}{@{}lrrrc@{}}
     \toprule
@@ -157,16 +160,16 @@
     \textbf{Pooled, 6 pairs} & & & \textbf{0.8262} & \textbf{0.8189 to 0.8335} \\
     \bottomrule
   \end{tabular}
-  \src{H2-2E emulator, HQC is the formula estimate. $p$ is the share of shots with the correct output. $R$ is the HQC per correct output of the alt compile over that of level 2. The three newest pairs use the PSEL4 pick. The three earlier pairs use P2, the pick of the earlier two-candidate selector PSEL. grover\_5 has no single correct output and is excluded. Source \code{value/hqc\_per\_correct.md}.}
+  \src{H2-2E emulator, HQC is the formula estimate. $p$ is the share of shots with the correct output. $R$ is the HQC per correct output of the alt compile over that of level 2. Three of six pairs compare P2, the earlier selector's pick. grover\_5 has no single correct output and is excluded. Source \code{value/hqc\_per\_correct.md}.}
   \raggedright\small
   \begin{itemize}\setlength{\itemsep}{2pt}
-    \item $R$ and its 95\,\% upper bound are below 1 in 6 of 6 pairs.
-    \item On cdkm\_adder\_10 the level 3 pick returns the correct sum less often ($z = -2.90$) and still costs less per correct sum.
+    \item The HQC saving carried over to cost per correct answer in 6 of 6 pairs. Pooled HQC ratio 0.8264 divided by accuracy ratio 1.0002 gives $R = 0.8262$.
+    \item One significant accuracy loss: on cdkm\_adder\_10 the level 3 pick returns the correct sum less often (0.8267 against 0.8692, $z = -2.90$).
   \end{itemize}
 \end{frame}
 
 % ---------------------------------------------------------------- 6
-\begin{frame}{PSEL4's saving is worth USD 95,289 to 115,707 on the benchmark ledger}
+\begin{frame}{Value of the saving in USD}
   \small
   \begin{itemize}\setlength{\itemsep}{5pt}
     \item Azure plan averages are USD 10.29 (Premium) to 12.50 (Standard) per HQC.
@@ -212,13 +215,13 @@
     PSEL4 & 17 of 20 & hrs\_mult\_5, rgqft\_mult\_6, draper\_adder\_28 & 10.22\,\% \\
     \bottomrule
   \end{tabular}
-  \src{Family C has 20 to 56 qubits. A PyZX miter reduction proves equality of the full unitary up to global phase. Sources \code{results/family\_C\_equivalence\_L3.md}, \code{value/psel4\_zx\_only.md}.}
+  \src{Family C has 20 to 56 qubits. A PyZX miter reduction proves equality of the full unitary up to global phase. Sources \code{results/family\_C\_equivalence\_L3.md}, \code{value/psel4\_zx\_only.md}, \code{value/psel4\_basis\_check.md}, \code{value/psel4\_conservative.md}, \code{results/family\_C\_equivalence\_qcec.md}.}
   \raggedright\small
-  \begin{itemize}\setlength{\itemsep}{4pt}
-    \item On families A, B1 and B2 every compiled circuit matches the uncompiled reference within 1e-8 (1260, 105 and 100 rows).
-    \item Our level 2 pipelines match the official pytket-quantinuum pass on all 445 compiled rows of A, B1, B1x and B2.
-    \item The level 3 miters of the two unproven circuits timed out after 900 s. The PSEL4 miters of rgqft\_mult\_6 and draper\_adder\_28 timed out after 300 s.
-    \item hrs\_mult\_5 has off-grid angles. Its PSEL4 output passes a check on 64 random basis inputs only.
+  \begin{itemize}\setlength{\itemsep}{2pt}
+    \item On families A, B1 and B2 every compiled circuit matches the uncompiled reference within 1e-8.
+    \item 64 random basis inputs, 9 to 20 qubits: all 83 PSEL4 picks pass, with 187 of 187 required and 142 of 142 other candidates. Negative controls fail as they should.
+    \item MQT QCEC 3.10.2 proved none of the three unproven PSEL4 outputs. Its verdicts were inconclusive, with no counterexample on any pair.
+    \item Conservative variant (cheapest verified candidate, else level 2 flagged ``default, unverified''): 12.25\,\% below level 2. It is costlier than level 2 on 0 circuits and than level 3 on 2 whose level 3 output is unverified.
   \end{itemize}
 \end{frame}
 
@@ -252,9 +255,9 @@
 \begin{frame}{Every result can be rerun from the code package}
   \small
   \begin{itemize}\setlength{\itemsep}{4pt}
-    \item \textbf{\code{code.zip}.} The source of the repository. \code{README.md} gives the run instructions.
-    \item \textbf{\code{requirements.txt}.} Pins pytket 2.18.4, pytket-quantinuum 0.59.3 and pyzx 0.10.7.
-    \item \textbf{\code{run\_tests.sh}.} Runs 35 test files and writes one return code per file to \code{submission/build\_logs/tests\_summary.txt}.
+    \item \textbf{\code{code.zip}.} The source of the repository. \code{requirements.txt} pins pytket 2.18.4, pytket-quantinuum 0.59.3 and pyzx 0.10.7.
+    \item \textbf{\code{run\_tests.sh}.} Runs 37 test files, including the 64-basis-input check and its negative-control test, and writes one return code per file.
+    \item \textbf{Notebook.} Demonstrates PSEL4. It compiles tof\_3 with PSEL4 and submits the pick to the H2-2SC syntax checker.
     \item \textbf{\code{EVIDENCE.md}.} Lists every emulator job with its job ID, shots, HQC estimate and payload. The 34 H2-2E jobs used an HQC estimate of 8983.4 of the 10,000 budget.
     \item \textbf{Generated tables.} Value tables come from the scripts under \code{value/}. Emulator tables are regenerated offline from the stored payloads.
     \item \textbf{Independent checks.} Verification reports by agents that did not produce the results are in \code{results/}.

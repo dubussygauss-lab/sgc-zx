@@ -50,7 +50,7 @@ HQC estimate = 5 + C (N_1q + 10 N_2q + 5 N_SPAM) / 5000 from the compiled circui
 | nexus:H2-2E | nexus_H2-2E_r4 | vbe_adder_3 | P0 | `AFByb3ZpZGVySm9iAaEdYjNvcqOEcN9YNr2S7A` | 1000 | True | yes | 151.6 | 0.9560 | `results/emulator/nexus_H2-2E_r4/P0/vbe_adder_3.json` |
 | nexus:H2-2E | nexus_H2-2E_r4 | vbe_adder_3 | P2 | `AFByb3ZpZGVySm9iAaEdYqgddNGsOWEAzIf6zg` | 1000 | True | yes | 119.0 | 0.9600 | `results/emulator/nexus_H2-2E_r4/P2/vbe_adder_3.json` |
 | nexus:H2-2SC | nexus_H2-2SC | tof_3 | P0 | `AFByb3ZpZGVySm9iAaEcdqFKfvGiVyt1pWCaEQ` | 1000 | - | no | 48.8 | - | `results/emulator/nexus_H2-2SC/P0/tof_3.json` |
-| nexus:H2-2SC | nexus_H2-2SC | tof_3 | select:P2 | `AFByb3ZpZGVySm9iAaEdzTywfrOWhGbnlXxd-w` | 1000 | - | no | 47.6 | - | `results/emulator/nexus_H2-2SC/notebook_select/tof_3.json` |
+| nexus:H2-2SC | nexus_H2-2SC | tof_3 | psel4:L3 | `AFByb3ZpZGVySm9iAaElTNS7cyOY831oDA3xZg` | 1000 | - | no | 46.4 | - | `results/emulator/nexus_H2-2SC/notebook_select/tof_3.json` |
 | nexus:H2-Emulator | nexus_H2-Emulator | barenco_tof_3 | P0 | `AFByb3ZpZGVySm9iAaEcfSKHfOKupN9nXyFL_A` | 1000 | True | yes | 59.6 | 0.9770 | `results/emulator/nexus_H2-Emulator/P0/barenco_tof_3.json` |
 | nexus:H2-Emulator | nexus_H2-Emulator | barenco_tof_3 | P1 | `AFByb3ZpZGVySm9iAaEcfSKHfOKupN9nXyFL_A` | 1000 | True | yes | 67.8 | 0.9760 | `results/emulator/nexus_H2-Emulator/P1/barenco_tof_3.json` |
 | nexus:H2-Emulator | nexus_H2-Emulator | barenco_tof_3 | P2 | `AFByb3ZpZGVySm9iAaEcfSKHfOKupN9nXyFL_A` | 1000 | True | yes | 58.6 | 0.9660 | `results/emulator/nexus_H2-Emulator/P2/barenco_tof_3.json` |
@@ -86,7 +86,7 @@ HQC estimate = 5 + C (N_1q + 10 N_2q + 5 N_SPAM) / 5000 from the compiled circui
 
 ## Ledger rows that did not complete
 
-11 of 69 ledger rows. The H2-Emulator rows failed on the simulation quota of the free tier. The first H2-2SC row failed on an upload error and was resubmitted.
+11 of 70 ledger rows. The H2-Emulator rows failed on the simulation quota of the free tier. The first H2-2SC row failed on an upload error and was resubmitted.
 
 | Timestamp (UTC) | Platform | Circuit | Pipeline | Job ID | Status (first 60 characters) |
 |---|---|---|---|---|---|
