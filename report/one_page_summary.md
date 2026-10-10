@@ -14,7 +14,7 @@ PSEL4 compiles each circuit four ways. These are level 2, level 3 and PyZX telep
 
 ## Key results
 
-| Circuit set | HQC saved vs level 2 | ZX part of the saving |
+| Circuit set | HQC saved vs level 2 | ZX-only, vs cheaper of L2 and L3 |
 |---|---|---|
 | Family C, 17 arithmetic and oracle circuits with proven output (20 to 56 qubits) | 10.22 % | 0.26 % |
 | Family C, all 20 circuits (3 picks unproven) | 25.85 % | 3.21 % |
@@ -24,7 +24,7 @@ PSEL4 compiles each circuit four ways. These are level 2, level 3 and PyZX telep
 
 - **Split.** Most of the saving comes from choosing level 3 where it is cheaper. The ZX part is the saving on top of the cheaper of the two levels per circuit.
 - **Guard.** Running ZX blindly before level 2 costs 6.27 % more HQC on 180 Trotter circuits and 22.1 % more on 3 QFT adders. pytket's ZXGraphlikeOptimisation before level 2 costs 59.22 % more on 14 B1 circuits. Qiskit level 3 rebased to H2 costs more than level 2. PSEL4 never pays these losses.
-- **Correctness.** Outputs are checked exactly up to 20 qubits. A PyZX miter proves 17 of the 20 family C outputs equal to their input. Our level 2 compiles, with and without ZX, give the same counts as the official pytket-quantinuum pass on 445 rows.
+- **Correctness.** Outputs up to 8 qubits are checked as full unitaries. From 9 to 20 qubits the check compares the output state on the all-zero input only. A PyZX miter proves 17 of the 20 family C outputs equal to their input. Our level 2 compiles, with and without ZX, give the same counts as the official pytket-quantinuum pass on 445 rows.
 - **Emulator.** 22 H2-2E jobs ran, with job IDs in `EVIDENCE.md`. On a non-zero input fixed in advance the 22-qubit adder vbe_adder_7 returns the correct sum 139 in 0.883 of shots under level 2 and 0.901 under level 3, the PSEL4 pick (z = 1.30, not resolved).
 
 <img src="figures/fig_hqc_saved.png" alt="HQC saved by the earlier two-candidate selector against level 2 per family C circuit" width="56%">

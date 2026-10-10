@@ -1157,6 +1157,7 @@ Figure 4. Learned cost model on the proxy data. Left, predicted F_H = exp(-y_hat
 
 ## 7. Limitations
 
+- `[F]` PSEL4 saving split. Most of the PSEL4 saving against level 2 comes from choosing level 3. The ZX candidates add 0.26 % on the 17 proven family C circuits and 3.21 % on all 20 (`value/psel4_zx_only.md`). Three family C picks have no proof, and 87.6 % of the family C saving against level 3 comes from two of them, hrs_mult_5 and draper_adder_28. The non-zero-input vbe_adder_7 difference has z = 1.30 and is not resolved. The selector's exactness check uses full unitaries up to 8 qubits and the all-zero input state from 9 to 20 qubits.
 `[F]` The HQC savings of this report are against pytket-quantinuum at optimisation level 2, the default. Against level 3 PSEL costs 9.92 % more on B1 and 8.37 % more on family C. The ZX stage on top of level 3 (PSEL3) saves 3.49 % and 2.34 % (Section 3.8.1). PSEL4 costs no more than either level on all 217 circuits where both passed (Table P4).
 
 `[F]` ZX extraction worsens the ZZPhase count. On family A the pipelines P1, P3 and P4 are above P0 on 180 of 180 circuits, with ZZ ratios from 1.28 to 10.32 (P1), 1.31 to 7.91 (P3) and 1.44 to 10.36 (P4). On family B1 (`results/family_B1_counts.csv`) P1 is above P0 on 14 of 15, P3 on 14 of 15 and P4 on 15 of 15. Only teleport reduction, which does not extract, helps on H2.
