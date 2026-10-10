@@ -8,7 +8,7 @@ Team Learned ZX Rewriting. Report title: "PSEL4 compiles each H2 circuit four wa
 
 ## Product and four findings
 
-`[F]` PSEL4, a cost-aware auto level that compiles each circuit four ways and keeps the cheapest checked result, is a drop-in for pytket-quantinuum's default compile on Quantinuum H2. It is never costlier than the default compile and needs 15.7 % less HQC on our 217-circuit benchmark. `[O]` For a team that spends the Standard Plan's 10,000 HQC a month on this mix it frees 1573.3 HQC a month, worth USD 19,666 (workload assumption).
+`[F]` PSEL4, a cost-aware auto level that compiles each circuit four ways and keeps the cheapest checked result, is a drop-in for pytket-quantinuum's default compile on Quantinuum H2. On our 217-circuit benchmark it is never costlier than the default compile and needs 15.7 % less HQC. By construction this holds whenever the default output passes the check. `[O]` For a team that spends the Standard Plan's 10,000 HQC a month on this mix it frees 1573.3 HQC a month, worth USD 19,666 (workload assumption).
 
 `[F]` Product. The candidates are level 2 (pytket's default, P0), level 3 (L3) and PyZX teleport_reduce before each (P2, P2L3). Usage is one command, `python3 pipelines/pass_select.py --psel4 <circuit.qasm>`. Level 2 and level 3 are always candidates. PSEL4 therefore never costs more HQC than level 2 or level 3 on a circuit where both pass its checks. This guarantee is a design property. It is not a measured result. Each candidate is checked against its input as a full unitary up to 8 qubits and on 64 random computational basis inputs from 9 to 20 qubits. The all-zero input is one of the 64. Above 20 qubits family C relies on PyZX miter proofs.
 
