@@ -49,7 +49,7 @@ SETS = {
         "4a": ("`[F]` Table 4a.", range(0, 6)),
         "4b": ("`[F]` Table 4b.", range(0, 6)),
         "use case": ("`[F]` Two complete Grover searches", range(0, 9)),
-        "finals plan": ("`[F]` `value/finals_plan.py` sizes", range(2, 5)),
+        "finals plan": ("`[O]` Secondary item. A hardware test", range(2, 5)),
     },
 }
 TABLES = SETS[which]
