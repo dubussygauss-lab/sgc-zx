@@ -81,12 +81,13 @@ git -C third_party/pyzx-fork checkout e695d6d711e67b2b7223417c4714b6b1fcc09191
 | Table E2 statistics | `python submit/h22e_stats.py` (offline, reads the stored counts) |
 | Pre-registered B1 run on H2-2E (report Table B1, appendix Section 3.7.6): input-prepared circuits, compilation, checks, submission and fetch | `python3 submit/h22e_b1_run.py --prepare`, `--compile`, `--check`, then `--submit` (needs the team credentials and `EMU_RUN_TAG=famB1_multi`, 14 jobs, 988.32 HQC) and `--fetch-all`. Pre-registration `results/h22e_b1_prereg.md` |
 | Statistics of that run, `results/h22e_b1.md` | `python3 submit/h22e_b1.py --md results/h22e_b1.md` (offline, reads the stored payloads under `results/emulator/nexus_H2-2E_famB1_multi/`) |
+| Figure PC of the main report, `report/figures/fig_policy.png` and `.pdf` | `python3 value/fig_policy.py` (reads `value/psel4_ledger.csv`) |
 | All report tables and figures | `python report/make_tables.py` |
 | Emulator jobs (Tables E1, E2) | `submit/syntax_check.py`, `submit/run_emulator.py` and `submit/fetch_job.py`. They need the team credentials and spend quota. Every job is recorded in `results/emulator_jobs.csv` |
 
 ## Tests (logs in `build_logs/`)
 
-Rerun all 38 (thirty-eight) test files with `bash run_tests.sh` (repository root, also inside an unzipped `code.zip`). Eight run as scripts and thirty under pytest. The logged run of 10 October 2026 covers the first 37, all with rc=0 (`build_logs/tests_summary.txt`). `submit/test_h22e_b1.py` was added after that run and passed when run on its own on 10 October 2026. The per-file results below are from the runs of 9 and 10 October 2026. Wall times vary between runs. Those of the latest run are in `build_logs/tests_summary.txt`.
+Rerun all 39 (thirty-nine) test files with `bash run_tests.sh` (repository root, also inside an unzipped `code.zip`). Eight run as scripts and thirty-one under pytest. The logged run of 10 October 2026 covers the first 37, all with rc=0 (`build_logs/tests_summary.txt`). `submit/test_h22e_b1.py` and `value/test_fig_policy.py` were added after that run and passed when run on their own on 10 October 2026. The per-file results below are from the runs of 9 and 10 October 2026. Wall times vary between runs. Those of the latest run are in `build_logs/tests_summary.txt`.
 
 | File | Command | Result | Wall |
 |---|---|---|---|
@@ -128,6 +129,7 @@ Rerun all 38 (thirty-eight) test files with `bash run_tests.sh` (repository root
 | `value/test_psel4_conservative.py` | `python -m pytest value/test_psel4_conservative.py -q` | 9 passed | 4 s |
 | `value/test_psel4_basis_check.py` | `python -m pytest value/test_psel4_basis_check.py -q` | 5 passed (includes the negative controls: reversed CX, extra X, extra Z) | 6 s |
 | `submit/test_h22e_b1.py` | `python -m pytest submit/test_h22e_b1.py -q` | 14 passed (offline, checks `submit/h22e_b1_run.py` and `submit/h22e_b1.py` against the pre-registration and the stored payloads) | 4 s |
+| `value/test_fig_policy.py` | `python -m pytest value/test_fig_policy.py -q` | 2 passed (the 45 and 0 regression counts of Figure PC against `value/psel4_ledger.csv`, and that both figure files are written) | 3 s |
 
 ## Rebuilding this package
 
