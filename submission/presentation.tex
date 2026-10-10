@@ -138,7 +138,7 @@
     \bottomrule
   \end{tabular}
   \par\smallskip
-  {\color{muted}HQC at 1000 shots. Family C is count-only apart from one H2-2E run.}
+  {\color{muted}HQC at 1000 shots. Family C is count-only apart from the H2-2E runs of vbe\_adder\_7.}
   \par\smallskip
   \raggedright\small
   \begin{itemize}\setlength{\itemsep}{1pt}
@@ -243,9 +243,8 @@
   \raggedright\footnotesize
   \begin{itemize}\setlength{\itemsep}{1pt}
     \item vbe\_adder\_3. $F_H$(P2) minus $F_H$(P0) is +0.0108, $z = +2.38$, two-sided $p = 0.017$.
-    \item Pooled Holm $p$ is 0.052 over three circuits. Repeats alone give $z = +2.44$, repeats-only Holm $p = 0.030$ over two. Inputs are all-zero.
-    \item vbe\_adder\_7 of family C runs on H2-2E. Its difference of +0.0110 ($z = 0.79$) is not resolved at 1000 shots.
-    \item 20 H2-2E jobs used 6598.0 HQC by the cost formula. Nothing has run on hardware.
+    \item Pooled Holm $p$ is 0.052 over three circuits. Repeats alone give $z = +2.44$, repeats-only Holm $p = 0.030$ over two. These inputs are all-zero.
+    \item vbe\_adder\_7 (22 qubits) on a non-zero input returns the correct sum in 0.883 (P0) and 0.901 (L3) of shots ($z = 1.30$). 22 H2-2E jobs used 7202.4 HQC. No hardware run.
   \end{itemize}
   \assess{The pooled test is primary. The repeats-only check reaches 0.030 but was chosen after the pooled result was known.}
 \end{frame}
@@ -284,7 +283,7 @@
       {\color{accent}\textbf{Limitations}}
       \begin{itemize}\setlength{\itemsep}{2pt}
         \item No user interview or survey is part of this submission.
-        \item Family C is count-only apart from one H2-2E run. PSEL output proven on 18 of 20, PSEL4 on 17.
+        \item Family C is count-only apart from two H2-2E runs. PSEL output proven on 18 of 20, PSEL4 on 17.
         \item Nothing has run on H2 hardware. All platform results are emulator runs.
         \item This submission contains no learned rewriting.
         \item PSEL costs 8.37\,\% more than pytket level 3 on family C. PSEL4 adds level 3 as a candidate and saves 0.80\,\% against it on 17 proven circuits.
@@ -319,7 +318,7 @@
   \begin{itemize}\setlength{\itemsep}{3pt}
     \item \textbf{\code{code.zip}.} The source of the repository. \code{README.md} gives the run instructions.
     \item \textbf{\code{requirements.txt}.} Pins 20 packages, among them pytket 2.18.4, pytket-quantinuum 0.59.3 and pyzx 0.10.7.
-    \item \textbf{\code{run\_tests.sh}.} Runs 27 test files, eight as scripts and nineteen under pytest. All 27 return rc=0 from a fresh unzip of \code{code.zip}.
+    \item \textbf{\code{run\_tests.sh}.} Runs 28 test files, eight as scripts and twenty under pytest. All 28 return rc=0 from a fresh unzip of \code{code.zip}.
     \item \textbf{\code{EVIDENCE.md}.} Lists every emulator job with its job ID, shots, HQC estimate and stored payload.
     \item \textbf{Generated tables.} \code{report/make\_tables.py} builds the results tables from \code{results/*.csv}. The circuit generators use seed 20261006.
     \item \textbf{Independent checks.} Verification reports by agents that did not produce the results are in \code{results/}.
