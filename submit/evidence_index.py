@@ -102,7 +102,9 @@ def render(df: pd.DataFrame, ledger: pd.DataFrame) -> str:
              "`python3 submit/h22e_pooled.py` recompute them from these payloads.")
     L.append("- Family C on H2-2E: `python3 submit/h22e_famC.py` (vbe_adder_7, all-zero input, run nexus_H2-2E_famC) and "
              "`python3 submit/h22e_famC_nz.py` (vbe_adder_7 on a = 28, b = 111, P0 vs L3, run nexus_H2-2E_famC_nz, "
-             "pre-registered in `results/h22e_nonzero_prereg.md`).")
+             "pre-registered in `results/h22e_nonzero_prereg.md`); `python3 submit/h22e_multi.py` (cdkm_adder_10 P0 vs L3 and "
+             "modadd_2n_10 P0 vs P2L3, three non-zero inputs each, 400 shots, run nexus_H2-2E_famC_multi, pre-registered in "
+             "`results/h22e_multi_prereg.md`).")
     L.append("- H2-Emulator comparison (appendix Section 3.7): `results/emulator_nexus_H2-Emulator.csv`.")
     L.append("- Notebook run on H2-2SC: `report/notebook_executed.html`.")
     L.append("- Logs: `results/emu_*.log`, `results/fetch_*.log`.")

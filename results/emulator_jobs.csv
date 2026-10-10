@@ -56,15 +56,15 @@ timestamp,platform,family,file,pipeline,shots,options,job_id,status,hqc_or_secon
 2026-10-09T17:08:39.551937Z,nexus:H2-2E,C,vbe_adder_7.qasm,P2,1000,"{""noisy_simulation"": true}",AFByb3ZpZGVySm9iAaEho9Ofd-OloWOVOFZbIw,COMPLETED,"{""duration"": 347}",results/emulator/nexus_H2-2E_famC/P2/vbe_adder_7.json
 2026-10-10T00:38:19.370862Z,nexus:H2-2E,C,vbe_adder_7_nz.qasm,P0,1000,"{""noisy_simulation"": true}",AFByb3ZpZGVySm9iAaEjP3JmdzCCVYjcuwRCWQ,COMPLETED,"{""duration"": 566}",results/emulator/nexus_H2-2E_famC_nz/P0/vbe_adder_7_nz.json
 2026-10-10T00:38:43.132100Z,nexus:H2-2E,C,vbe_adder_7_nz.qasm,L3,1000,"{""noisy_simulation"": true}",AFByb3ZpZGVySm9iAaEjP3vMemG-YGxBHOUGTw,COMPLETED,"{""duration"": 393}",results/emulator/nexus_H2-2E_famC_nz/L3/vbe_adder_7_nz.json
-2026-10-10T02:30:34.392625Z,nexus:H2-2E,C,cdkm_adder_10_i1.qasm,P0,400,"{""noisy_simulation"": true}",AFByb3ZpZGVySm9iAaEjpkMacgKkrU-swOtCFQ,SUBMITTED,,
-2026-10-10T02:31:00.993270Z,nexus:H2-2E,C,cdkm_adder_10_i1.qasm,L3,400,"{""noisy_simulation"": true}",AFByb3ZpZGVySm9iAaEjpk_TcBOHhxpETvWAQg,SUBMITTED,,
-2026-10-10T02:31:04.268192Z,nexus:H2-2E,C,cdkm_adder_10_i2.qasm,P0,400,"{""noisy_simulation"": true}",AFByb3ZpZGVySm9iAaEjplW-dSKY8MFMYtDekA,SUBMITTED,,
-2026-10-10T02:31:05.757628Z,nexus:H2-2E,C,cdkm_adder_10_i2.qasm,L3,400,"{""noisy_simulation"": true}",AFByb3ZpZGVySm9iAaEjplwVeQG7E80mrz295Q,SUBMITTED,,
-2026-10-10T02:31:07.397844Z,nexus:H2-2E,C,cdkm_adder_10_i3.qasm,P0,400,"{""noisy_simulation"": true}",AFByb3ZpZGVySm9iAaEjpmJrekCbqt_qZZPW9g,SUBMITTED,,
-2026-10-10T02:31:09.026893Z,nexus:H2-2E,C,cdkm_adder_10_i3.qasm,L3,400,"{""noisy_simulation"": true}",AFByb3ZpZGVySm9iAaEjpmpycaOVkPIKXR-FYA,SUBMITTED,,
-2026-10-10T02:31:11.075977Z,nexus:H2-2E,C,modadd_2n_10_i1.qasm,P0,400,"{""noisy_simulation"": true}",AFByb3ZpZGVySm9iAaEjpnAodYC0rJqK7p_UTA,SUBMITTED,,
-2026-10-10T02:31:12.534848Z,nexus:H2-2E,C,modadd_2n_10_i1.qasm,P2L3,400,"{""noisy_simulation"": true}",AFByb3ZpZGVySm9iAaEjpnh_ecCPBehAhE6cLg,SUBMITTED,,
-2026-10-10T02:31:14.681407Z,nexus:H2-2E,C,modadd_2n_10_i2.qasm,P0,400,"{""noisy_simulation"": true}",AFByb3ZpZGVySm9iAaEjpn6udQCMqYpX0oQicQ,SUBMITTED,,
-2026-10-10T02:31:16.239930Z,nexus:H2-2E,C,modadd_2n_10_i2.qasm,P2L3,400,"{""noisy_simulation"": true}",AFByb3ZpZGVySm9iAaEjpogIe7GpyYOrJuoEBA,SUBMITTED,,
-2026-10-10T02:31:18.660156Z,nexus:H2-2E,C,modadd_2n_10_i3.qasm,P0,400,"{""noisy_simulation"": true}",AFByb3ZpZGVySm9iAaEjpo3acYCSuifesKvQ8w,SUBMITTED,,
-2026-10-10T02:31:20.134446Z,nexus:H2-2E,C,modadd_2n_10_i3.qasm,P2L3,400,"{""noisy_simulation"": true}",AFByb3ZpZGVySm9iAaEjppbFdVCIFBZT9yxlAQ,SUBMITTED,,
+2026-10-10T02:30:34.392625Z,nexus:H2-2E,C,cdkm_adder_10_i1.qasm,P0,400,"{""noisy_simulation"": true}",AFByb3ZpZGVySm9iAaEjpkMacgKkrU-swOtCFQ,COMPLETED,"{""duration"": 174}",results/emulator/nexus_H2-2E_famC_multi/P0/cdkm_adder_10_i1.json
+2026-10-10T02:31:00.993270Z,nexus:H2-2E,C,cdkm_adder_10_i1.qasm,L3,400,"{""noisy_simulation"": true}",AFByb3ZpZGVySm9iAaEjpk_TcBOHhxpETvWAQg,COMPLETED,"{""duration"": 226}",results/emulator/nexus_H2-2E_famC_multi/L3/cdkm_adder_10_i1.json
+2026-10-10T02:31:04.268192Z,nexus:H2-2E,C,cdkm_adder_10_i2.qasm,P0,400,"{""noisy_simulation"": true}",AFByb3ZpZGVySm9iAaEjplW-dSKY8MFMYtDekA,COMPLETED,"{""duration"": 180}",results/emulator/nexus_H2-2E_famC_multi/P0/cdkm_adder_10_i2.json
+2026-10-10T02:31:05.757628Z,nexus:H2-2E,C,cdkm_adder_10_i2.qasm,L3,400,"{""noisy_simulation"": true}",AFByb3ZpZGVySm9iAaEjplwVeQG7E80mrz295Q,COMPLETED,"{""duration"": 376}",results/emulator/nexus_H2-2E_famC_multi/L3/cdkm_adder_10_i2.json
+2026-10-10T02:31:07.397844Z,nexus:H2-2E,C,cdkm_adder_10_i3.qasm,P0,400,"{""noisy_simulation"": true}",AFByb3ZpZGVySm9iAaEjpmJrekCbqt_qZZPW9g,COMPLETED,"{""duration"": 412}",results/emulator/nexus_H2-2E_famC_multi/P0/cdkm_adder_10_i3.json
+2026-10-10T02:31:09.026893Z,nexus:H2-2E,C,cdkm_adder_10_i3.qasm,L3,400,"{""noisy_simulation"": true}",AFByb3ZpZGVySm9iAaEjpmpycaOVkPIKXR-FYA,COMPLETED,"{""duration"": 189}",results/emulator/nexus_H2-2E_famC_multi/L3/cdkm_adder_10_i3.json
+2026-10-10T02:31:11.075977Z,nexus:H2-2E,C,modadd_2n_10_i1.qasm,P0,400,"{""noisy_simulation"": true}",AFByb3ZpZGVySm9iAaEjpnAodYC0rJqK7p_UTA,COMPLETED,"{""duration"": 143}",results/emulator/nexus_H2-2E_famC_multi/P0/modadd_2n_10_i1.json
+2026-10-10T02:31:12.534848Z,nexus:H2-2E,C,modadd_2n_10_i1.qasm,P2L3,400,"{""noisy_simulation"": true}",AFByb3ZpZGVySm9iAaEjpnh_ecCPBehAhE6cLg,COMPLETED,"{""duration"": 147}",results/emulator/nexus_H2-2E_famC_multi/P2L3/modadd_2n_10_i1.json
+2026-10-10T02:31:14.681407Z,nexus:H2-2E,C,modadd_2n_10_i2.qasm,P0,400,"{""noisy_simulation"": true}",AFByb3ZpZGVySm9iAaEjpn6udQCMqYpX0oQicQ,COMPLETED,"{""duration"": 38}",results/emulator/nexus_H2-2E_famC_multi/P0/modadd_2n_10_i2.json
+2026-10-10T02:31:16.239930Z,nexus:H2-2E,C,modadd_2n_10_i2.qasm,P2L3,400,"{""noisy_simulation"": true}",AFByb3ZpZGVySm9iAaEjpogIe7GpyYOrJuoEBA,COMPLETED,"{""duration"": 141}",results/emulator/nexus_H2-2E_famC_multi/P2L3/modadd_2n_10_i2.json
+2026-10-10T02:31:18.660156Z,nexus:H2-2E,C,modadd_2n_10_i3.qasm,P0,400,"{""noisy_simulation"": true}",AFByb3ZpZGVySm9iAaEjpo3acYCSuifesKvQ8w,COMPLETED,"{""duration"": 151}",results/emulator/nexus_H2-2E_famC_multi/P0/modadd_2n_10_i3.json
+2026-10-10T02:31:20.134446Z,nexus:H2-2E,C,modadd_2n_10_i3.qasm,P2L3,400,"{""noisy_simulation"": true}",AFByb3ZpZGVySm9iAaEjppbFdVCIFBZT9yxlAQ,COMPLETED,"{""duration"": 141}",results/emulator/nexus_H2-2E_famC_multi/P2L3/modadd_2n_10_i3.json

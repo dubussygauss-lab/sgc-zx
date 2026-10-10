@@ -1,4 +1,4 @@
-"""Tests for submit/evidence_index.py: H2-2E totals (Section 3.7.1 subset, the family C run and the non-zero-input run) and every job is listed once."""
+"""Tests for submit/evidence_index.py: H2-2E totals (Section 3.7.1 subset, the family C run, the non-zero-input run and the multi-input run) and every job is listed once."""
 import os
 import sys
 
@@ -12,8 +12,9 @@ def test_h22e_totals():
     ok = df[df.counts_ok & (df.platform == "nexus:H2-2E")]
     # all H2-2E jobs: Table E2/E3 runs (18 jobs, 5933.2) + family C vbe_adder_7 (2 jobs, 664.8)
     # + vbe_adder_7 on the non-zero input a=28, b=111 (2 jobs, 604.4)
-    assert len(ok) == 22 and ok.job_id.nunique() == 22
-    assert round(ok.hqc_estimate.sum(), 1) == 7202.4
+    # + cdkm_adder_10 / modadd_2n_10 on three non-zero inputs each, 400 shots (12 jobs, 1781.04)
+    assert len(ok) == 34 and ok.job_id.nunique() == 34
+    assert round(ok.hqc_estimate.sum(), 2) == 8983.44
     # Table E2/E3 subset: run dirs nexus_H2-2E and nexus_H2-2E_r*
     e23 = ok[ok.run_dir.str.fullmatch(r"nexus_H2-2E(_r\d+)?")]
     assert len(e23) == 18 and e23.job_id.nunique() == 18
@@ -24,6 +25,9 @@ def test_h22e_totals():
     nz = ok[ok.run_dir == "nexus_H2-2E_famC_nz"]
     assert len(nz) == 2 and nz.job_id.nunique() == 2
     assert round(nz.hqc_estimate.sum(), 1) == 604.4
+    multi = ok[ok.run_dir == "nexus_H2-2E_famC_multi"]
+    assert len(multi) == 12 and multi.job_id.nunique() == 12
+    assert round(multi.hqc_estimate.sum(), 2) == 1781.04
 
 
 def test_h2_emulator_batches():
