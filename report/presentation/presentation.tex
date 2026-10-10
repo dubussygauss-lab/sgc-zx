@@ -1,11 +1,12 @@
 % Submission 1 presentation, Quantinuum Singapore Grand Challenge, team Learned ZX Rewriting.
-% Framing 4. Content and numbers are taken only from value/policy_compare.md, value/usd_psel4.md,
+% Framing 6. Content and numbers are taken only from value/policy_compare.md, value/usd_psel4.md,
 % value/hqc_per_correct.md, value/psel4_zx_only.md, value/mechanism_zx_l3.md, value/zx_classifier.md,
 % value/psel4_basis_check.md, value/psel4_conservative.md, results/family_C_equivalence_qcec.md,
+% results/h22e_b1.md, results/h22e_multi.md, results/h22e_famC_nz.md, results/h22e_multi_depth.md,
 % results/h22e_confirmatory.md, results/family_C_equivalence_L3.md, results/strong_baselines.md,
 % results/EVIDENCE.md and report/report_v5.md.
 % Story: customer value (drop-in auto level, never costlier than the default), level 3 adoption made
-% safe, H2-2E emulator results, value in USD, mechanism, correctness.
+% safe, Finding 2 (the HQC-cheapest compile is not the most accurate), value in USD, mechanism, correctness.
 % Build: pdflatex presentation.tex (twice).
 \documentclass[aspectratio=169,11pt]{beamer}
 \usepackage[utf8]{inputenc}
@@ -144,27 +145,29 @@
 \end{frame}
 
 % ---------------------------------------------------------------- 5
-\begin{frame}{H2-2E emulator results}
-  \centering\small
-  \begin{tabular}{@{}lrrrc@{}}
+\begin{frame}{Finding 2. The HQC-cheapest compile is not the most accurate}
+  \centering\footnotesize
+  {\renewcommand{\arraystretch}{0.92}%
+  \begin{tabular}{@{}llrrrr@{}}
     \toprule
-    Circuit, lower-HQC compile & $p$ level 2 & $p$ alt & $R$ & 95\,\% interval of $R$ \\
+    Circuit & Pick & $p$ level 2 & $p$ pick & $z$ & $R$ \\
     \midrule
-    vbe\_adder\_3, P2 & 0.9520 & 0.9627 & 0.7762 & 0.7690 to 0.7834 \\
-    hwb6, P2 & 0.9240 & 0.9090 & 0.9730 & 0.9476 to 0.9991 \\
-    vbe\_adder\_7 all-zero input, P2 & 0.8860 & 0.8970 & 0.7851 & 0.7614 to 0.8095 \\
-    vbe\_adder\_7 non-zero input, L3 & 0.8830 & 0.9010 & 0.6114 & 0.5930 to 0.6303 \\
-    cdkm\_adder\_10, L3 & 0.8692 & 0.8267 & 0.9203 & 0.8896 to 0.9521 \\
-    modadd\_2n\_10, P2L3 & 0.8417 & 0.8383 & 0.9526 & 0.9199 to 0.9864 \\
+    cdkm\_adder\_10 & L3 & 0.8692 & 0.8267 & $-2.90$ & 0.9203 \\
+    hwb6 & P2L3 & 0.9200 & 0.8883 & $-2.64$ & 0.8909 \\
+    modadd\_2n\_10 & P2L3 & 0.8417 & 0.8383 & $-0.22$ & 0.9526 \\
+    vbe\_adder\_3 & L3 & 0.9531 & 0.9569 & $+0.51$ & 0.6713 \\
+    vbe\_adder\_7 & L3 & 0.8830 & 0.9010 & $+1.30$ & 0.6114 \\
     \midrule
-    \textbf{Pooled, 6 pairs} & & & \textbf{0.8262} & \textbf{0.8189 to 0.8335} \\
+    \textbf{Pooled per answer, 8 pairs} & & & & & \textbf{0.8192} \\
     \bottomrule
-  \end{tabular}
-  \src{H2-2E emulator, HQC is the formula estimate. $p$ is the share of shots with the correct output. $R$ is the HQC per correct output of the alt compile over that of level 2. Three of six pairs compare P2, the earlier selector's pick. grover\_5 has no single correct output and is excluded. Source \code{value/hqc\_per\_correct.md}.}
-  \raggedright\small
-  \begin{itemize}\setlength{\itemsep}{2pt}
-    \item The HQC saving carried over to cost per correct answer in 6 of 6 pairs. Pooled HQC ratio 0.8264 divided by accuracy ratio 1.0002 gives $R = 0.8262$.
-    \item One significant accuracy loss: on cdkm\_adder\_10 the level 3 pick returns the correct sum less often (0.8267 against 0.8692, $z = -2.90$).
+  \end{tabular}}
+  \src{Pre-registered H2-2E runs of the PSEL4 pick against level 2 on non-zero inputs, 3 to 4 each at 400 shots per program. $p$: share of correct shots. $z$: pooled two-proportion statistic. $R$: HQC per correct output, pick over level 2. The pooled row adds three earlier P2 pairs. Source \code{value/hqc\_per\_correct.md}.}
+  \raggedright\footnotesize
+  \begin{itemize}\setlength{\itemsep}{0pt}
+    \item The pick was significantly less accurate on 2 of 5 (hwb6 Holm $p = 0.0168$), not different on 2, not significantly better on 1. No pick was significantly more accurate.
+    \item On cdkm\_adder\_10 the less accurate pick has fewer two-qubit gates (118 against 141) and lower two-qubit depth (65 against 122, post hoc), so neither HQC nor gate counts order fidelity.
+    \item HQC per correct answer is lower for the pick in 5 of 5 pairs, 8 of 8 with the earlier pairs. Pooled 18.1\,\% lower (bootstrap 95\,\% interval 0.8132 to 0.8254), HQC ratio 0.8170 over accuracy ratio 0.9973.
+    \item \Otag\ PSEL4 serves cost-bound users. Accuracy-bound users need the fidelity-aware finals selector.
   \end{itemize}
 \end{frame}
 
@@ -195,11 +198,12 @@
     \bottomrule
   \end{tabular}
   \src{Totals after each pipeline. 6 circuits did not fit the compile budget. Source \code{value/mechanism\_zx\_l3.md}.}
-  \raggedright\small
-  \begin{itemize}\setlength{\itemsep}{3pt}
+  \raggedright\footnotesize
+  \begin{itemize}\setlength{\itemsep}{1pt}
+    \item \textbf{Mechanism.} HQC charges no Rz gate and bills every PhasedX at the same rate, so the T-count reduction ZX is best at has no HQC value on H2, and ZX can pay only through two-qubit gates, which level 3 already resynthesises.
     \item GreedyPauliSimp in level 3 lowers the two-qubit count on 180 of 180 A, 13 of 14 B1 and 9 of 15 C circuits.
-    \item teleport\_reduce leaves fewer non-Clifford gates on B1. On H2 this rarely lowers HQC, since a two-qubit gate costs 2 HQC at 1000 shots and a PhasedX 0.2.
-    \item ZX on top of the cheaper pytket level saves 3.21\,\% on all 20 family C circuits, 0.49\,\% on B1 and 0 on Trotter circuits.
+    \item teleport\_reduce leaves fewer non-Clifford gates on B1 (656 against 746 for level 3). A two-qubit gate costs 2 HQC at 1000 shots and a PhasedX 0.2.
+    \item ZX on top of the cheaper pytket level saves 3.21\,\% on all 20 family C circuits (0.26\,\% on the 17 proven), 0.49\,\% on B1 and 0 on Trotter circuits. Its gain anticorrelates with the level 3 gain, $\rho = -0.64$.
     \item On B1 the ZX stage removes 40.6\,\% of T gates. The Gosset et al.\ (2014) bound leaves at most 0.3\,\% for further exact T optimisation (24 circuits of at most 5 qubits).
   \end{itemize}
 \end{frame}
@@ -228,11 +232,11 @@
 % ---------------------------------------------------------------- 9
 \begin{frame}{Limitations}
   \small
-  \begin{itemize}\setlength{\itemsep}{4pt}
+  \begin{itemize}\setlength{\itemsep}{3pt}
     \item HQC is the formula estimate. All fidelity results come from the H2-2E emulator. Nothing has run on H2 hardware.
-    \item On cdkm\_adder\_10 the level 3 pick returns the correct sum less often (0.8267 against 0.8692, $z = -2.90$). Accuracy-bound users need a fidelity-aware choice.
+    \item The PSEL4 pick was significantly less accurate on 2 of 5 pre-registered pairs (cdkm\_adder\_10 $z = -2.90$, hwb6 $z = -2.64$). Accuracy-bound users need a fidelity-aware choice.
+    \item Per-answer intervals pool inputs and ignore between-run variation. 3 of 8 per-answer pairs use P2, the earlier selector's pick.
     \item The ZX-only gain is 0.26\,\% on the 17 proven family C circuits.
-    \item Per correct answer: three of the six pairs compare P2, not the PSEL4 pick. Inputs are pooled as one binomial.
     \item 2 family C level 3 outputs and 3 PSEL4 outputs are unproven. On draper\_adder\_28 the PSEL4 pick starts from angles PyZX rounded by up to 1.50e-06 rad.
     \item The earlier vbe\_adder\_3 fidelity gain used the all-zero input. Its Holm-adjusted $p$ is 0.052 over three circuits.
     \item No user interview or survey is part of this submission. The selector follows pytket's PassSelector pattern.
@@ -244,10 +248,10 @@
   \small
   \begin{itemize}\setlength{\itemsep}{5pt}
     \item \Otag\ Goal: a learned selector that predicts fidelity as well as HQC for each candidate. It keeps the per-answer saving and protects accuracy where users need it.
-    \item cdkm\_adder\_10 shows why. Its cheaper compile costs less per correct sum but returns the correct sum less often.
-    \item A first classifier on input-circuit features does not beat constant choices with a whole family held out (balanced accuracy 0.433 against 0.500).
-    \item \Otag\ The finals model therefore needs structural features and emulator labels.
-    \item \Otag\ Its starting data are the four-candidate ledger of 217 circuits and the 34 stored H2-2E jobs.
+    \item Finding 2 shows why. On 2 of 5 pre-registered pairs the HQC-cheapest compile returns the correct output less often.
+    \item Submission 1 provides the training data: the checked ledger (217 circuits, 4 candidates each) and the emulator labels (5 pre-registered PSEL4-pick pairs, 48 H2-2E jobs).
+    \item A first classifier on input-circuit features does not beat a constant choice with a whole family held out (balanced accuracy 0.433 against 0.500).
+    \item \Otag\ The model therefore needs compiled-candidate structural features and emulator labels.
   \end{itemize}
 \end{frame}
 
@@ -256,9 +260,9 @@
   \small
   \begin{itemize}\setlength{\itemsep}{4pt}
     \item \textbf{\code{code.zip}.} The source of the repository. \code{requirements.txt} pins pytket 2.18.4, pytket-quantinuum 0.59.3 and pyzx 0.10.7.
-    \item \textbf{\code{run\_tests.sh}.} Runs 37 test files, including the 64-basis-input check and its negative-control test, and writes one return code per file.
+    \item \textbf{\code{run\_tests.sh}.} Runs 38 test files, including the 64-basis-input check and its negative-control test, and writes one return code per file.
     \item \textbf{Notebook.} Demonstrates PSEL4. It compiles tof\_3 with PSEL4 and submits the pick to the H2-2SC syntax checker.
-    \item \textbf{\code{EVIDENCE.md}.} Lists every emulator job with its job ID, shots, HQC estimate and payload. The 34 H2-2E jobs used an HQC estimate of 8983.4 of the 10,000 budget.
+    \item \textbf{\code{EVIDENCE.md}.} Lists every emulator job with its job ID, shots, HQC estimate and payload. The 48 H2-2E jobs used an HQC estimate of 9971.8 of the 10,000 budget.
     \item \textbf{Generated tables.} Value tables come from the scripts under \code{value/}. Emulator tables are regenerated offline from the stored payloads.
     \item \textbf{Independent checks.} Verification reports by agents that did not produce the results are in \code{results/}.
   \end{itemize}
