@@ -2,7 +2,7 @@
 # Runs every test file once from the repository root and writes one log per file
 # plus a summary to submission/build_logs/ (or $TEST_LOG_DIR). Rerunnable from the repository root or from an unzipped code.zip.
 cd "$(dirname "$0")"
-# 37 test files: 8 run as scripts, 29 under pytest. See REPRODUCE.md (Tests).
+# 38 test files: 8 run as scripts, 30 under pytest. See REPRODUCE.md (Tests).
 LOG="${TEST_LOG_DIR:-submission/build_logs}"
 mkdir -p "$LOG"
 : > "$LOG/tests_summary.txt"
@@ -47,6 +47,7 @@ run policy_compare python -m pytest value/test_policy_compare.py -q
 run mechanism_zx_l3 python -m pytest value/test_mechanism_zx_l3.py -q
 run h22e_multi   python -m pytest submit/test_h22e_multi.py -q
 run h22e_multi_depth python -m pytest submit/test_h22e_multi_depth.py -q
+run h22e_b1      python -m pytest submit/test_h22e_b1.py -q
 run hqc_per_correct python -m pytest value/test_hqc_per_correct.py -q
 run usd_psel4    python -m pytest value/test_usd_psel4.py -q
 run psel4_conservative python -m pytest value/test_psel4_conservative.py -q

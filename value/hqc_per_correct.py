@@ -6,6 +6,8 @@ Inputs (all under results/emulator/)
   nexus_H2-2E_famC_nz              vbe_adder_7_nz                P0 vs L3
   nexus_H2-2E_famC_multi           cdkm_adder_10_i1..3           P0 vs L3
                                    modadd_2n_10_i1..3            P0 vs P2L3
+  nexus_H2-2E_famB1_multi          vbe_adder_3_i1..4             P0 vs L3    (PSEL4 pick)
+                                   hwb6_i1..3                    P0 vs P2L3  (PSEL4 pick)
   Each payload <run>/<pipeline>/<file>.json carries counts, shots, hqc_estimate, F_H.
 
 Ideal output (repository code only)
@@ -13,6 +15,7 @@ Ideal output (repository code only)
   vbe_adder_7      submit/common.reference_probs("C", file) (bench/sv.py on the written circuit)
   vbe_adder_7_nz   submit/h22e_famC_nz.expected_bits()
   famC_multi       submit/h22e_multi_run.expected_bits(circuit, a, b) for the drawn inputs
+  famB1_multi      submit/h22e_b1_run.expected_bits(circuit, inp) for the drawn inputs
   A circuit enters only if its ideal distribution is a single bitstring. Then p = count of that
   bitstring / shots, checked against the stored F_H to 1e-9. grover_5 is excluded when its ideal
   distribution has more than one outcome (no unique marked item).
@@ -24,6 +27,9 @@ Statistics per (circuit, pipeline), pooled over repeats / inputs
             var(log p) = (1 - p) / (S p) per arm (H fixed), checked by a parametric
             bootstrap K* ~ Binomial(S, p_hat) per arm, 10,000 resamples, seed 20261010.
   pooled R  (sum H_alt / sum K_alt) / (sum H_P0 / sum K_P0) over all pairs.
+  Headline counts are given over all pairs and, separately, over the pairs whose alternative is the
+  PSEL4 pick of the circuit (psel4 column: vbe_adder_7_nz L3, cdkm_adder_10 L3, modadd_2n_10 P2L3,
+  vbe_adder_3 L3, hwb6 P2L3; the P0 vs P2 pairs predate PSEL4).
 
 Run from the repository root:  python3 value/hqc_per_correct.py
 Writes value/hqc_per_correct.csv and value/hqc_per_correct.md.
@@ -44,6 +50,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "submit"))
 import common  # noqa: E402
 import h22e_famC_nz  # noqa: E402
+import h22e_b1_run  # noqa: E402
 import h22e_multi_run  # noqa: E402
 
 EMU = ROOT / "results" / "emulator"
@@ -54,17 +61,20 @@ N_BOOT = 10000
 Z95 = 1.959963984540054
 TOL = 1e-9
 
-# (circuit, runs, P0 baseline, alternative)
+# (circuit, runs, P0 baseline, alternative, alternative is the PSEL4 pick)
 PAIRS = [
-    ("vbe_adder_3", ("nexus_H2-2E", "nexus_H2-2E_r2", "nexus_H2-2E_r3", "nexus_H2-2E_r4"), "P0", "P2"),
-    ("hwb6", ("nexus_H2-2E",), "P0", "P2"),
-    ("grover_5", ("nexus_H2-2E", "nexus_H2-2E_r2", "nexus_H2-2E_r3", "nexus_H2-2E_r4"), "P0", "P2"),
-    ("vbe_adder_7", ("nexus_H2-2E_famC",), "P0", "P2"),
-    ("vbe_adder_7_nz", ("nexus_H2-2E_famC_nz",), "P0", "L3"),
-    ("cdkm_adder_10", ("nexus_H2-2E_famC_multi",), "P0", "L3"),
-    ("modadd_2n_10", ("nexus_H2-2E_famC_multi",), "P0", "P2L3"),
+    ("vbe_adder_3", ("nexus_H2-2E", "nexus_H2-2E_r2", "nexus_H2-2E_r3", "nexus_H2-2E_r4"), "P0", "P2", False),
+    ("hwb6", ("nexus_H2-2E",), "P0", "P2", False),
+    ("grover_5", ("nexus_H2-2E", "nexus_H2-2E_r2", "nexus_H2-2E_r3", "nexus_H2-2E_r4"), "P0", "P2", False),
+    ("vbe_adder_7", ("nexus_H2-2E_famC",), "P0", "P2", False),
+    ("vbe_adder_7_nz", ("nexus_H2-2E_famC_nz",), "P0", "L3", True),
+    ("cdkm_adder_10", ("nexus_H2-2E_famC_multi",), "P0", "L3", True),
+    ("modadd_2n_10", ("nexus_H2-2E_famC_multi",), "P0", "P2L3", True),
+    ("vbe_adder_3", ("nexus_H2-2E_famB1_multi",), "P0", "L3", True),
+    ("hwb6", ("nexus_H2-2E_famB1_multi",), "P0", "P2L3", True),
 ]
 B1 = {"vbe_adder_3", "hwb6", "grover_5"}
+B1_MULTI = {f for *_, f in h22e_b1_run.programs()}
 
 
 def circuit_of(file: str) -> str:
@@ -74,6 +84,11 @@ def circuit_of(file: str) -> str:
 def ideal(file: str) -> dict:
     """{'bits': str or None, 'support': int, 'p_max': float, 'source': str} for one payload file."""
     c = circuit_of(file)
+    if file in B1_MULTI:
+        for cc, k, inp, f in h22e_b1_run.programs():
+            if f == file:
+                return dict(bits=h22e_b1_run.expected_bits(cc, inp), support=1, p_max=1.0,
+                            source="h22e_b1_run.expected_bits")
     if c in B1 or c == "vbe_adder_7":
         fam = "B1" if c in B1 else "C"
         p = common.reference_probs(fam, file)
@@ -129,7 +144,7 @@ def compute() -> dict:
     assert (used.absdiff_FH <= TOL).all(), used[used.absdiff_FH > TOL]
     rng = np.random.default_rng(SEED)
     out, excluded, boot_all = [], [], []
-    for circ, runs, base, alt in PAIRS:
+    for circ, runs, base, alt, psel4 in PAIRS:
         sub = df[(df.circuit == circ) & df.run.isin(runs)]
         assert set(sub.pipeline) == {base, alt}, (circ, set(sub.pipeline))
         if sub.ideal_bits.isna().any():
@@ -151,7 +166,7 @@ def compute() -> dict:
         boot_all.append((H0, H1, k0b, k1b))
         Rb = (H1 / k1b) / (H0 / k0b)
         out.append(dict(circuit=circ, runs="+".join(r.replace("nexus_", "") for r in runs), n_jobs_per_arm=len(a0),
-                        alt=alt, shots_per_arm=S0, K_P0=K0, K_alt=K1, p_P0=p0, p_alt=p1, z=z,
+                        alt=alt, psel4=psel4, shots_per_arm=S0, K_P0=K0, K_alt=K1, p_P0=p0, p_alt=p1, z=z,
                         hqc_P0=H0, hqc_alt=H1, hqc_ratio=H1 / H0,
                         hqc_per_1000_correct_P0=1000 * C0, hqc_per_1000_correct_alt=1000 * C1, R=R,
                         R_lo_delta=R * math.exp(-Z95 * se), R_hi_delta=R * math.exp(Z95 * se),
@@ -160,9 +175,13 @@ def compute() -> dict:
     sH0, sK0, sH1, sK1 = T.hqc_P0.sum(), T.K_P0.sum(), T.hqc_alt.sum(), T.K_alt.sum()
     Rpool = (sH1 / sK1) / (sH0 / sK0)
     Rpb = (sH1 / sum(b[3] for b in boot_all)) / (sH0 / sum(b[2] for b in boot_all))
+    P = T[T.psel4]
     head = dict(n_pairs=len(T), n_alt_cheaper=int((T.R < 1).sum()),
                 n_upper_delta_below_1=int((T.R_hi_delta < 1).sum()),
                 n_upper_boot_below_1=int((T.R_hi_boot < 1).sum()),
+                n_pairs_psel4=len(P), n_alt_cheaper_psel4=int((P.R < 1).sum()),
+                n_upper_delta_below_1_psel4=int((P.R_hi_delta < 1).sum()),
+                n_upper_boot_below_1_psel4=int((P.R_hi_boot < 1).sum()),
                 R_cdkm=float(T.set_index("circuit").loc["cdkm_adder_10", "R"]),
                 R_pooled=Rpool, R_pooled_lo_boot=float(np.quantile(Rpb, 0.025)),
                 R_pooled_hi_boot=float(np.quantile(Rpb, 0.975)),
@@ -186,17 +205,20 @@ def render_md(r: dict) -> str:
          "R = C_alt / C_P0. The interval is the delta method on log R. The bootstrap column is a parametric "
          "bootstrap (10,000 resamples, seed %d). z is the pooled two-proportion statistic of p_alt - p_P0." % SEED,
          "",
-         "| Circuit | Runs | Alt | Shots per arm | p_P0 | p_alt | z | HQC per 1000 correct, P0 | HQC per 1000 correct, alt | R | 95 % interval (delta) | 95 % interval (bootstrap) |",
-         "|---|---|---|---:|---:|---:|---:|---:|---:|---:|---|---|"]
+         "| Circuit | Runs | Alt | PSEL4 pick | Shots per arm | p_P0 | p_alt | z | HQC per 1000 correct, P0 | HQC per 1000 correct, alt | R | 95 % interval (delta) | 95 % interval (bootstrap) |",
+         "|---|---|---|---|---:|---:|---:|---:|---:|---:|---:|---|---|"]
     for t in T.itertuples():
-        L.append("| %s | %s | %s | %d | %.4f | %.4f | %+.2f | %.1f | %.1f | %.4f | [%.4f, %.4f] | [%.4f, %.4f] |" % (
-            t.circuit, t.runs, t.alt, t.shots_per_arm, t.p_P0, t.p_alt, t.z, t.hqc_per_1000_correct_P0,
+        L.append("| %s | %s | %s | %s | %d | %.4f | %.4f | %+.2f | %.1f | %.1f | %.4f | [%.4f, %.4f] | [%.4f, %.4f] |" % (
+            t.circuit, t.runs, t.alt, "yes" if t.psel4 else "no", t.shots_per_arm, t.p_P0, t.p_alt, t.z, t.hqc_per_1000_correct_P0,
             t.hqc_per_1000_correct_alt, t.R, t.R_lo_delta, t.R_hi_delta, t.R_lo_boot, t.R_hi_boot))
     L += ["", "## Headline", ""]
     L.append("- `[F]` The alternative costs fewer HQC per correct output than P0 (R < 1) in %d of %d pairs."
              % (h["n_alt_cheaper"], h["n_pairs"]))
     L.append("- `[F]` The upper 95 %% bound of R is below 1 in %d of %d pairs by the delta method and in %d of %d by the bootstrap."
              % (h["n_upper_delta_below_1"], h["n_pairs"], h["n_upper_boot_below_1"], h["n_pairs"]))
+    L.append("- `[F]` Restricted to the %d pairs whose alternative is the PSEL4 pick: R < 1 in %d, upper 95 %% bound below 1 "
+             "in %d (delta) and %d (bootstrap)."
+             % (h["n_pairs_psel4"], h["n_alt_cheaper_psel4"], h["n_upper_delta_below_1_psel4"], h["n_upper_boot_below_1_psel4"]))
     c = T.set_index("circuit").loc["cdkm_adder_10"]
     L.append("- `[F]` cdkm_adder_10 (L3, three inputs pooled): R = %.4f, delta interval [%.4f, %.4f]."
              % (c.R, c.R_lo_delta, c.R_hi_delta))
@@ -219,8 +241,11 @@ def render_md(r: dict) -> str:
         L.append("- `[F]` %s is excluded. Its ideal distribution (`common.reference_probs`) has %d outcomes with "
                  "largest probability %.6f, so it has no unique marked item. Its HQC ratio alt / P0 over %d runs is %.4f."
                  % (e["circuit"], e["support"], e["p_max"], e["runs"], e["hqc_ratio"]))
-    L.append("- `[O]` Pooling the three inputs of cdkm_adder_10 and modadd_2n_10 treats them as one binomial. "
-             "The intervals ignore variation between inputs and between emulator runs.")
+    L.append("- `[O]` Pooling the inputs of cdkm_adder_10, modadd_2n_10, vbe_adder_3 (famB1_multi) and hwb6 (famB1_multi) "
+             "treats them as one binomial. The intervals ignore variation between inputs and between emulator runs.")
+    L.append("- `[F]` vbe_adder_3 and hwb6 appear twice: the zero-input P0 vs P2 runs of 2026-10-08 (1000 shots) and the "
+             "non-zero-input P0 vs PSEL4-pick run `nexus_H2-2E_famB1_multi` (400 shots per input, pre-registered in "
+             "`results/h22e_b1_prereg.md`).")
     return "\n".join(L) + "\n"
 
 

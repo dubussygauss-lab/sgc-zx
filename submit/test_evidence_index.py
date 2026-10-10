@@ -13,8 +13,9 @@ def test_h22e_totals():
     # all H2-2E jobs: Table E2/E3 runs (18 jobs, 5933.2) + family C vbe_adder_7 (2 jobs, 664.8)
     # + vbe_adder_7 on the non-zero input a=28, b=111 (2 jobs, 604.4)
     # + cdkm_adder_10 / modadd_2n_10 on three non-zero inputs each, 400 shots (12 jobs, 1781.04)
-    assert len(ok) == 34 and ok.job_id.nunique() == 34
-    assert round(ok.hqc_estimate.sum(), 2) == 8983.44
+    # + vbe_adder_3 (4 inputs) / hwb6 (3 inputs) P0 vs PSEL4 pick, 400 shots (14 jobs, 988.32)
+    assert len(ok) == 48 and ok.job_id.nunique() == 48
+    assert round(ok.hqc_estimate.sum(), 2) == 9971.76
     # Table E2/E3 subset: run dirs nexus_H2-2E and nexus_H2-2E_r*
     e23 = ok[ok.run_dir.str.fullmatch(r"nexus_H2-2E(_r\d+)?")]
     assert len(e23) == 18 and e23.job_id.nunique() == 18
@@ -28,6 +29,9 @@ def test_h22e_totals():
     multi = ok[ok.run_dir == "nexus_H2-2E_famC_multi"]
     assert len(multi) == 12 and multi.job_id.nunique() == 12
     assert round(multi.hqc_estimate.sum(), 2) == 1781.04
+    b1 = ok[ok.run_dir == "nexus_H2-2E_famB1_multi"]
+    assert len(b1) == 14 and b1.job_id.nunique() == 14
+    assert round(b1.hqc_estimate.sum(), 2) == 988.32
 
 
 def test_h2_emulator_batches():
