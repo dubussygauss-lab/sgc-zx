@@ -1,5 +1,5 @@
 % Submission 1 presentation, Quantinuum Singapore Grand Challenge, team Learned ZX Rewriting.
-% Framing 6. Content and numbers are taken only from value/policy_compare.md, value/usd_psel4.md,
+% Framing 7. Content and numbers are taken only from value/policy_compare.md, value/usd_psel4.md,
 % value/hqc_per_correct.md, value/psel4_zx_only.md, value/mechanism_zx_l3.md, value/zx_classifier.md,
 % value/psel4_basis_check.md, value/psel4_conservative.md, results/family_C_equivalence_qcec.md,
 % results/h22e_b1.md, results/h22e_multi.md, results/h22e_famC_nz.md, results/h22e_multi_depth.md,
@@ -11,6 +11,7 @@
 \documentclass[aspectratio=169,11pt]{beamer}
 \usepackage[utf8]{inputenc}
 \usepackage{booktabs}
+\usepackage{graphicx}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning}
 
@@ -56,10 +57,10 @@
   \vfill
   {\color{accent}\LARGE\bfseries PSEL4 is a drop-in auto level for pytket-quantinuum\par}
   \vspace{0.4cm}
-  \begin{itemize}\setlength{\itemsep}{3pt}\large
-    \item PSEL4 is a cost-aware auto level. It compiles each circuit four ways and keeps the cheapest checked result.
-    \item It is never costlier than the default compile (0 of 217 circuits).
-    \item It needs 15.7\,\% less HQC than the default level 2 on our 217-circuit benchmark.
+  \begin{itemize}\setlength{\itemsep}{3pt}
+    \item \textbf{Problem, measured.} pytket-quantinuum's level 3 saves 13.9\,\% HQC over the default level 2 on 217 circuits, but costs more on 45 of them (372.0 HQC lost, worst 12.95\,\% on gf2\_pow\_4\_mult). \Otag\ A user cannot tell in advance which.
+    \item \textbf{PSEL4 removes that risk.} It compiles each circuit four ways (level 2, level 3, ZX before each), checks each result and keeps the cheapest. Costlier than level 2 on none of the 217.
+    \item 15.7\,\% below level 2. 2.08\,\% (1,051.6 HQC) below always level 3. 1.35\,\% (679.6 HQC) below the per-circuit cheaper of level 2 and level 3.
     \item \Otag\ Workload assumption: a team spends the Standard Plan's 10,000 HQC a month on this mix. PSEL4 then frees 1,573.3 HQC, worth USD 19,666 a month.
   \end{itemize}
   \vspace{0.35cm}
@@ -123,7 +124,10 @@
 
 % ---------------------------------------------------------------- 4
 \begin{frame}{Finding 1. Level 3 adoption made safe}
-  \centering\small
+  \centering
+  \includegraphics[width=0.70\textwidth]{../figures/fig_policy.pdf}\par
+  \vspace{-4pt}
+  {\scriptsize
   \begin{tabular}{@{}lrrrr@{}}
     \toprule
     Policy & Total HQC & Saved vs L2 & Circuits costlier than L2 & HQC lost there \\
@@ -132,22 +136,15 @@
     Always L3 & 50,632.2 & 13.9\,\% & 45 & 372.0 \\
     \textbf{PSEL4} & \textbf{49,580.6} & \textbf{15.7\,\%} & \textbf{0} & \textbf{0.0} \\
     \bottomrule
-  \end{tabular}
-  \src{217 circuits (A 180, B1 15, C 20, Grover use case 2), HQC at 1000 shots. Source \code{value/policy\_compare.md}, \code{value/usd\_psel4.md}.}
-  \raggedright\small
-  \begin{itemize}\setlength{\itemsep}{2pt}
-    \item Split of the 15.73\,\% saving: always level 3 gives 13.95 points, per-circuit selection plus ZX give 1.79 points.
-    \item Against the per-circuit cheaper of level 2 and level 3, PSEL4 saves 679.6 HQC (1.35\,\%).
-    \item Always level 3 costs more than level 2 on 45 circuits, up to 12.95\,\% on one (gf2\_pow\_4\_mult). PSEL4 on none.
-    \item The largest saving is on family C (arithmetic and oracles), 25.8\,\% below level 2.
-    \item Four compilations take 5.08 times the wall time of level 2 (215 timed circuits), or 3.03 HQC saved per extra second.
-  \end{itemize}
+  \end{tabular}\par}
+  \raggedright
+  \src{Left: always level 3 over level 2 per circuit, the 45 regressions in orange. Right: PSEL4 over level 2, none above 1. 217 circuits (A 180, B1 15, C 20, Grover use case 2), HQC at 1000 shots. PSEL4 is 2.08\,\% (1,051.6 HQC) below always level 3 and 1.35\,\% (679.6 HQC) below the per-circuit cheaper of level 2 and level 3. Largest saving on family C, 25.8\,\% below level 2. Four compilations take 5.08 times the wall time of level 2 (215 timed circuits). Figure \code{value/fig\_policy.py} from \code{value/psel4\_ledger.csv}. Source \code{value/policy\_compare.md}, \code{value/usd\_psel4.md}.}
 \end{frame}
 
 % ---------------------------------------------------------------- 5
 \begin{frame}{Finding 2. The HQC-cheapest compile is not the most accurate}
   \centering\footnotesize
-  {\renewcommand{\arraystretch}{0.92}%
+  {\renewcommand{\arraystretch}{0.85}%
   \begin{tabular}{@{}llrrrr@{}}
     \toprule
     Circuit & Pick & $p$ level 2 & $p$ pick & $z$ & $R$ \\
@@ -161,7 +158,7 @@
     \textbf{Pooled per answer, 8 pairs} & & & & & \textbf{0.8192} \\
     \bottomrule
   \end{tabular}}
-  \src{Pre-registered H2-2E runs of the PSEL4 pick against level 2 on non-zero inputs, one to four inputs each at 400 shots per program (vbe_adder_7 one input at 1000 shots). $p$: share of correct shots. $z$: pooled two-proportion statistic. $R$: HQC per correct output, pick over level 2. The pooled row adds three earlier P2 pairs. Source \code{value/hqc\_per\_correct.md}.}
+  \src{Pre-registered H2-2E runs of the PSEL4 pick against level 2 on non-zero inputs, one to four inputs each at 400 shots per program (vbe\_adder\_7 one input at 1000 shots). $p$: share of correct shots. $z$: pooled two-proportion statistic. $R$: HQC per correct output, pick over level 2. The pooled row adds three earlier P2 pairs. Source \code{value/hqc\_per\_correct.md}.}
   \raggedright\footnotesize
   \begin{itemize}\setlength{\itemsep}{0pt}
     \item The pick was significantly less accurate on 2 of 5 (hwb6 Holm $p = 0.0168$), not significantly different on 2, not significantly better on 1. No pick was significantly more accurate.
@@ -260,7 +257,7 @@
   \small
   \begin{itemize}\setlength{\itemsep}{4pt}
     \item \textbf{\code{code.zip}.} The source of the repository. \code{requirements.txt} pins pytket 2.18.4, pytket-quantinuum 0.59.3 and pyzx 0.10.7.
-    \item \textbf{\code{run\_tests.sh}.} Runs 38 test files, including the 64-basis-input check and its negative-control test, and writes one return code per file.
+    \item \textbf{\code{run\_tests.sh}.} Runs 39 test files, including the 64-basis-input check and its negative-control test, and writes one return code per file.
     \item \textbf{Notebook.} Demonstrates PSEL4. It compiles tof\_3 with PSEL4 and submits the pick to the H2-2SC syntax checker.
     \item \textbf{\code{EVIDENCE.md}.} Lists every emulator job with its job ID, shots, HQC estimate and payload. The 48 H2-2E jobs used an HQC estimate of 9971.8 of the 10,000 budget.
     \item \textbf{Generated tables.} Value tables come from the scripts under \code{value/}. Emulator tables are regenerated offline from the stored payloads.
