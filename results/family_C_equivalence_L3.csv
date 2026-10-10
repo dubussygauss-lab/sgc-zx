@@ -1,0 +1,21 @@
+file,n,hqc,n_2q,hqc_csv,hqc_L2_csv,hqc_match,method,verdict,max_snap_halfturns,grid,seconds,t_compile,stored,spot_check,spot_check_dev,notes
+draper_adder_10.qasm,20,390.6,164,390.6,370.4,True,pyzx-miter,proven,0.0,2^-14,6.38,1.17,new,,,
+modadd_2n_10.qasm,20,379.4,147,379.4,388.2,True,pyzx-miter,proven,0.0,2^-4,2.59,0.7,new,,,
+hrs_mult_5.qasm,21,4487.4,1972,4487.4,5291.4,True,pyzx-miter,timeout,,,900.16,22.89,new,,,killed after 900 s
+mcx_clean_11.qasm,21,182.8,60,182.8,180.8,True,pyzx-miter,proven,0.0,2^-4,0.91,0.5,new,,,
+cdkm_adder_10.qasm,22,325.4,118,325.4,371.6,True,pyzx-miter,proven,0.0,2^-4,2.27,0.67,kept (matches),,,
+mcx_b95_20.qasm,22,702.0,296,702.0,693.4,True,pyzx-miter,proven,0.0,2^-4,29.15,1.54,new,,,
+vbe_adder_7.qasm,22,232.2,79,232.2,370.4,True,pyzx-miter,proven,0.0,2^-4,1.33,0.49,kept (matches),,,
+rgqft_mult_6.qasm,24,1540.4,698,1540.4,4445.6,True,pyzx-miter,timeout,,,900.17,74.43,kept (matches),,,killed after 900 s
+cdkm_adder_15.qasm,32,484.0,177,484.0,551.6,True,pyzx-miter,proven,0.0,2^-4,13.73,4.01,kept (matches),,,
+draper_adder_16.qasm,32,911.2,407,911.2,906.8,True,pyzx-miter,proven,1.734723475976807e-18,2^-20,87.93,25.37,new,,,
+vbe_adder_11.qasm,34,367.4,127,367.4,593.6,True,pyzx-miter,proven,0.0,2^-4,7.0,2.59,kept (matches),,,
+mcx_clean_20.qasm,39,341.2,114,341.2,339.2,True,pyzx-miter,proven,0.0,2^-4,5.6,1.89,new,,,
+modadd_2n_20.qasm,40,783.4,307,783.4,802.2,True,pyzx-miter,proven,0.0,2^-4,27.49,4.74,new,,,
+cdkm_adder_20.qasm,42,632.2,232,632.2,731.6,True,pyzx-miter,proven,0.0,2^-4,13.31,4.16,kept (matches),,,
+mcx_clean_28.qasm,55,482.0,162,482.0,480.0,True,pyzx-miter,proven,0.0,2^-4,11.69,3.29,new,,,
+mcx_dirty_28.qasm,55,599.2,215,599.2,591.0,True,pyzx-miter,proven,0.0,2^-4,21.96,3.28,new,,,
+vbe_adder_18.qasm,55,604.0,211,604.0,984.2,True,pyzx-miter,proven,0.0,2^-4,15.65,5.75,kept (matches),,,
+cdkm_adder_27.qasm,56,840.4,309,840.4,983.6,True,pyzx-miter,proven,0.0,2^-4,23.03,6.67,kept (matches),,,
+draper_adder_28.qasm,56,2601.2,1217,2601.2,3501.2,True,pyzx-miter,proven,1.734723475976807e-18,2^-32,522.41,202.81,new,,,
+mcx_b95_54.qasm,56,1966.8,840,1966.8,1958.2,True,pyzx-miter,proven,0.0,2^-4,311.92,14.8,new,,,
