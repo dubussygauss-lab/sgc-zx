@@ -1,13 +1,13 @@
 645 distinct numbers in report/report_short.md, 645 found in sources, 0 missing
-[2026-10-10T12:26:37Z] check_short_numbers.py: every number of report/report_short.md found in its sources
-[2026-10-10T12:26:37Z] report.md copied from report/report_short.md
+[2026-10-10T12:39:46Z] check_short_numbers.py: every number of report/report_short.md found in its sources
+[2026-10-10T12:39:46Z] report.md copied from report/report_short.md
 report/report_v5.md: 1683 lines -> submission/report_full.md: 1519 lines, 4 changelog sections removed
-[2026-10-10T12:26:37Z] report.md: no [PENDING or TBD
-[2026-10-10T12:26:37Z] report_full.md: no [PENDING or TBD
-[2026-10-10T12:26:37Z] pandoc 3.1.3, wkhtmltopdf 0.12.6
+[2026-10-10T12:39:46Z] report.md: no [PENDING or TBD
+[2026-10-10T12:39:46Z] report_full.md: no [PENDING or TBD
+[2026-10-10T12:39:46Z] pandoc 3.1.3, wkhtmltopdf 0.12.6
 QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-root'
-[2026-10-10T12:26:38Z] report.pdf written from report.md, title "PSEL4 compiles each H2 circuit four ways and keeps the cheapest" (397331 bytes, 13 pages)
-[2026-10-10T12:26:38Z] report.pdf text: no [PENDING, TBD or Changelog
+[2026-10-10T12:39:47Z] report.pdf written from report.md, title "PSEL4 compiles each H2 circuit four ways and keeps the cheapest" (397335 bytes, 13 pages)
+[2026-10-10T12:39:47Z] report.pdf text: no [PENDING, TBD or Changelog
 Table PC: markdown rows 5, rows found in PDF 5: ok
 Table 1c: markdown rows 6, rows found in PDF 6: ok
 Table official baseline: markdown rows 4, rows found in PDF 4: ok
@@ -19,31 +19,30 @@ Table 4b: markdown rows 4, rows found in PDF 4: ok
 Table use case: markdown rows 2, rows found in PDF 2: ok
 Table finals plan: markdown rows 5, rows found in PDF 5: ok
 QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-root'
-[2026-10-10T12:26:40Z] report_full.pdf written from report_full.md, title "PSEL4 compiles each H2 circuit four ways and keeps the cheapest" (959232 bytes, 40 pages)
-[2026-10-10T12:26:40Z] report_full.pdf text: no [PENDING, TBD or Changelog
+[2026-10-10T12:39:50Z] report_full.pdf written from report_full.md, title "PSEL4 compiles each H2 circuit four ways and keeps the cheapest" (959309 bytes, 40 pages)
+[2026-10-10T12:39:50Z] report_full.pdf text: no [PENDING, TBD or Changelog
 Table 1.1a: markdown rows 4, rows found in PDF 4: ok
 Table 1.1: markdown rows 10, rows found in PDF 10: ok
 Table C2: markdown rows 23, rows found in PDF 23: ok
 Table E1: markdown rows 22, rows found in PDF 22: ok
 Table E2: markdown rows 6, rows found in PDF 6: ok
-[2026-10-10T12:26:42Z] code.zip from HEAD 6c129e4c9588605bc42e8ca33fd1ed31556953b8, 7319586 bytes, 2712 entries
-[2026-10-10T12:26:42Z] REPRODUCE.md names HEAD as the code.zip commit
-[2026-10-10T12:26:42Z] credential check 1: no credentials.json, *.token, *.env, aqora-home in archive listing
-[2026-10-10T12:26:42Z] exclusion check: no papers/ or third_party/ in archive
-[2026-10-10T12:26:42Z] TOKEN STRING CHECK: 3 lines with refresh_token or access_token, listed below
+[2026-10-10T12:39:51Z] code.zip from HEAD df1722bc9e76208e45b463ead3933b5bac9c2c11, 7342118 bytes, 2713 entries
+[2026-10-10T12:39:51Z] REPRODUCE.md names HEAD as the code.zip commit
+[2026-10-10T12:39:51Z] credential check 1: no credentials.json, *.token, *.env, aqora-home in archive listing
+[2026-10-10T12:39:51Z] exclusion check: no papers/ or third_party/ in archive
+[2026-10-10T12:39:52Z] TOKEN STRING CHECK: 3 lines with refresh_token or access_token, listed below
 results/verification_2026-10-09h.md:107:  - `grep` for `refresh_token|access_token` finds only schema descriptions in `docs/platform_notes.md` lines 75–84.
 results/verification_2026-10-09j.md:107:- [F] No credential files in code.zip: no `*.env`, `*credential*`, `*token*`, `*.pem`, `*secret*`, `id_rsa*` or `.netrc` files. A grep for `ghp_`, `github_pat_`, `sk-...`, `AKIA...`, JWT-shaped strings and private-key headers finds nothing. `refresh_token` and `access_token` appear only as schema field names in `docs/platform_notes.md` line 75 and in the earlier verification report quoting that.
 docs/platform_notes.md:75:[F] `credentials.json` schema, from strings in `aqora/_aqora.abi3.so`: `struct CredentialsFile with 1 element`, `struct Credentials with 5 elements`, field names `client_id client_secret access_token refresh_token expires_at`. The file is written by the login flow (OAuth2 mutations `oauth2Token` / `oauth2Refresh` appear in the same binary). There is no documented way to hand-write it from a username/password.
-[2026-10-10T12:26:42Z] token string check: matches above are key names only, no token value of 20 or more characters
-[2026-10-10T12:32:38Z] tests rerun, see submission/build_logs/tests_summary.txt
+[2026-10-10T12:39:52Z] token string check: matches above are key names only, no token value of 20 or more characters
 ok            59  report_v5.md (+4)
 ok            58  report_v5.md
 205 distinct numbers, 205 found, 0 missing, 0 style issues
 76 distinct numbers in report/one_page_summary.md, 76 found in sources, 0 missing
 QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-root'
-[2026-10-10T12:32:42Z] one_page_summary.pdf written, 1 page
+[2026-10-10T12:39:56Z] one_page_summary.pdf written, 1 page
 82 payloads, 70 with valid counts, 51 distinct job IDs; 11 ledger rows not completed; wrote results/EVIDENCE.md
 nexus:H2-2E 48 48 9971.8
 nexus:H2-Emulator 22 3 2127.6
-[2026-10-10T12:32:42Z] README.md, requirements.txt and EVIDENCE.md copied
-[2026-10-10T12:32:43Z] MANIFEST.txt written
+[2026-10-10T12:39:57Z] README.md, requirements.txt and EVIDENCE.md copied
+[2026-10-10T12:39:57Z] MANIFEST.txt written
