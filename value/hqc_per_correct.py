@@ -208,6 +208,13 @@ def render_md(r: dict) -> str:
     L.append("- `[F]` In percent: pooled over the %d pairs the alternative needs %.1f %% fewer HQC per correct output "
              "(bootstrap 95 %% interval %.1f to %.1f %%)."
              % (h["n_pairs"], 100 * (1 - h["R_pooled"]), 100 * (1 - h["R_pooled_hi_boot"]), 100 * (1 - h["R_pooled_lo_boot"])))
+    sS0 = sS1 = int(r["T"].shots_per_arm.sum())
+    hq = h["sum_H_alt"] / h["sum_H_P0"]
+    if sS0 and sS1:
+        acc = (h["sum_K_alt"] / sS1) / (h["sum_K_P0"] / sS0)
+        L.append("- `[F]` Decomposition of the pooled R: HQC ratio alt / P0 = %.2f / %.2f = %.4f, divided by the accuracy ratio "
+                 "p_alt / p_P0 = (%d / %d) / (%d / %d) = %.4f. The per-answer gain is the HQC saving with no average loss "
+                 "of accuracy over the pairs." % (h["sum_H_alt"], h["sum_H_P0"], hq, h["sum_K_alt"], sS1, h["sum_K_P0"], sS0, acc))
     for e in r["excluded"]:
         L.append("- `[F]` %s is excluded. Its ideal distribution (`common.reference_probs`) has %d outcomes with "
                  "largest probability %.6f, so it has no unique marked item. Its HQC ratio alt / P0 over %d runs is %.4f."

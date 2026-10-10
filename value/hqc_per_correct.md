@@ -23,5 +23,6 @@
 - `[F]` In percent: cdkm_adder_10 needs 8.0 % fewer HQC per correct output than P0 (95 % interval 4.8 to 11.0 %).
 - `[F]` Pooled over the 6 pairs: R = (2085.12 / 8556) / (2523.12 / 8554) = 0.8262, bootstrap interval [0.8189, 0.8335].
 - `[F]` In percent: pooled over the 6 pairs the alternative needs 17.4 % fewer HQC per correct output (bootstrap 95 % interval 16.7 to 18.1 %).
+- `[F]` Decomposition of the pooled R: HQC ratio alt / P0 = 2085.12 / 2523.12 = 0.8264, divided by the accuracy ratio p_alt / p_P0 = (8556 / 9400) / (8554 / 9400) = 1.0002. The per-answer gain is the HQC saving with no average loss of accuracy over the pairs.
 - `[F]` grover_5 is excluded. Its ideal distribution (`common.reference_probs`) has 64 outcomes with largest probability 0.015625, so it has no unique marked item. Its HQC ratio alt / P0 over 4 runs is 0.9339.
 - `[O]` Pooling the three inputs of cdkm_adder_10 and modadd_2n_10 treats them as one binomial. The intervals ignore variation between inputs and between emulator runs.

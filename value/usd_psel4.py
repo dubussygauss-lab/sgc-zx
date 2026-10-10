@@ -21,6 +21,7 @@ Run from the repository root:  python3 value/usd_psel4.py   (writes value/usd_ps
 
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -59,7 +60,8 @@ def compute() -> dict:
     freed = MONTHLY_HQC * (1 - ratio)
     monthly = dict(ratio=ratio, freed_hqc=freed, freed_usd_standard=freed * p_std,
                    freed_usd_premium=freed * p_prem)
-    return dict(L=L, T=T, p_std=p_std, p_prem=p_prem, monthly=monthly)
+    minL = float(np.minimum(L.hqc_P0, L.hqc_L3).sum())
+    return dict(L=L, T=T, p_std=p_std, p_prem=p_prem, monthly=monthly, minL=minL)
 
 
 def _usd(x: float) -> str:
@@ -96,6 +98,12 @@ def render_md(r: dict) -> str:
             % (tot.saved_vs_L3, tot.saved_vs_L3_pct, _usd(tot.saved_vs_L3_usd_premium), _usd(tot.saved_vs_L3_usd_standard)),
             "- `[F]` Always level 3 costs more than level 2 on %d circuits and loses %.1f HQC there, worth USD %s to %s."
             % (tot.n_l3_loses, tot.l3_loss, _usd(tot.l3_loss_usd_premium), _usd(tot.l3_loss_usd_standard)),
+            "- `[F]` Split of the saving against always level 2: always level 3 gives %.2f points and per-circuit "
+            "selection plus ZX give the remaining %.2f points (%.2f %% in total)."
+            % (100 * (1 - tot.hqc_L3 / tot.hqc_L2), tot.saved_vs_L2_pct - 100 * (1 - tot.hqc_L3 / tot.hqc_L2), tot.saved_vs_L2_pct),
+            "- `[F]` Against the per-circuit cheaper of level 2 and level 3 (%.1f HQC) PSEL4 saves %.1f HQC, %.2f %% of that "
+            "total and %.2f %% of the always-level-2 total." % (r["minL"], r["minL"] - tot.hqc_PSEL4,
+            100 * (1 - tot.hqc_PSEL4 / r["minL"]), 100 * (r["minL"] - tot.hqc_PSEL4) / tot.hqc_L2),
             "- `[O]` Workload assumption: a team spends the Standard Plan's 10,000 HQC per month on circuits with the "
             "ledger's mix. `[F]` Under that assumption PSEL4 / L2 = %.4f, and PSEL4 frees 10,000 x (1 - %.4f) = %.1f HQC "
             "per month, worth USD %s at the Standard average (USD %s at the Premium average)."

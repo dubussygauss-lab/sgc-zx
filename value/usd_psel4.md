@@ -27,5 +27,7 @@
 - `[F]` PSEL4 saves 9256.6 HQC (15.73 %) against always level 2 on the ledger, worth USD 95,289 to 115,707 at the plan averages.
 - `[F]` PSEL4 saves 1051.6 HQC (2.08 %) against always level 3, worth USD 10,825 to 13,145.
 - `[F]` Always level 3 costs more than level 2 on 45 circuits and loses 372.0 HQC there, worth USD 3,829 to 4,650.
+- `[F]` Split of the saving against always level 2: always level 3 gives 13.95 points and per-circuit selection plus ZX give the remaining 1.79 points (15.73 % in total).
+- `[F]` Against the per-circuit cheaper of level 2 and level 3 (50260.2 HQC) PSEL4 saves 679.6 HQC, 1.35 % of that total and 1.16 % of the always-level-2 total.
 - `[O]` Workload assumption: a team spends the Standard Plan's 10,000 HQC per month on circuits with the ledger's mix. `[F]` Under that assumption PSEL4 / L2 = 0.8427, and PSEL4 frees 10,000 x (1 - 0.8427) = 1573.3 HQC per month, worth USD 19,666 at the Standard average (USD 16,195 at the Premium average).
 - `[O]` Plan averages are not marginal prices. The figures ignore bundled eHQCs and Azure infrastructure costs. The total depends on the ledger's family mix. Family C gives 6341.8 of the 9256.6 HQC saved against level 2.
