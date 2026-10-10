@@ -58,7 +58,7 @@ def test_payloads_and_ledger():
     ids = {p: d["job_id"] for p, d in pay.items()}
     assert len(set(ids.values())) == 2
     led = pd.read_csv(ROOT / "results" / "emulator_jobs.csv")
-    led = led[(led.platform == "nexus:H2-2E") & (led.family == "C")]
+    led = led[(led.platform == "nexus:H2-2E") & (led.family == "C") & (led.file == fc.FILE)]
     assert len(led) == 2 and set(led.job_id) == set(ids.values())
     assert (led.status == "COMPLETED").all()
     for p, d in pay.items():

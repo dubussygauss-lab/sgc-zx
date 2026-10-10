@@ -8,3 +8,8 @@ submitted job AFByb3ZpZGVySm9iAaEjP3vMemG-YGxBHOUGTw (L3) at 2026-10-10T00:38:45
 both jobs submitted; collect with --fetch <job id> (fetch_job.main), one at a time
 [fetch P0 start 2026-10-10T00:38:51Z]
 job AFByb3ZpZGVySm9iAaEjP3JmdzCCVYjcuwRCWQ: 1 circuits on nexus:H2-2E, shots 1000
+job AFByb3ZpZGVySm9iAaEjP3JmdzCCVYjcuwRCWQ COMPLETED cost {'duration': 566} rows 1
+[fetch L3 start 2026-10-10T01:00:41Z]
+job AFByb3ZpZGVySm9iAaEjP3vMemG-YGxBHOUGTw: 1 circuits on nexus:H2-2E, shots 1000
+job AFByb3ZpZGVySm9iAaEjP3vMemG-YGxBHOUGTw COMPLETED cost {'duration': 393} rows 1
+[fetch done 2026-10-10T01:01:36Z]

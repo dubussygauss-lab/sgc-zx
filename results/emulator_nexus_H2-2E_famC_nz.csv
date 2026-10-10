@@ -1,0 +1,3 @@
+file,model,n,r,disorder,instance,pipeline,n_qubits,n_2q,n_1q,n_rz,depth_2q,n_layers,ideal_vs_ref_maxdiff,F_H,TVD,support_size,t_sim,job_id,shots
+vbe_adder_7_nz.qasm,vbe_adder_7_nz,22,,,,P0,22,142,196,19,100,193,7.105427357601002e-15,0.8829999999999913,0.11699999999999505,1,1251.0678743150002,AFByb3ZpZGVySm9iAaEjP3JmdzCCVYjcuwRCWQ,1000
+vbe_adder_7_nz.qasm,vbe_adder_7_nz,22,,,,L3,22,79,126,19,44,82,6.439293542825908e-15,0.900999999999991,0.09899999999999504,1,3.0586806539999998,AFByb3ZpZGVySm9iAaEjP3vMemG-YGxBHOUGTw,1000
