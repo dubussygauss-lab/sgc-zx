@@ -10,7 +10,7 @@ Team Learned ZX Rewriting. Report title: "PSEL4 keeps ZX rewriting only where it
 
 `[F]` The product is PSEL4, a drop-in pytket pass selector. It compiles each circuit four ways. These are pytket-quantinuum level 2 (P0), PyZX teleport_reduce before level 2 (P2), level 3 (L3) and teleport_reduce before level 3 (P2L3). It keeps the candidate with the lowest HQC. The baseline is pytket level 3. Level 2 and level 3 are always candidates. PSEL4 therefore never costs more HQC than either level on a circuit where both pass its checks. This guarantee is a design property. It is not a measured result.
 
-`[F]` A PyZX miter proves the PSEL4 output equal to its input on 17 of the 20 family C circuits. On these 17 circuits PSEL4 saves 0.80 % against level 3. On all 20 it saves 3.50 %. 87.6 % of that saving comes from 3 picks whose output is not proven (appendix Section 3.8.1, Table P4). The two-candidate selector PSEL keeps the lower HQC of P0 and P2. Its figures in the sections below are against level 2.
+`[F]` A PyZX miter proves the PSEL4 output equal to its input on 17 of the 20 family C circuits. On these 17 circuits PSEL4 saves 0.80 % against level 3. On all 20 it saves 3.50 %. 87.6 % of that saving comes from 2 unproven picks, hrs_mult_5 and draper_adder_28 (appendix Section 3.8.1, Table P4). The two-candidate selector PSEL keeps the lower HQC of P0 and P2. Its figures in the sections below are against level 2.
 
 ## HQC saved on arithmetic and oracle circuits of 20 to 56 qubits
 
