@@ -22,9 +22,9 @@ The baseline is pytket-quantinuum at optimisation level 3. On the 20 family C ci
 - **Against level 3, all of family C.** PSEL4 saves 3.50 % on all 20 circuits. 87.6 % of that saving comes from 2 unproven picks, hrs_mult_5 and draper_adder_28.
 - **Against level 3, other families.** PSEL4 saves 0.73 % on 15 Clifford+T benchmarks (family B1) and 0.44 % on the Grover use case. On 180 Trotter circuits (family A) it saves 1.74 % by choosing between the two levels only.
 - **Guard.** The same per-circuit choice removes the blind ZX losses of 6.27 % and 22.1 % stated above.
-- **Emulator.** 20 H2-2E jobs and 3 H2-Emulator jobs ran, with job IDs in `EVIDENCE.md`.
+- **Emulator.** 22 H2-2E jobs and 3 H2-Emulator jobs ran, with job IDs in `EVIDENCE.md`. On a non-zero input fixed in advance the 22-qubit adder vbe_adder_7 returns the correct sum in 0.883 of shots under level 2 and 0.901 under the PSEL4 pick.
 
-**Limits.** No user interview. Family C is count-only apart from one emulator run. No hardware run. On the emulator P2 beats P0 on vbe_adder_3 in the repeats-only check (Holm p = 0.030 over two circuits, a check chosen after the pooled result). The pooled primary test over three circuits gives Holm p = 0.052. Inputs are all-zero.
+**Limits.** No user interview. Family C is count-only apart from the emulator runs of vbe_adder_7. No hardware run. On the emulator P2 beats P0 on vbe_adder_3 in the repeats-only check (Holm p = 0.030 over two circuits, a check chosen after the pooled result). The pooled primary test over three circuits gives Holm p = 0.052. Inputs are all-zero except one vbe_adder_7 run.
 
 ## Relevance to quantum computing
 
