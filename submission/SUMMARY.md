@@ -2,15 +2,27 @@
 
 The main report is `report.pdf` and the technical appendix is `report_full.pdf`.
 
-Team Learned ZX Rewriting. Report title: "PSEL4 keeps ZX rewriting only where it beats pytket level 3 on Quantinuum H2". Quantinuum Singapore Grand Challenge, submission 1. `report.pdf` is built from `report/report_short.md`. `report_full.pdf` is the full report v5 built from `report/report_v5.md` without its changelog sections. This page was built on 9 October 2026 and is aligned with the main report `report.pdf` and with Section 1 of the technical appendix `report_full.pdf`.
+Team Learned ZX Rewriting. Report title: "PSEL4 compiles each H2 circuit four ways and keeps the cheapest". Quantinuum Singapore Grand Challenge, submission 1. `report.pdf` is built from `report/report_short.md`. `report_full.pdf` is the full report v5 built from `report/report_v5.md` without its changelog sections. This page was built on 9 October 2026 and is aligned with the main report `report.pdf` and with Section 1 of the technical appendix `report_full.pdf`.
 
 `[F]` marks a statement copied from the report or from the `value/` outputs. `[O]` marks a judgement. The script `check_summary_numbers.py` finds every number of this page in `report/report_v5.md` or in `value/`.
 
 ## Product, baseline and headline
 
-`[F]` The product is PSEL4, a drop-in pytket pass selector. It compiles each circuit four ways. These are pytket-quantinuum level 2 (P0), PyZX teleport_reduce before level 2 (P2), level 3 (L3) and teleport_reduce before level 3 (P2L3). It keeps the candidate with the lowest HQC. The baseline is pytket level 3. Level 2 and level 3 are always candidates. PSEL4 therefore never costs more HQC than either level on a circuit where both pass its checks. This guarantee is a design property. It is not a measured result.
+`[F]` The product is PSEL4, a drop-in replacement for pytket-quantinuum's default compile on Quantinuum H2. It compiles each circuit four ways and keeps the result with the lowest HQC. The candidates are level 2 (pytket's default, P0), level 3 (L3) and PyZX teleport_reduce before each (P2, P2L3). Level 2 and level 3 are always candidates. PSEL4 therefore never costs more HQC than level 2 or level 3 on a circuit where both pass its checks. This guarantee is a design property. It is not a measured result.
 
-`[F]` A PyZX miter proves the PSEL4 output equal to its input on 17 of the 20 family C circuits. On these 17 circuits PSEL4 saves 0.80 % against level 3. On all 20 it saves 3.50 %. 87.6 % of that saving comes from 2 unproven picks, hrs_mult_5 and draper_adder_28 (appendix Section 3.8.1, Table P4). The two-candidate selector PSEL keeps the lower HQC of P0 and P2. Its figures in the sections below are against level 2.
+`[F]` Against level 2 (pytket's default) PSEL4 saves 10.22 % HQC on the 17 arithmetic and oracle circuits of family C with 20 to 56 qubits whose output a PyZX miter proves equal to the input. On all 20 family C circuits it saves 25.85 %. This figure includes 3 picks without a proof. PSEL4 saves 10.65 % on the 15 B1 benchmarks, 2.88 % on the 180 Trotter circuits of family A and 33.36 % on the Grover use case (appendix Section 3.8.1, Table P4).
+
+`[F]` Most of this saving comes from choosing level 3 where it is cheaper. On top of the per-circuit best pytket level the ZX candidates add 0.26 % on the 17 proven family C circuits and 3.21 % on all 20. They add 0.49 % on B1, nothing on the Trotter circuits and 0.44 % on the use case (`value/psel4_zx_only.md`).
+
+`[F]` Guard. Run on every circuit before level 2, the ZX stage costs 6.27 % more HQC on the 180 Trotter circuits and 22.1 % more on the 3 QFT adders of family C. pytket's own ZXGraphlikeOptimisation followed by level 2 costs 59.22 % more than level 2 on 14 B1 circuits. Qiskit level 3 rebased to H2 also costs more than level 2 on B1 and on family C. PSEL4 never pays these losses.
+
+`[F]` Correctness. Outputs are checked exactly up to 20 qubits. In the PSEL4 ledger runs the check of the level 3 candidates stopped at 12 qubits. A PyZX miter proves the PSEL4 output equal to its input on 17 of the 20 family C circuits. Our P0 and P2 give the same counts as the official pytket-quantinuum pass on all 445 compiled rows of families A, B1, B1x and B2.
+
+`[F]` Emulator. Of the 22 H2-2E jobs with valid counts two ran the 22-qubit adder vbe_adder_7 on a non-zero input fixed and committed in advance. It returns the correct sum 139 in 0.883 of the shots under level 2 and 0.901 under level 3, the PSEL4 pick. The difference has z = 1.30 and is not resolved at 1000 shots (appendix Section 3.7.3).
+
+`[O]` Learned ZX rewriting is the roadmap for the finals. `[F]` A first classifier on input-circuit features does not beat constant choices on held-out families (appendix Section 3.8.2). `[O]` The finals model needs structural features.
+
+`[F]` Limitations (appendix Section 7). No user interview supports the need. The gain of the ZX candidates alone is small. Three family C picks have no proof. Two of them, hrs_mult_5 and draper_adder_28, give 87.6 % of the family C saving against level 3. The H2-2E fidelity gain of P2 over P0 on vbe_adder_3 has a pooled Holm-adjusted p of 0.052 over three circuits. A repeats-only test gives 0.030 and was chosen after the pooled result. The earlier emulator inputs were all-zero. HQC is the formula estimate and nothing has run on H2 hardware. The T-count floor is the known bound of Gosset et al. evaluated on 24 circuits of at most 5 qubits. `[O]` PSEL4 is the PassSelector pattern of pytket. `[F]` The earlier two-candidate selector PSEL keeps the lower HQC of P0 and P2. Its figures in the sections below are against level 2.
 
 ## HQC saved on arithmetic and oracle circuits of 20 to 56 qubits
 
