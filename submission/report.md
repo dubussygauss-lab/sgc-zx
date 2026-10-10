@@ -28,7 +28,7 @@ Team Learned ZX Rewriting: C.-F. Kam, A. Mahasinghe, D. De Silva, N. Karunarathn
 
 ### 1.2 Savings by application on H2
 
-`[F]` Table 1. HQC at 1000 shots of P0 and PSEL. Family C is count-only above 20 qubits, apart from one H2-2E run of vbe_adder_7 (Table 3c), and is reported per application (`value/family_C_selector.md`, Appendix Table 1.1b). B1 is the checked Clifford+T benchmark set with n <= 12 (`value/selector_ledger.md`, Appendix Table 1.1a). The two multipliers and the three QFT adders carry continuous rotation angles. The row without continuous angles holds the 9 adders and the 6 MCX oracles.
+`[F]` Table 1. HQC at 1000 shots of P0 and PSEL. Family C is count-only above 20 qubits, apart from the H2-2E runs of vbe_adder_7 (Tables 3c and 3d), and is reported per application (`value/family_C_selector.md`, Appendix Table 1.1b). B1 is the checked Clifford+T benchmark set with n <= 12 (`value/selector_ledger.md`, Appendix Table 1.1a). The two multipliers and the three QFT adders carry continuous rotation angles. The row without continuous angles holds the 9 adders and the 6 MCX oracles.
 
 | Application | Family | Circuits | Qubits | PSEL picks P2 | HQC P0 | HQC PSEL | Saved | Saved % |
 |---|---|---|---|---|---|---|---|---|
