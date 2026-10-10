@@ -1,13 +1,13 @@
-# code.zip = git archive of commit 537c353b62ace863622a614dddd95e26fd61cac2 (submission/ excluded)
+# code.zip = git archive of commit f5c55ce3f5d76a2d32aa7a519daf3f7a0af00834 (submission/ excluded)
 # report.pdf and report.md (main report) built from report/report_short.md at that commit
 # report_full.pdf and report_full.md (technical appendix) built from report/report_v5.md at that commit, changelog sections removed
-# sha256  size_bytes  path (relative to submission/), generated 2026-10-10T14:00:03Z
+# sha256  size_bytes  path (relative to submission/), generated 2026-10-10T14:02:45Z
 98afb63e7192a367d1e0935372b98fb9d7157bfb0bd2958fa1b5aa27d2f424bb       20634  EVIDENCE.md
 dffb6051a8e17513f1b22d7f1b22a9becb91ad54ddec656e3bd716c20785132a       18294  README.md
-b8136e393aa599b4456d4be34780817e9454f4ae13c1ff046f4ee1be1eaabe14       16010  REPRODUCE.md
+bd7e7017fd908a9332b436f4b0816d953ccfc28499d6ca25c1c00690c115da6a       16010  REPRODUCE.md
 de0d4b504c411ebfa8f6aac67729f353aaed2b6b51ee7411390c38b94bdd80df       24688  SUMMARY.md
 901f57c7ca0faafd95edf0d9823a1b8db13e9ddb4e4ccaeadf34e4e59a5983dd        9241  build.sh
-a3c2686b5581c81acf6c6966d06a85587efb0c877047d2fed674638814d278af        4153  build_logs/build.log
+2c13442fc3f6a1095a997907b5ed907b4df95fa16c0df682b9240cd0b8bf7b07        4153  build_logs/build.log
 99ff932482879ebad38314fe15549919401cc08cfbec703d54490de9bc9fe5bb          38  build_logs/test_c2_literature.log
 1b5f0798e5dc0fb7c5524a755e86d3f81d38e9b6f2e6d64f8cc1fd5807681e39        3730  build_logs/test_certificate.log
 8985b89300693d482a193858eff53dd1aab96b462abe94440cf76462837a822b         168  build_logs/test_compile.log
@@ -50,20 +50,20 @@ ced2575e6678f101a13ce17621f61179d066b6edae29d2343bb19938b1937212          98  bu
 44985c479de3434329f4ea23acc4c6cd438395dabd829975276fec4d1cf49a54        3303  build_logs/tests_summary.txt
 ec2113b42c5ef863bef2ee42ce9ef5785363acae7e674f251f67c7f41c385630        3175  check_pdf_tables.py
 12501f3d9f0b0be09bf538e6702e95cb255f0ae65ffa62f3a431ffae2c15d6b9        3889  check_summary_numbers.py
-2057f3186ef3d38d574ae57549c62186af8efc25ab54452637beb7c3aaeec3b2     7542025  code.zip
+f98d3215676b3a6a4793513b91a7c1bf5c475fdef64842b3cb9e73c3ce5f3120     7543409  code.zip
 64674c19f8310d3d9fa78ba40465f41bf2ee17ec20bc6199bb2dddaf9dbcaa9a       94548  figures/fig_A_zz_ratio.png
 6e4ee395255f144a39b88d298dd49770e7dab2eb70516dc7cda3caee80a102a4       73781  figures/fig_B1_zz.png
 f45283b15f906701203d2eb56cb560256c39ae4b7a087d5df18e45ec5d1bb8d1       53399  figures/fig_B2_t.png
 85e649a98882d2ead44ba9853fd165b2829a1c49b04889e74d5a3929b918b19c      160224  figures/fig_cost_model.png
 3c6f16c91c302315679f07f110b28e83c235e27b0e365685efcfe6350f69eb70      192212  figures/fig_policy.png
-d056e07e7bfa63ae7901dcfaee0d10c17811ff7f0556635f7afdcf420afb47e9      254848  one_page_summary.pdf
+6b7766e66de0999948c15c9f5ff7bbfe9c22634d2cb8358045c4634f227d0fc8      255033  one_page_summary.pdf
 c3664563c77acc6991b739ecd6bec2aaa6a51e142f32e6f08b10dad8b2edbc33      246168  presentation.pdf
 d6cee78c25a33333cd92828f9ee053be19162fc3219b719d64733ac443640a03       17690  presentation.tex
 e17c943271f7fdb86906ddf45ae69d98af01044b2e875e3ff873564120c47b30        1015  report.css
 f73335f26e17fc3d7373ea29b45798c4ed0109e69ef1a9f1e3439b76ea3bfcc3       76247  report.md
-17d191a38117ecf1af24a68bb3dc0380ed07f861a62994ec94e60c4597da67d3      615599  report.pdf
+fde6e06d71395fbc2ec8bd0173b2a5cf70707d56efd5ab5e56ee9074a55f917c      615599  report.pdf
 8b985a47c6493be4b26d038a1c5b26152f09b85fd663b56913b0b741cc38bc3e      250822  report_full.md
-75b82ed415ad8e5f4d905a323880ac04237473f1a8fc2e6446fce79349058bd5     1176306  report_full.pdf
+de310bc2948c2bf72dab830aa898396cfc27dd62e6bfbaa5d7bcb874eaff84c6     1176306  report_full.pdf
 d751ca24521ef073f0c9ee747a2841679e2a68076e23715c755399e3639e695b         501  requirements.txt
 64eb4118118c3135c32a82a5f3badbd74eb41cf6d01ffe99229b29f06b286a0a        1247  strip_changelog.py
 95399f4e9029d2ec742cf553e437fec70ed988b7f51d7831f909abaea447741f         379  summary.css
