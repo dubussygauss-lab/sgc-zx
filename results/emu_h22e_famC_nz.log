@@ -1,0 +1,10 @@
+{'pipeline': 'P0', 'n_qubits': 22, 'n_2q': 142, 'hqc': 372.2, 'native': True, 'support': 1, 'ideal_out': '0001110011010001000000', 'p_expected': 0.9999999999999971}
+{'pipeline': 'L3', 'n_qubits': 22, 'n_2q': 79, 'hqc': 232.2, 'native': True, 'support': 1, 'ideal_out': '0001110011010001000000', 'p_expected': 0.9999999999999964}
+HQC total 604.4 (limit 700)
+submitting P0 vbe_adder_7_nz.qasm hqc 372.2
+submitted job AFByb3ZpZGVySm9iAaEjP3JmdzCCVYjcuwRCWQ (P0) at 2026-10-10T00:38:43.040493Z
+submitting L3 vbe_adder_7_nz.qasm hqc 232.2
+submitted job AFByb3ZpZGVySm9iAaEjP3vMemG-YGxBHOUGTw (L3) at 2026-10-10T00:38:45.439904Z
+both jobs submitted; collect with --fetch <job id> (fetch_job.main), one at a time
+[fetch P0 start 2026-10-10T00:38:51Z]
+job AFByb3ZpZGVySm9iAaEjP3JmdzCCVYjcuwRCWQ: 1 circuits on nexus:H2-2E, shots 1000
