@@ -1,13 +1,22 @@
 # sgc-zx
 
-Team Learned ZX Rewriting, Quantinuum Singapore Grand Challenge. A resource-certification benchmark for Quantinuum H2 with two cost layers: the NISQ layer (ZZPhase count, two-qubit depth, HQC, emulated fidelity) and the fault-tolerant layer of T-counts. A per-instance certified T-count floor exists for the 24 circuits of `results/certificates.csv`. The main submission report is `report/report_short.md` (`submission/report.pdf`); the full report `report/report_v5.md` is its technical appendix (`submission/report_full.pdf`). The executable companion is `report/notebook_skeleton.py`.
+Team Learned ZX Rewriting, Quantinuum Singapore Grand Challenge. PSEL4 compiles each H2 circuit four ways and keeps the cheapest. The four candidates are pytket-quantinuum level 2 (P0), level 3 (L3), PyZX teleport_reduce then level 2 (P2) and teleport_reduce then level 3 (P2L3). Over 217 circuits PSEL4 needs 15.7 % less HQC than pytket-quantinuum's default level 2 (`value/policy_compare.md`).
+
+- Cost. PSEL4 totals 49,580.6 HQC against 58,837.2 for always level 2. It costs more than level 2 on none of the 217 circuits (`value/policy_compare.md`).
+- Mechanism. Level 3 wins mainly through two-qubit resynthesis by GreedyPauliSimp. ZX phase teleportation adds little on top of level 3 (`value/mechanism_zx_l3.md`).
+- Cost is not fidelity on the H2-2E emulator. On cdkm_adder_10 the PSEL4 pick L3 returns the correct sum less often than P0, 0.8267 against 0.8692 with z = -2.90 (`results/h22e_multi.md`).
+
+The main submission report is `report/report_short.md` (`submission/report.pdf`). The full report `report/report_v5.md` is its technical appendix (`submission/report_full.pdf`). The executable companion is `report/notebook_skeleton.py`.
+
+A secondary component is a per-instance certified T-count floor for the 24 circuits of `results/certificates.csv` (`barrier/certificate.py`, report Table C1).
 
 ## Running the solution
 
 ```
 pip install -r requirements.txt                                   # Python 3.13, pinned versions
-python3 pipelines/pass_select.py bench/family_B1/vbe_adder_3.qasm # PSEL on one circuit: P0, P2 and the pick with HQC
-bash run_tests.sh                                                 # all 33 test files, about 5 to 7 min, logs in submission/build_logs/
+python3 pipelines/pass_select.py --psel4 bench/family_B1/vbe_adder_3.qasm  # PSEL4 on one circuit: P0, P2, L3, P2L3 and the pick with HQC
+python3 pipelines/pass_select.py bench/family_B1/vbe_adder_3.qasm          # the earlier two-candidate selector PSEL (P0, P2)
+bash run_tests.sh                                                 # all 33 test files (8 scripts, 25 pytest), about 5 to 7 min, logs in submission/build_logs/
 marimo edit report/notebook_skeleton.py                           # notebook: tables, figures, live compilation
 python3 submit/evidence_index.py                                  # rebuilds results/EVIDENCE.md from the stored job payloads
 ```
@@ -34,7 +43,7 @@ Configuration. No configuration file is needed to compile or to rebuild tables. 
 | `value/value_by_application.py` | Regroups the ledger by application area from `docs/applications.md`. Writes `value/value_by_application.csv` and `value/value_by_application.md`, the sources of Section 1. |
 | `submit/syntax_check.py`, `submit/run_emulator.py`, `submit/fetch_job.py` | Platform jobs through `aqora`. Every job is recorded in `results/emulator_jobs.csv`. |
 | `submit/h22e_stats.py` | Recomputes the H2-2E statistics of Table E2 from the stored counts. |
-| `report/notebook_skeleton.py` | Marimo notebook: tables, figures, live compilation of one circuit through P0 and P2, gated submission to the free syntax checker `nexus:H2-2SC` through `aqora.QPU`. |
+| `report/notebook_skeleton.py` | Marimo notebook: tables, figures, live compilation of one circuit through P0 and P2 (the earlier two-candidate selector PSEL), gated submission to the free syntax checker `nexus:H2-2SC` through `aqora.QPU`. |
 | `report/tables/`, `report/figures/` | Outputs of `make_tables.py`. |
 | `results/` | All CSVs, logs and compiled QASM (hqslib1 header, measure-all appended). |
 | `docs/platform_notes.md` | aqora API, emulator tiers, H2-2E noise parameters, HQC formula, with sources. |
@@ -88,6 +97,8 @@ Status on 10 October 2026:
 - PSEL4 policy comparison done. `python3 value/policy_compare.py` writes `value/policy_compare.md`. Over 217 circuits PSEL4 needs 15.7 % less HQC than always using level 2 and costs more than level 2 on 0 circuits. Always using level 3 saves 13.9 % and costs more than level 2 on 45 circuits. Report Section 3.8.4.
 - Level 3 equivalence on family C done. `python3 pipelines/equiv_L3_C.py` writes `results/family_C_equivalence_L3.md`. The PyZX miter proves the level 3 output equal to its input on 18 of 20 circuits. Report Section 3.8.3.
 - Mechanism done. `python3 value/mechanism_zx_l3.py report` writes `value/mechanism_zx_l3.md`. Level 3 wins mainly through two-qubit resynthesis by GreedyPauliSimp. Six circuits are missing because their level 3 or P2L3 compile did not fit the CPU budget. Report Section 3.8.5.
+- Tests done. All 33 test files (8 as scripts, 25 under pytest) returned rc=0 in the run of 10 October (`submission/build_logs/tests_summary.txt`).
+- Independent verification. 24 reports `results/verification_2026-10-*.md`, 7 to 10 October.
 - The submission cell of `report/notebook_skeleton.py` was executed once on the free H2-2SC syntax checker (job `AFByb3ZpZGVySm9iAaEdzTywfrOWhGbnlXxd-w`, export `report/notebook_executed.html`). It refuses any platform whose name does not end in SC. The emulator jobs were submitted by the `submit/` scripts.
 
 Value ledger, run after the compilation steps:
@@ -106,7 +117,7 @@ marimo edit report/notebook_skeleton.py          # interactive
 marimo export html report/notebook_skeleton.py -o notebook.html   # runs every cell up to the submission gate
 ```
 
-Before submitting, set the environment variable `AQORA_TEAM_ORG` to the team's aqora organization username (read into `TEAM_ORG` in the setup cell). The submission cell is gated behind its **Submit to the H2-2SC syntax checker** button and sends nothing until it is pressed, or until the notebook is run with `SGC_NOTEBOOK_SUBMIT_SC=1`. It submits the PSEL pick of the chosen circuit to the free syntax checker `nexus:H2-2SC` only; any platform whose name does not end in `SC` raises an error. Emulator jobs on H2-2E and H2-Emulator were submitted with `submit/run_emulator.py` and are listed in `results/EVIDENCE.md`.
+Before submitting, set the environment variable `AQORA_TEAM_ORG` to the team's aqora organization username (read into `TEAM_ORG` in the setup cell). The submission cell is gated behind its **Submit to the H2-2SC syntax checker** button and sends nothing until it is pressed, or until the notebook is run with `SGC_NOTEBOOK_SUBMIT_SC=1`. It submits the pick of the earlier two-candidate selector PSEL for the chosen circuit to the free syntax checker `nexus:H2-2SC` only; any platform whose name does not end in `SC` raises an error. Emulator jobs on H2-2E and H2-Emulator were submitted with `submit/run_emulator.py` and are listed in `results/EVIDENCE.md`.
 
 ## Environment
 
@@ -122,4 +133,4 @@ Proxy note. In the development container outbound HTTPS goes through an agent pr
 
 ## Pass selector
 
-`pipelines/pass_select.py` compiles a circuit with P0 and P2 through `compile_pipeline` (unchanged), drops a candidate that raises, leaves the native gate set or fails `compile.check` (no check above 20 qubits, marked `ok-unchecked`), and keeps the lower HQC at 1000 shots. Ties go to the lower n_2q (ZZPhase + ZZMax), then to P0. `compile_select(circ)` returns the compiled circuit and a per-candidate record. `python3 pipelines/pass_select.py <qasm files...>` prints one row per file. Tests: `python3 pipelines/test_pass_select.py`. With `--psel4` (PSEL4) the candidates are P0, P2, L3 (official pass at optimisation level 3) and P2L3 (teleport_reduce then L3), tie order P0, L3, P2, P2L3 (`value/psel4_ledger.md`, `pipelines/test_psel4.py`).
+`python3 pipelines/pass_select.py --psel4 <qasm files...>` runs PSEL4, the submitted tool, and prints one row per file. The candidates are P0, P2, L3 (official pass at optimisation level 3) and P2L3 (teleport_reduce then L3), tie order P0, L3, P2, P2L3 (`value/psel4_ledger.md`, `pipelines/test_psel4.py`). Each candidate is compiled through `compile_pipeline` (unchanged). The selector drops a candidate that raises, leaves the native gate set or fails `compile.check` (no check above 20 qubits, marked `ok-unchecked`), and keeps the lowest HQC at 1000 shots. Ties go to the lower n_2q (ZZPhase + ZZMax), then by the tie order. `compile_select(circ, candidates=PSEL4_CANDIDATES)` returns the compiled circuit and a per-candidate record. Without `--psel4`, and in `compile_select(circ)` with its default candidates, `--psel4` the script runs the earlier two-candidate selector PSEL (P0 and P2, ties to P0). Tests: `python3 pipelines/test_pass_select.py`.

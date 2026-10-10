@@ -210,7 +210,7 @@
   \raggedright\footnotesize
   \begin{itemize}\setlength{\itemsep}{0pt}
     \item Inputs, picks and the primary metric were pre-registered in files committed before any job ran.
-    \item On cdkm\_adder\_10 the level 3 output has fewer two-qubit gates (118 against 141) and two-qubit depth 65 against 122, yet returns the correct sum less often.
+    \item On cdkm\_adder\_10 the level 3 output has fewer two-qubit gates (118 against 141) and, post hoc, two-qubit depth 65 against 122, yet returns the correct sum less often.
     \item modadd\_2n\_10 shows no difference. vbe\_adder\_7 favours level 3, not resolved at 1000 shots.
   \end{itemize}
   \par\vspace{-8pt}\assess{On the H2-2E emulator the cheapest compile is not always the most accurate. For accuracy-bound work the fidelity should be checked first.}
@@ -267,7 +267,7 @@
   \begin{itemize}\setlength{\itemsep}{2pt}
     \item No user interview or survey is part of this submission.
     \item The ZX-only gain is small, 0.26\,\% on the 17 proven family C circuits.
-    \item 2 family C level 3 outputs and 3 PSEL4 outputs are unproven.
+    \item 2 family C level 3 outputs and 3 PSEL4 outputs are unproven. On draper\_adder\_28 the PSEL4 pick starts from angles PyZX rounded by up to 1.50e-06 rad.
     \item HQC is the formula estimate. All fidelity results come from the H2-2E emulator. Nothing has run on H2 hardware.
     \item The earlier vbe\_adder\_3 tests used the all-zero input. Their pooled Holm-adjusted $p$ is 0.052 over three circuits.
     \item The T-count floor is the known Gosset et al.\ bound, evaluated on 24 circuits of at most 5 qubits.
@@ -293,7 +293,7 @@
   \begin{itemize}\setlength{\itemsep}{3pt}
     \item \textbf{\code{code.zip}.} The source of the repository. \code{README.md} gives the run instructions.
     \item \textbf{\code{requirements.txt}.} Pins pytket 2.18.4, pytket-quantinuum 0.59.3 and pyzx 0.10.7.
-    \item \textbf{\code{run\_tests.sh}.} Runs 28 test files. The last run in \code{submission/build\_logs/tests\_summary.txt} shows rc=0 for all 28.
+    \item \textbf{\code{run\_tests.sh}.} Runs 33 test files. The last run in \code{submission/build\_logs/tests\_summary.txt} (10 October 2026) shows rc=0 for all 33.
     \item \textbf{\code{EVIDENCE.md}.} Lists every emulator job with its job ID, shots, HQC estimate and stored payload. 34 H2-2E jobs used an HQC estimate of 8983.4. Of the 10,000 HQC budget 1016.6 are left.
     \item \textbf{Generated tables.} The value tables come from the scripts under \code{value/}. The emulator tables are regenerated offline from the stored payloads.
     \item \textbf{Independent checks.} Verification reports by agents that did not produce the results are in \code{results/}.

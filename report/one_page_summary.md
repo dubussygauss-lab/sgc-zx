@@ -1,6 +1,6 @@
 # PSEL4 compiles each H2 circuit four ways and keeps the cheapest
 
-**Over 217 circuits PSEL4 needs 15.7 % less HQC on Quantinuum H2 than pytket-quantinuum's default level 2, and by construction it never costs more than level 2 or level 3 on any circuit.**
+**Over 217 circuits PSEL4 needs 15.7 % less HQC on Quantinuum H2 than pytket-quantinuum's default level 2, and on none of the 217 circuits does it cost more than level 2 or level 3.**
 
 <style>table{border-collapse:collapse;margin:0.3em 0;font-size:9.8pt}th,td{border-bottom:1px solid #bbb;padding:1px 8px;text-align:left}th:nth-child(n+2),td:nth-child(n+2){text-align:right}</style>
 
@@ -10,7 +10,7 @@ A job on Quantinuum H2 is billed in HQC = 5 + N_shots (N_1q + 10 N_2q + 5 N_SPAM
 
 ## Approach
 
-PSEL4 compiles each circuit four ways. The candidates are level 2, level 3 and PyZX teleport_reduce before each. Each candidate is checked against its input as a full unitary up to 8 qubits and as the output state on the all-zero input from 9 to 20 qubits. Above 20 qubits the selector runs no check. PSEL4 drops a candidate that fails and keeps the lowest HQC. Level 2 and level 3 are always candidates, so PSEL4 never costs more than either where both pass. It is pytket's `PassSelector` pattern with HQC as the metric.
+PSEL4 compiles each circuit four ways. The candidates are level 2, level 3 and PyZX teleport_reduce before each. Each candidate is checked against its input as a full unitary up to 8 qubits and as the output state on the all-zero input from 9 to 20 qubits (level 3 candidates up to 12 qubits in the ledger run). Above that the selector runs no check, and family C relies on miter proofs (result 4). PSEL4 drops a candidate that fails and keeps the lowest HQC. Level 2 and level 3 are always candidates, so PSEL4 never costs more than either where both pass. It is pytket's `PassSelector` pattern with HQC as the metric.
 
 ## Key results
 
@@ -26,7 +26,7 @@ PSEL4 saves 25.8 % on family C (20 arithmetic and oracle circuits of 20 to 56 qu
 
 **2. Mechanism.** Level 3 wins mainly through two-qubit resynthesis by GreedyPauliSimp, and two-qubit gates dominate HQC. ZX phase teleportation still removes non-Clifford rotations that level 3 keeps (656 against 746 on 14 B1 circuits), but its gain on top of the cheaper level is 0.26 % on the 17 proven family C circuits, 3.21 % on all 20, 0.49 % on B1 and 0 on Trotter circuits, and it falls as T-density rises (family C Spearman rho -0.64, p 0.010). The hypothesis that ZX rewriting lowers the H2 cost partly holds. [O]
 
-**3. Cost is not fidelity.** Three pre-registered H2-2E tests compare the PSEL4 pick with level 2 on non-zero inputs. On cdkm_adder_10 the pick (level 3) has 118 two-qubit gates against 141 and two-qubit depth 65 against 122. It returns the correct sum less often, 0.8267 against 0.8692 over 3 inputs and 1200 shots per arm (z = -2.90). On modadd_2n_10 there is no resolved difference (z = -0.22). On vbe_adder_7 level 3 is ahead, 0.901 against 0.883 (z = 1.30, not resolved). On the H2-2E emulator the cheapest compile is not always the most accurate. [O]
+**3. Cost is not fidelity.** Pre-registered H2-2E tests compare the PSEL4 pick with level 2 on non-zero inputs. On cdkm_adder_10 the pick (level 3) has 118 two-qubit gates against 141 and (post hoc) two-qubit depth 65 against 122. It returns the correct sum less often, 0.8267 against 0.8692 over 3 inputs and 1200 shots per arm (z = -2.90). On modadd_2n_10 there is no resolved difference (z = -0.22). On vbe_adder_7 level 3 is ahead, 0.901 against 0.883 (z = 1.30, not resolved). On the H2-2E emulator the cheapest compile is not always the most accurate. [O]
 
 **4. Correctness.** A PyZX miter proves the level 3 output equal to its input on 18 of 20 family C circuits, where level 3 saves 13.33 % against level 2. It proves the PSEL4 output on 17 of 20. Our level 2 compiles, with and without ZX, give the same counts as the official pytket-quantinuum pass on 445 rows.
 
@@ -38,7 +38,7 @@ Adders sit in the modular arithmetic of Shor factoring and in arithmetic for der
 
 For a cost-bound H2 user PSEL4 is a drop-in that cuts HQC by 15.7 % on this benchmark at 5.08 times the total compile time of level 2, or 3.03 HQC saved per extra second. [O] For accuracy-bound work result 3 says to check fidelity first. [O] This motivates the finals goal, a learned and fidelity-aware selector. [O] A first classifier on input-circuit features does not beat constant choices on held-out families (App.). The finals model therefore needs structural features and emulator labels. [O]
 
-**Limits.** No user interview. The ZX-only gain is small. Two family C level 3 outputs and three PSEL4 outputs are unproven. In the ledger runs the level 3 check stopped at 12 qubits. HQC is the formula estimate. Emulator only, no hardware run (34 H2-2E jobs, 8983.4 HQC). Earlier vbe_adder_3 tests used all-zero inputs (pooled Holm p = 0.052 over three circuits). The T-count floor is the Gosset et al. bound on 24 circuits of at most 5 qubits. The mechanism analysis lacks 6 circuits.
+**Limits.** No user interview. The ZX-only gain is small. Two family C level 3 outputs and three PSEL4 outputs are unproven. On draper_adder_28 the PSEL4 pick (teleport_reduce then level 3) starts from angles PyZX rounded by up to 1.50e-06 rad. In the ledger runs the level 3 check stopped at 12 qubits. HQC is the formula estimate. Emulator only, no hardware run (34 H2-2E jobs, 8983.4 HQC). Earlier vbe_adder_3 tests used all-zero inputs (pooled Holm p = 0.052 over three circuits). The T-count floor is the Gosset et al. bound on 24 circuits of at most 5 qubits. The mechanism analysis lacks 6 circuits.
 
 Team Learned ZX Rewriting: C.-F. Kam, A. Mahasinghe, D. De Silva, N. Karunarathne, F. Cadet, M. Bessafi, K. De Silva. Quantinuum Singapore Grand Challenge, submission 1. Report `report.pdf`, appendix `report_full.pdf` (App.), code `code.zip`, evidence `EVIDENCE.md`.
 

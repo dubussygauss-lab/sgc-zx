@@ -68,15 +68,18 @@ git -C third_party/pyzx-fork checkout e695d6d711e67b2b7223417c4714b6b1fcc09191
 | Use-case circuits | `python bench/usecase/build_usecase.py` |
 | Official baseline comparison | `python pipelines/official_baseline.py run`, then `python pipelines/official_baseline.py report` |
 | Section 1 value ledger, Tables 1.1 and 1.2 | `python value/value_ledger.py`, then `python value/value_by_application.py` |
-| Table 1.1a, pass selector PSEL totals | `python value/selector_ledger.py` (reads `value/value_ledger.csv` and `results/family_B2_counts.csv`) |
-| Pass selector PSEL on new circuits | `python pipelines/pass_select.py [--shots N] [--candidates P0,P2] <qasm files>` |
+| Table 1.1a, totals of the earlier two-candidate selector PSEL | `python value/selector_ledger.py` (reads `value/value_ledger.csv` and `results/family_B2_counts.csv`) |
+| PSEL4 ledger, `value/psel4_ledger.csv` and `.md` | `python3 value/psel4_ledger.py run`, then `python3 value/psel4_ledger.py report` |
+| PSEL4 policy comparison, `value/policy_compare.md` | `python3 value/policy_compare.py` |
+| PSEL4 (the submitted tool) on new circuits | `python pipelines/pass_select.py --psel4 [--shots N] <qasm files>` |
+| The earlier two-candidate selector PSEL on new circuits | `python pipelines/pass_select.py [--shots N] [--candidates P0,P2] <qasm files>` |
 | Table E2 statistics | `python submit/h22e_stats.py` (offline, reads the stored counts) |
 | All report tables and figures | `python report/make_tables.py` |
 | Emulator jobs (Tables E1, E2) | `submit/syntax_check.py`, `submit/run_emulator.py` and `submit/fetch_job.py`. They need the team credentials and spend quota. Every job is recorded in `results/emulator_jobs.csv` |
 
 ## Tests (logs in `build_logs/`)
 
-Rerun all thirty-three with `bash run_tests.sh` (repository root, also inside an unzipped `code.zip`). Eight run as scripts and twenty-five under pytest. The results below are from the runs of 9 and 10 October 2026. Wall times vary between runs; those of the latest run are in `build_logs/tests_summary.txt`.
+Rerun all 33 test files with `bash run_tests.sh` (repository root, also inside an unzipped `code.zip`). Eight run as scripts and twenty-five under pytest. All 33 returned rc=0 in the run of 10 October 2026 (`build_logs/tests_summary.txt`). The per-file results below are from the runs of 9 and 10 October 2026. Wall times vary between runs; those of the latest run are in `build_logs/tests_summary.txt`.
 
 | File | Command | Result | Wall |
 |---|---|---|---|
@@ -126,6 +129,7 @@ Rerun all thirty-three with `bash run_tests.sh` (repository root, also inside an
 | README | `README.md` in `code.zip` |
 | Test results | this page, `build_logs/tests_summary.txt`, `build_logs/test_*.log` |
 | Reproduction record | this page, report Section 5, `results/repro_2026-10-08/repro_log.md` in `code.zip` |
+| Independent verification | 24 reports `results/verification_2026-10-*.md` (7 to 10 October) in `code.zip` |
 
 ## Known gaps
 

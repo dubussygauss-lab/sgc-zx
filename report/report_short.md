@@ -21,7 +21,7 @@ Team Learned ZX Rewriting: C.-F. Kam, A. Mahasinghe, D. De Silva, N. Karunarathn
 
 `[F]` Finding 3, cost is not fidelity. Two pre-registered H2-2E tests compared the PSEL4 pick with level 2 on family C adders with three non-zero inputs each (Section 3.2, Table 3e). On cdkm_adder_10 the pick is level 3 with 118 two-qubit gates against 141. It returns the correct sum less often than level 2, 0.8267 against 0.8692 at 1200 shots per arm, with z = -2.90. On modadd_2n_10 there is no resolved difference (z = -0.22). On vbe_adder_7 level 3 is ahead with 0.901 against 0.883. That difference has z = 1.30 and is not resolved. `[O]` On the H2-2E emulator the cheapest compile is not always the most accurate. This motivates the finals goal of a learned, fidelity-aware selector, the programme behind the team name. `[F]` A first classifier on input-circuit features does not beat constant choices on held-out families (Section 4.4). `[O]` The finals model needs structural features and emulator labels.
 
-`[F]` Guard. Blind ZX rewriting raises HQC. Run on every circuit before level 2, the ZX stage costs 6.27 % more HQC on the 180 Trotter circuits and 22.1 % more on the 3 QFT adders of family C. pytket's ZXGraphlikeOptimisation followed by level 2 costs 59.22 % more than level 2 on 14 B1 circuits. PSEL4 never pays these losses.
+`[F]` Guard. Blind ZX rewriting raises HQC. Run on every circuit before level 2, the ZX stage costs 6.27 % more HQC on the 180 Trotter circuits and 22.1 % more on the 3 QFT adders of family C. pytket's ZXGraphlikeOptimisation followed by level 2 costs 59.22 % more than level 2 on 14 B1 circuits. PSEL4 pays none of these losses on the 217 circuits of its ledger.
 
 `[F]` Limitations (Section 7). No user interview supports the need. The ZX-only gain is small. Two family C level 3 outputs and three PSEL4 outputs have no proof. HQC is the formula estimate. All platform runs are emulator runs and nothing has run on H2 hardware. The earlier vbe_adder_3 tests ran on all-zero inputs and have a pooled Holm-adjusted p of 0.052 over three circuits. The T-count floor is the known bound of Gosset et al. on 24 circuits of at most 5 qubits. The mechanism analysis lacks 6 circuits for lack of CPU budget. `[O]` The selector is the PassSelector pattern of pytket and not a new selection mechanism.
 
@@ -33,7 +33,7 @@ Team Learned ZX Rewriting: C.-F. Kam, A. Mahasinghe, D. De Silva, N. Karunarathn
 - `[O]` Decision. Should this circuit go through ZX rewriting before pytket's Quantinuum pass?
 - `[F]` Tool. PSEL4 takes this decision per circuit. It compiles the circuit with all four candidates and keeps the result with the lowest HQC (`pipelines/pass_select.py --psel4`, `value/psel4_ledger.md`). An HQC tie goes to the lower two-qubit count n_2q. A remaining tie goes to the first of P0, L3, P2 and P2L3. A candidate that fails the exactness check is dropped. PSEL is the earlier two-candidate selector and keeps the cheaper of P0 and P2. In PSEL an HQC tie goes to the lower n_2q and a further tie to P0 (Appendix 2.2).
 - `[F]` Guarantee. Level 2 (P0) and level 3 (L3) are always candidates of PSEL4. PSEL4 therefore costs no more HQC than level 2 or level 3 whenever both pass its checks. In the same way PSEL costs no more HQC than P0 whenever P0 passes its checks. This holds by construction and is not a measured result. The exactness check runs up to 20 qubits only. In the PSEL4 ledger runs the check of the level 3 candidates stopped at 12 qubits. All 20 family C PSEL4 outputs therefore rest on separate PyZX miter proofs. These prove the PSEL4 output equal to its input on 17 of the 20 family C circuits and the PSEL pick on 18 of them (Appendix Section 3.8).
-- `[F]` Need for a selector. Running P2 on every circuit is not safe. On the 180 Trotter circuits of family A P2 alone would cost 1,030.4 HQC or 6.27 % more than P0. On the 60 XXZ circuits it would raise the total by 12.33 %. The earlier two-candidate selector PSEL keeps P0 on all 60 of them.
+- `[F]` Need for a selector. Running P2 on every circuit is not safe. On the 180 Trotter circuits of family A P2 alone would cost 1,030.4 HQC or 6.27 % more than P0. On the 60 XXZ circuits it would raise the total by 12.33 %. PSEL4 picks no ZX candidate on any of the 180 Trotter circuits. On the 60 XXZ circuits it keeps P0 on 35 and picks L3 on 25 (`value/psel4_ledger.csv`). The earlier two-candidate selector PSEL kept P0 on all 60 XXZ circuits.
 - `[F]` User validation. No user interview or survey is part of this submission. `[O]` The need rests on the H2 cost formula and on the algorithm literature cited in Appendix 1.4.
 
 ### 1.2 Savings by application on H2
@@ -52,9 +52,9 @@ Team Learned ZX Rewriting: C.-F. Kam, A. Mahasinghe, D. De Silva, N. Karunarathn
 | All of family C | C | 20 | 20-56 | 14 | 24535.0 | 20430.6 | 4104.4 | 16.7 |
 | Clifford+T benchmarks | B1 | 15 | 5-12 | 14 | 15,516.0 | 14,772.4 | 743.6 | 4.79 |
 
-`[F]` Shots. On family C PSEL affords between 0 and 7,159 more shots per circuit with one 10,000 HQC budget per circuit. The H2 hardware guide limits a job to 10,000 shots and each job pays 5 HQC. On family C vbe_adder_7 gains the most. Shot gains belong to single circuits and are not summed.
+`[F]` Shots. On family C the earlier selector PSEL affords between 0 and 7,159 more shots per circuit with one 10,000 HQC budget per circuit. The H2 hardware guide limits a job to 10,000 shots and each job pays 5 HQC. On family C vbe_adder_7 gains the most. Shot gains belong to single circuits and are not summed.
 
-`[F]` Table 1b. P2 against P0 on the checked B1 circuits by application area (Appendix Table 1.1, `value/value_by_application.md`). PSEL equals P2 on every B1 circuit except qft_4, where P2 costs 0.4 HQC more and PSEL keeps P0.
+`[F]` Table 1b. P2 against P0 on the checked B1 circuits by application area (Appendix Table 1.1, `value/value_by_application.md`). The earlier selector PSEL equals P2 on every B1 circuit except qft_4, where P2 costs 0.4 HQC more and PSEL keeps P0. PSEL4 picks L3 on qft_4 (`value/psel4_ledger.csv`). The bullets below describe the earlier selector PSEL. The PSEL4 picks per family are in Table P4.
 
 | Area | Circuits | HQC P0 | HQC P2 | Saved % | Median per-circuit % |
 |---|---|---|---|---|---|
@@ -64,27 +64,27 @@ Team Learned ZX Rewriting: C.-F. Kam, A. Mahasinghe, D. De Silva, N. Karunarathn
 | Reversible logic, no sourced algorithm | 2 | 13,524.0 | 12,885.0 | 4.7 | 4.5 |
 
 - `[F]` Multipliers. rgqft_mult_6 drops from 4445.6 to 2206.6 HQC, a saving of 50.4 %. Its two-qubit count falls from 1994 to 990. Both multipliers carry continuous rotation angles and supply 3356.0 of the 4104.4 HQC saved on family C.
-- `[F]` Adders. PSEL picks P2 on all 9 adders. The three VBE adders save 20.5 %, 20.9 % and 23.6 %. The four CDKM adders save 10.2 % to 10.5 %.
-- `[F]` Where ZX does not pay. On the three QFT adders P2 is dearer than P0 and PSEL keeps P0. On the MCX oracles the saving is 2.8 HQC in total. A fixed choice of P2 would cost 21487.8 HQC on family C against 20430.6 for PSEL. `[O]` These rows show the selector at work.
-- `[F]` hwb8 caveat. On B1 the circuit hwb8 alone accounts for 84.5 % of the PSEL saving and serves no sourced quantum algorithm. Without hwb8 the B1 saving is 115.0 HQC. The median per-circuit saving on B1 is 3.94 %. `[O]` The median is the better guide for a single small circuit.
+- `[F]` Adders. PSEL picks P2 on all 9 adders. PSEL4 picks L3 on 7 of them and P2L3 on 2. The three VBE adders save 20.5 %, 20.9 % and 23.6 %. The four CDKM adders save 10.2 % to 10.5 %.
+- `[F]` Where ZX does not pay. On the three QFT adders P2 is dearer than P0 and PSEL keeps P0. On the MCX oracles the saving is 2.8 HQC in total. A fixed choice of P2 would cost 21487.8 HQC on family C against 20430.6 for PSEL. PSEL4 keeps P0 on draper_adder_10 and draper_adder_16. On draper_adder_28 it picks P2L3, whose output is unproven (Section 2.4). `[O]` These rows show the selector at work.
+- `[F]` hwb8 caveat. On B1 the circuit hwb8 alone accounts for 84.5 % of the saving of the earlier selector PSEL and serves no sourced quantum algorithm. Without hwb8 the B1 saving is 115.0 HQC. The median per-circuit saving on B1 is 3.94 %. `[O]` The median is the better guide for a single small circuit.
 
 ### 1.3 Use case: Grover search within the 10,000 HQC budget
 
-`[F]` Two complete Grover searches with one marked item were built from Grover 1996 and the multi-controlled gate of Barenco et al. 1995 (`value/usecase.md`, Appendix 3.9 and Table U1). They are small enough for an exact check. Both pass it under P0 and P2 with a deviation of at most 2.7e-14 in magnitude.
+`[F]` Two complete Grover searches with one marked item were built from Grover 1996 and the multi-controlled gate of Barenco et al. 1995 (`value/usecase.md`, Appendix 3.9 and Table U1). They are small enough for an exact check. Both pass it under P0 and P2 with a deviation of at most 2.7e-14 in magnitude. The table shows the earlier selector PSEL. PSEL4 picks P2L3 on both, at 533.4 and 1041.6 HQC (Table P4, `value/psel4_ledger.md`).
 
 | Instance | Qubits | Ideal success | HQC P0 | HQC PSEL | Saving % | Shots in 10,000 HQC, P0 | Shots, PSEL | Extra shots |
 |---|---|---|---|---|---|---|---|---|
 | grover_d5 | 7 | 0.999182 | 734.2 | 694.4 | 5.42 | 13699 | 14490 | 791 |
 | grover_d6 | 9 | 0.996586 | 1629.4 | 1548.6 | 4.96 | 6153 | 6475 | 322 |
 
-- `[F]` The shot counts respect the H2 limit of 10,000 shots per job and charge 5 HQC per job. PSEL buys 5.77 % more shots on grover_d5 and 5.23 % more on grover_d6.
+- `[F]` The shot counts respect the H2 limit of 10,000 shots per job and charge 5 HQC per job. The earlier selector PSEL buys 5.77 % more shots on grover_d5 and 5.23 % more on grover_d6.
 - `[F]` The expected number of marked-item hits within the budget rises from 13687.8 to 14478.2 on grover_d5 at the ideal success probability.
 - `[O]` A slope model fitted on B1 proxy data predicts a fidelity ratio of 1.0287 and 1.0583 in favour of PSEL as a model prediction. No platform job ran these instances.
 
 ### 1.4 Magic states on a fault-tolerant machine
 
 - `[F]` Each T gate of a surface-code machine consumes one magic state (Litinski 2019). On H2 a T gate is a free Rz and changes no HQC.
-- `[F]` On B1 the ZX stage removes 2,862 of 7,048 T gates of the written circuits, or 40.6 %. On family C the ZX stage removes 1110 T gates from the 9 adders and 30 from the 3 MCX oracles where PSEL picks P2. The two multipliers lose 1,408 more but keep 600 and 507 rotations outside the pi/4 grid, so T-count is not their non-Clifford cost. On the Grover instances the T-count falls from 448 to 210 and from 1008 to 436. `[O]` This T-count drop comes from Toffolis that the Barenco construction repeats on the same qubits. It is not a general ZX gain.
+- `[F]` On B1 the ZX stage removes 2,862 of 7,048 T gates of the written circuits, or 40.6 %. On family C the ZX stage removes 1110 T gates from the 9 adders and 30 from the 3 MCX oracles where the earlier selector PSEL picks P2. The two multipliers lose 1,408 more but keep 600 and 507 rotations outside the pi/4 grid, so T-count is not their non-Clifford cost. On the Grover instances the T-count falls from 448 to 210 and from 1008 to 436. `[O]` This T-count drop comes from Toffolis that the Barenco construction repeats on the same qubits. It is not a general ZX gain.
 
 `[F]` Table 1c. T-count as written and after the ZX stage of P2 by application area (Appendix Table 1.2). Each saved T gate is one magic state.
 
@@ -104,10 +104,10 @@ Team Learned ZX Rewriting: C.-F. Kam, A. Mahasinghe, D. De Silva, N. Karunarathn
 ### 1.5 Value in USD, finance use, guard and fault-tolerant effort map
 
 - `[F]` Plan prices. Azure Quantum lists the Quantinuum H2 Standard Plan at USD 125,000 per month with 10,000 HQC and the Premium Plan at USD 175,000 per month with 17,000 HQC (Reference 10). The page was last updated on 2025-12-23. The implied plan-average price is USD 12.50 per HQC on Standard and USD 10.29 on Premium.
-- `[O]` At these averages the family C saving of 748.4 HQC on the 15 circuits without continuous angles is worth about USD 7,700 to 9,400. The family A avoided loss of 1,076.4 HQC is worth about USD 11,100 to 13,500. Both figures count 1000 shots of each circuit once. They use the plan average and not a marginal price. They ignore the bundled eHQCs and the Azure infrastructure costs.
-- `[F]` Finance users. In the derivative-pricing methods of Chakrabarti et al. both path-loading schemes and the payoff calculation need quantum arithmetic. Chakrabarti et al. state this in Appendix C and write that "the T-count dominates the computational requirements" (Reference 12). PSEL saves 12.9 % HQC on the 9 adders and 7.47 % on the 15 family C circuits without continuous angles. `[O]` These adders are the kind of arithmetic such circuits call. A claim that arithmetic dominates the cost of derivative pricing is Unverifiable.
+- `[O]` At these averages the family C saving of the earlier selector PSEL of 748.4 HQC on the 15 circuits without continuous angles is worth about USD 7,700 to 9,400. The family A avoided loss of 1,076.4 HQC is worth about USD 11,100 to 13,500. Both figures count 1000 shots of each circuit once. They use the plan average and not a marginal price. They ignore the bundled eHQCs and the Azure infrastructure costs.
+- `[F]` Finance users. In the derivative-pricing methods of Chakrabarti et al. both path-loading schemes and the payoff calculation need quantum arithmetic. Chakrabarti et al. state this in Appendix C and write that "the T-count dominates the computational requirements" (Reference 12). The earlier selector PSEL saves 12.9 % HQC on the 9 adders and 7.47 % on the 15 family C circuits without continuous angles. `[O]` These adders are the kind of arithmetic such circuits call. A claim that arithmetic dominates the cost of derivative pricing is Unverifiable.
 - `[O]` Do-no-harm guard for pytket users. A pytket user can add a ZX stage in front of the Quantinuum pass without knowing whether it pays. `[F]` pytket 2.18.4 ships one such pass, `ZXGraphlikeOptimisation`. Its documentation warns that it "may increase the cost of the circuit" (Reference 9, pytket 2.18.5 documentation, same docstring in the installed 2.18.4). We measured the PyZX stage of P2 and not that pass. Added blindly, the P2 stage costs 6.27 % more HQC than P0 on the 180 Trotter circuits of family A and 22.1 % more on the three QFT adders of family C. On draper_adder_16 it costs 1,385.0 HQC against 906.8 or 52.7 % more. A PyZX miter proves its P0 and P2 outputs equal to its input (Appendix Section 3.8).
-- `[F]` PSEL costs no more HQC than P0 whenever P0 passes PSEL's checks and still keeps the 4.79 % saving on B1 and the 7.47 % saving on family C without continuous angles. `[O]` A pytket user can try ZX rewriting on every circuit for the price of a second compilation.
+- `[F]` PSEL4 costs no more HQC than level 2 or level 3 where its checks pass. It saves 10.65 % against level 2 on B1 and 11.52 % on family C without continuous angles (Table P4). The earlier selector PSEL saved 4.79 % and 7.47 % there. `[O]` A pytket user can try ZX rewriting and level 3 on every circuit for the price of three extra compilations.
 - `[O]` Where not to spend fault-tolerant compiler effort. `[F]` On the 20 B2 circuits with gridsynth-synthesised rotations the ZX stage removes 2.0 % of the T gates. The certified floor shows that every Clifford+T circuit with the same unitary on the same qubits keeps at least 99.7 % of the pooled remaining T-count and on the worst single circuit, haar_n3_eps1e-03_s5, at least 2478 of its 2496 T gates. Further exact T optimisation can gain at most 0.3 % of the pooled count and 0.72 % on the worst instance. The floor bounds the T-count of every Clifford+T circuit that realises the same unitary up to global phase on the same n qubits with no ancilla and no measurement. It covers 24 circuits with n at most 5. T gates compile to Rz on H2 and the HQC formula charges no Rz gate. The certificate therefore addresses the fault-tolerant layer only.
 - `[F]` Reiher et al. write of the rotations in their FeMoco simulation that "These rotations dominate the cost of the quantum simulation". Beverland et al. call non-Clifford rotations "among the most resource intensive operations". Ross and Selinger approximate a z-rotation with T-count 3 log2(1/eps) plus lower-order terms in the typical case (Reference 11). `[O]` The certificate tells a team that plans fault-tolerant chemistry or phase-estimation workloads per instance how much exact T optimisation of these rotations can still gain.
 
@@ -123,19 +123,22 @@ Team Learned ZX Rewriting: C.-F. Kam, A. Mahasinghe, D. De Silva, N. Karunarathn
 | P0 | pytket-quantinuum 0.59.3 default pass at optimisation level 2. The baseline. |
 | P2 | PyZX teleport_reduce, then P0. |
 | P1, P3, P4 | ZX extraction variants, then P0. Kept as controls. |
-| PSEL | Selector over P0 and P2. Adds no compilation stage. |
+| L3 | pytket-quantinuum pass at optimisation level 3. |
+| P2L3 | PyZX teleport_reduce, then L3. |
+| PSEL4 | Delivered selector over P0, L3, P2 and P2L3. Adds no compilation stage. |
+| PSEL | Earlier two-candidate selector over P0 and P2. |
 
 ![Family A ZZPhase ratio](figures/fig_A_zz_ratio.png)
 
 `[F]` Figure 1. Family A. ZZPhase count of each pipeline divided by the P0 count on the same circuit, mean over the 36 circuits at each n with the min-max band shaded. Data: Appendix Table A2 and `results/family_A_counts.csv`.
 
-`[F]` P1, P3 and P4 are above P0 in ZZPhase count on all 180 family A circuits. On B1 they are above P0 on 14, 14 and 15 of the 15 circuits. `[O]` Only teleport reduction keeps the circuit skeleton and helps on H2. PSEL therefore selects between P0 and P2 only.
+`[F]` P1, P3 and P4 are above P0 in ZZPhase count on all 180 family A circuits. On B1 they are above P0 on 14, 14 and 15 of the 15 circuits. `[O]` Only teleport reduction keeps the circuit skeleton and helps on H2. The ZX candidates of PSEL4 and PSEL therefore use teleport_reduce only.
 
-`[F]` pytket documents `PassSelector`, which returns "the best circuit as selected by a given metric" from a list of passes (Reference 9). `pipelines/pass_select.py` does not call it. `[O]` PSEL is this PassSelector pattern applied to P0 and P2 with HQC as the metric. The contribution is the measured ledger and the guard result and not a new selection mechanism.
+`[F]` pytket documents `PassSelector`, which returns "the best circuit as selected by a given metric" from a list of passes (Reference 9). `pipelines/pass_select.py` does not call it. `[O]` PSEL4 is this PassSelector pattern applied to P0, L3, P2 and P2L3 with HQC as the metric. The contribution is the measured ledger and the guard result and not a new selection mechanism.
 
 ### 2.2 Official baseline check
 
-`[F]` Our P0 reproduces the pass from the pytket-quantinuum source. `results/official_baseline.md` compares it with `QuantinuumBackend("H2-1").get_compiled_circuit(circ, optimisation_level=2)` built offline from the device list in the package. The two passes have the same stages in the same order. The one parameter difference is a set of classical op types that no benchmark input contains. On all 445 compiled rows of families A, B1, B1x and B2 the official pass gives the same n_2q, n_1q, two-qubit depth and HQC as our P0 and P2. The PSEL savings against the official P0 are therefore identical to ours. This holds on families A, B1, B1x and B2. Family C was not compiled with the official pass.
+`[F]` Our P0 reproduces the pass from the pytket-quantinuum source. `results/official_baseline.md` compares it with `QuantinuumBackend("H2-1").get_compiled_circuit(circ, optimisation_level=2)` built offline from the device list in the package. The two passes have the same stages in the same order. The one parameter difference is a set of classical op types that no benchmark input contains. On all 445 compiled rows of families A, B1, B1x and B2 the official pass gives the same n_2q, n_1q, two-qubit depth and HQC as our P0 and P2. The savings of the earlier selector PSEL against the official P0 are therefore identical to ours. This holds on families A, B1, B1x and B2. Family C was not compiled with the official P0 pass. The L3 and P2L3 candidates of PSEL4 call the official pass at level 3 (Section 3.4).
 
 | Family | Official P0 rows identical | Official P2 rows identical | Exactness of official output |
 |---|---|---|---|
@@ -152,8 +155,8 @@ Team Learned ZX Rewriting: C.-F. Kam, A. Mahasinghe, D. De Silva, N. Karunarathn
 ### 2.4 Exactness checks
 
 - `[F]` Families A, B1 and B2. Every compiled circuit is checked against P0ref. The check is the unitary deviation for n <= 8 and the statevector infidelity beyond, with tolerance 1e-8. All 1260 family A rows, all 105 B1 rows and all 100 B2 rows pass (Appendix 2.4).
-- `[F]` Family C. A PyZX miter reduction proves the PSEL output of every one of the 15 circuits without continuous angles equal to its input as a full unitary up to global phase (Appendix 2.4 and 3.8). The miter joins the compiled circuit to the adjoint of the input. After `full_reduce` only wires from input i to output i may remain as in the `verify_equality` test of PyZX. No ancilla is assumed to start in |0>. Compiled angles are snapped to a dyadic grid with a largest snap of 5.27e-12 half-turns. Over all 20 circuits the PSEL output is proven on 18. The compiled angles of hrs_mult_5 lie off the dyadic grid. It keeps only a check on 64 random basis inputs. The miter of the P0 pick of draper_adder_28 timed out after 300 s. PSEL itself runs no exactness check above 20 qubits. The proof is a separate offline run.
-- `[F]` Continuous angles. The Draper adders and the two multipliers carry rotation angles off the pi/4 grid (`bench/family_C/manifest.csv`). PyZX rounds angles to fractions. On draper_adder_28 this changes the P2 input by at most 1.50e-06 rad per angle. PSEL keeps P0 on that circuit.
+- `[F]` Family C. A PyZX miter reduction proves the PSEL4 output of every one of the 15 circuits without continuous angles equal to its input as a full unitary up to global phase (Appendix 2.4 and 3.8, `results/family_C_equivalence_psel4.md`). The miter joins the compiled circuit to the adjoint of the input. After `full_reduce` only wires from input i to output i may remain as in the `verify_equality` test of PyZX. No ancilla is assumed to start in |0>. Compiled angles are snapped to a dyadic grid with a largest snap of 5.27e-12 half-turns. Over all 20 circuits the PSEL4 output is proven on 17. The compiled angles of the P2 pick of hrs_mult_5 lie off the dyadic grid. It keeps only a check on 64 random basis inputs. The miters of the L3 pick of rgqft_mult_6 and the P2L3 pick of draper_adder_28 timed out after 300 s. The output of the earlier selector PSEL is proven on 18 of the 20. PSEL4 itself runs no exactness check above 20 qubits. The proof is a separate offline run.
+- `[F]` Continuous angles. The Draper adders and the two multipliers carry rotation angles off the pi/4 grid (`bench/family_C/manifest.csv`). PyZX rounds angles to fractions. On draper_adder_28 this changes the input of the ZX candidates by at most 1.50e-06 rad per angle (`value/family_C_selector.md`). The earlier selector PSEL keeps P0 on that circuit. PSEL4 picks P2L3 at 2336.2 HQC against 3501.2 for P0 and 2601.2 for L3. Its output therefore equals the input circuit only up to that rounding. Its miter timed out after 300 s, so the PSEL4 output of draper_adder_28 is unproven.
 - `[F]` Family B1x has 8 circuits with 14 to 19 qubits and is count-only. Its rows carry no exactness check and are never merged with B1.
 
 ### 2.5 The certificate
@@ -166,7 +169,7 @@ Team Learned ZX Rewriting: C.-F. Kam, A. Mahasinghe, D. De Silva, N. Karunarathn
 
 ### 3.1 Count results by family
 
-`[F]` Table 2. PSEL against P0 and P2 per family at 1000 shots (`value/selector_ledger.md`, `value/family_C_selector.md`, Appendix Tables 1.1a and 1.1b). The PSEL column never exceeds the P0 column. On family C the 15 circuits without continuous angles save 7.47 %.
+`[F]` Table 2. The earlier two-candidate selector PSEL against P0 and P2 per family at 1000 shots (`value/selector_ledger.md`, `value/family_C_selector.md`, Appendix Tables 1.1a and 1.1b). It is not the delivered tool. The PSEL4 totals are in Table P4 (Section 3.4) and Table PC (Section 3.5). The PSEL column never exceeds the P0 column. On family C the 15 circuits without continuous angles save 7.47 %.
 
 | Family | Content | Circuits | Qubits | Check | Picks P2 | HQC P0 | HQC P2 | HQC PSEL | Saved vs P0 % |
 |---|---|---|---|---|---|---|---|---|---|
@@ -176,7 +179,7 @@ Team Learned ZX Rewriting: C.-F. Kam, A. Mahasinghe, D. De Silva, N. Karunarathn
 | B2 | Synthesised Haar unitaries | 20 | 2-3 | exact | 0 | 730.0 | 731.6 | 730.0 | 0.00 |
 | C | Arithmetic and oracles | 20 | 20-56 | proof on 18 | 14 | 24535.0 | 21487.8 | 20430.6 | 16.7 |
 
-`[F]` Table 2b. Family C per circuit (`value/family_C_selector.md`, Appendix Section 3.8 and Table C3). Proof gives the PyZX miter verdict for the PSEL output against the input. hrs_mult_5 is inconclusive because its compiled angles lie off the dyadic grid. It passes the 64-input basis check.
+`[F]` Table 2b. Family C per circuit under the earlier two-candidate selector PSEL (`value/family_C_selector.md`, Appendix Section 3.8 and Table C3). Pick and Proof refer to PSEL and not to the delivered PSEL4. The PSEL4 pick and miter verdict of each circuit are in `results/family_C_equivalence_psel4.md` (Section 3.4). The verdicts differ only on rgqft_mult_6, where the miter of the PSEL4 pick L3 timed out. On draper_adder_28 the PSEL4 pick is P2L3 and its miter also timed out (Section 2.4). Proof gives the PyZX miter verdict for the PSEL output against the input. hrs_mult_5 is inconclusive because its compiled angles lie off the dyadic grid. It passes the 64-input basis check.
 
 | Circuit | Qubits | Application | HQC P0 | HQC PSEL | Pick | Saved % | n_2q P0 | n_2q PSEL | Proof |
 |---|---|---|---|---|---|---|---|---|---|
@@ -201,16 +204,16 @@ Team Learned ZX Rewriting: C.-F. Kam, A. Mahasinghe, D. De Silva, N. Karunarathn
 | hrs_mult_5 | 21 | multiplier | 5291.4 | 4174.4 | P2 | 21.1 | 2335 | 1807 | inconclusive |
 | rgqft_mult_6 | 24 | multiplier | 4445.6 | 2206.6 | P2 | 50.4 | 1994 | 990 | proven |
 
-- `[F]` On family A PSEL avoids 1,076.4 HQC against always running P2 and still saves 46.0 HQC against P0. This avoided loss is what PSEL adds over P2 on Trotter circuits.
-- `[F]` PSEL never raises n_2q against P0 on any of the 223 circuits of families A, B1, B1x and B2. On family C it lowers n_2q by 1884 in total.
-- `[F]` Family A by model. PSEL picks P2 on 32 of the 60 TFIM circuits and saves 0.62 % against P0. On the 60 ladder circuits it picks P2 on 25 and saves 0.52 %. On the 60 XXZ circuits it keeps P0 throughout.
+- `[F]` On family A the earlier selector PSEL avoids 1,076.4 HQC against always running P2 and still saves 46.0 HQC against P0. This avoided loss is what PSEL adds over P2 on Trotter circuits.
+- `[F]` The earlier selector PSEL never raises n_2q against P0 on any of the 223 circuits of families A, B1, B1x and B2. On family C it lowers n_2q by 1884 in total.
+- `[F]` Family A by model. The earlier selector PSEL picks P2 on 32 of the 60 TFIM circuits and saves 0.62 % against P0. On the 60 ladder circuits it picks P2 on 25 and saves 0.52 %. On the 60 XXZ circuits it keeps P0 throughout.
 
 ![Family B1 ZZPhase count](figures/fig_B1_zz.png)
 
 `[F]` Figure 2. Family B1. ZZPhase count per circuit for P0ref, P0 and P2 on a log scale, ordered by qubit number and then by T-count. hwb8 is omitted. Data: Appendix Table B1.
 
-- `[F]` The best single B1 circuit is vbe_adder_3. P2 cuts its ZZPhase count from 56 to 41, a reduction of 26.8 %. At a 10,000 HQC budget PSEL buys 28.5 % more shots of it.
-- `[F]` Scalability. Family C reaches 56 qubits. Its largest circuit under P0 has 2335 two-qubit gates. The largest B1 circuit hwb8 took 815.7 s under P2 in the stored run. `[O]` The ZX stage is the time cost of PSEL. It runs once per circuit before any shot is paid.
+- `[F]` The best single B1 circuit is vbe_adder_3. P2 cuts its ZZPhase count from 56 to 41, a reduction of 26.8 %. At a 10,000 HQC budget the earlier selector PSEL buys 28.5 % more shots of it.
+- `[F]` Scalability. Family C reaches 56 qubits. Its largest circuit under P0 has 2335 two-qubit gates. The largest B1 circuit hwb8 took 815.7 s under P2 in the stored run. `[O]` The ZX stage was the time cost of the earlier selector PSEL. The compile time of PSEL4 is in Section 3.5. Both run once per circuit before any shot is paid.
 
 ### 3.2 H2-Emulator and H2-2E
 
@@ -254,7 +257,7 @@ Team Learned ZX Rewriting: C.-F. Kam, A. Mahasinghe, D. De Silva, N. Karunarathn
 | vbe_adder_7 | 22 | P0 | 142 | 370.4 | 0.886 | 0.0101 |
 | vbe_adder_7 | 22 | P2 | 107 | 294.4 | 0.897 | 0.0096 |
 
-- `[F]` The difference F_H(P2) minus F_H(P0) is +0.0110 with sd 0.0139 and z = 0.79. It is not resolved at 1000 shots. `[O]` The run shows that a 22-qubit PSEL output executes on a Quantinuum emulator.
+- `[F]` The difference F_H(P2) minus F_H(P0) is +0.0110 with sd 0.0139 and z = 0.79. It is not resolved at 1000 shots. `[O]` The run shows that a 22-qubit output of the earlier selector PSEL executes on a Quantinuum emulator.
 
 `[F]` Table 3d. The same adder on the non-zero input a = 28, b = 111, fixed and committed before submission (Appendix Section 3.7.3, Table E5). Success probability is the share of shots that return the correct sum 139.
 
@@ -277,7 +280,7 @@ Team Learned ZX Rewriting: C.-F. Kam, A. Mahasinghe, D. De Silva, N. Karunarathn
 | modadd_2n_10 | i2 | P2L3 | 147 | 142 | 0.8575 | 0.8025 | -0.0550 | 0.0265 | -2.08 |
 | modadd_2n_10 | i3 | P2L3 | 147 | 142 | 0.8350 | 0.8525 | +0.0175 | 0.0257 | 0.68 |
 
-- `[F]` cdkm_adder_10. The PSEL4 pick L3 has 118 two-qubit gates against 141 under P0. On the submitted compiled programs its two-qubit depth is 65 against 122 (`results/h22e_multi_depth.md`). It returns the correct sum less often. The pooled difference is -0.0425 with z = -2.90 and is negative on all three inputs.
+- `[F]` cdkm_adder_10. The PSEL4 pick L3 has 118 two-qubit gates against 141 under P0. Post hoc, and not part of the pre-registration, its two-qubit depth on the submitted compiled programs is 65 against 122 (`results/h22e_multi_depth.md`). It returns the correct sum less often. The pooled difference is -0.0425 with z = -2.90 and is negative on all three inputs.
 - `[F]` modadd_2n_10. The pooled difference of the pick P2L3 is -0.0033 with z = -0.22. The per-input differences change sign.
 - `[F]` Secondary. Pooled over both circuits the pick reaches 0.8325 against 0.8554 for P0 at 2400 shots per arm, with z = -2.19.
 - `[F]` The 12 jobs used 1781.04 HQC by the formula.
@@ -290,7 +293,7 @@ Team Learned ZX Rewriting: C.-F. Kam, A. Mahasinghe, D. De Silva, N. Karunarathn
 
 ### 3.4 Stronger baselines
 
-`[F]` Table SB. HQC at 1000 shots against further compilers (Appendix Section 3.8.1, `results/strong_baselines.md`). L2 is the official pass at level 2, the default and our P0. L3 is level 3. ZXG is ZXGraphlikeOptimisation followed by L2. QK3 is Qiskit at optimization level 3 rebased to H2 natives. PSEL3 keeps the cheaper of L3 and teleport_reduce followed by L3. A negative saved % means the compiler costs more.
+`[F]` Table SB. HQC at 1000 shots against further compilers (Appendix Section 3.8.1, `results/strong_baselines.md`). L2 is the official pass at level 2, the default and our P0. L3 is level 3. ZXG is ZXGraphlikeOptimisation followed by L2. QK3 is Qiskit at optimization level 3 rebased to H2 natives. PSEL is the earlier two-candidate selector over P0 and P2. PSEL3 keeps the cheaper of L3 and teleport_reduce followed by L3. A negative saved % means the compiler costs more. The delivered PSEL4 is in Table P4.
 
 | family (circuits) | L2 | L3 | ZXG | QK3 | PSEL | PSEL saved vs L2 (%) | PSEL saved vs L3 (%) | BEST = min(L2, L3, ZXG, QK3) | PSEL saved vs BEST (%) | PSEL3 saved vs L3 (%) |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -299,7 +302,7 @@ Team Learned ZX Rewriting: C.-F. Kam, A. Mahasinghe, D. De Silva, N. Karunarathn
 
 `[F]` The official pytket-quantinuum compilation at optimisation level 3 (L3) is a stronger baseline than level 2 (L2), the default level and our P0. Its total HQC is 13.71 % below L2 on B1 and 23.16 % below L2 on family C. PSEL beats L2 but loses to L3 in total, with saved -9.92 % on B1 and -8.37 % on family C. Among L2, L3, ZXG, QK3 and PSEL, PSEL alone gives the lowest HQC on 3 of 14 B1 circuits and 6 of 20 family C circuits. ZXGraphlikeOptimisation followed by L2 (ZXG) and Qiskit optimization level 3 rebased to H2 natives (QK3) both cost more than L2 in total on both families. Applying teleport_reduce before L3 and keeping the cheaper of the two (PSEL3) saves 3.49 % against L3 on B1 and 2.34 % against L3 on family C. hwb8 is left out of the B1 totals because its ZXG and P2L3 runs timed out at 180 s. Family C outputs are above 12 qubits and are not checked for exactness here. All B1 outputs pass the unitary or statevector check.
 
-`[O]` The HQC savings stated elsewhere in this report are against L2. Against L3 the PSEL saving does not hold. The ZX stage still pays on top of L3, by 3.49 % and 2.34 %.
+`[O]` Against L3 the saving of the earlier selector PSEL does not hold. The ZX stage still pays on top of L3, by 3.49 % and 2.34 %. This is why the delivered PSEL4 adds L3 and P2L3 to the candidates.
 
 `[F]` Table P4. HQC at 1000 shots of the level-3-aware selector PSEL4 (`value/psel4_ledger.md`). Totals are over the circuits where L2 and L3 both passed.
 
@@ -403,7 +406,7 @@ Team Learned ZX Rewriting: C.-F. Kam, A. Mahasinghe, D. De Silva, N. Karunarathn
 
 ### 4.3 Related work
 
-`[F]` ZX-calculus optimisation rests on the graph-theoretic simplification of Duncan et al. (Reference 14) and on the phase teleportation of Kissinger and van de Wetering (Reference 3), which our P2 stage runs as PyZX teleport_reduce. `[F]` Staudacher et al. (Reference 15) and Chen et al. (Reference 16) change the ZX simplification to lower the two-qubit gate count. `[F]` Nägele and Marquardt train a graph-neural-network agent whose reward is the drop in the number of ZX-diagram nodes (Reference 17). `[F]` Riu et al. train an agent on the total or the two-qubit gate count of Clifford+T circuits and compare it with ZX heuristics (Reference 18). `[F]` Quarl learns rewrite sequences that cut the total and CNOT gate counts on the Nam and IBM gate sets (Reference 19), and Kremer et al. apply reinforcement learning to Clifford synthesis and routing (Reference 20). `[F]` AlphaTensor-Quantum minimises the T-count and can use gadgets (Reference 4). `[O]` In the parts of these works that we read, none prices its output with the H2 HQC formula or runs the pytket-quantinuum pass as a baseline. `[O]` This submission adds no new rewriting method. It adds a measured HQC ledger on H2 against the official pytket-quantinuum pass at optimisation levels 2 and 3. `[F]` Every output of families A, B1 and B2 passes an exactness check and a PyZX miter proves 18 of the 20 family C picks equal to their inputs.
+`[F]` ZX-calculus optimisation rests on the graph-theoretic simplification of Duncan et al. (Reference 14) and on the phase teleportation of Kissinger and van de Wetering (Reference 3), which our P2 stage runs as PyZX teleport_reduce. `[F]` Staudacher et al. (Reference 15) and Chen et al. (Reference 16) change the ZX simplification to lower the two-qubit gate count. `[F]` Nägele and Marquardt train a graph-neural-network agent whose reward is the drop in the number of ZX-diagram nodes (Reference 17). `[F]` Riu et al. train an agent on the total or the two-qubit gate count of Clifford+T circuits and compare it with ZX heuristics (Reference 18). `[F]` Quarl learns rewrite sequences that cut the total and CNOT gate counts on the Nam and IBM gate sets (Reference 19), and Kremer et al. apply reinforcement learning to Clifford synthesis and routing (Reference 20). `[F]` AlphaTensor-Quantum minimises the T-count and can use gadgets (Reference 4). `[O]` In the parts of these works that we read, none prices its output with the H2 HQC formula or runs the pytket-quantinuum pass as a baseline. `[O]` This submission adds no new rewriting method. It adds a measured HQC ledger on H2 against the official pytket-quantinuum pass at optimisation levels 2 and 3. `[F]` Every compiled output of families A, B1 and B2 checked in Section 2.4 passes an exactness check. A PyZX miter proves 17 of the 20 family C PSEL4 picks equal to their inputs (`results/family_C_equivalence_psel4.md`).
 
 ### 4.4 A learned gate for the selector
 
@@ -428,22 +431,24 @@ Team Learned ZX Rewriting: C.-F. Kam, A. Mahasinghe, D. De Silva, N. Karunarathn
 | Path | Content |
 |---|---|
 | `bench/` | Generators and builders of families A, B1, B1x, B2, C and the use case, with manifests |
-| `pipelines/` | Pipelines, metrics, exactness checks, PSEL and the official baseline comparison |
+| `pipelines/` | Pipelines, metrics, exactness checks, PSEL4, PSEL and the official baseline comparison |
 | `barrier/` | Exact certificate with a line map to the manuscript in `barrier/NOTES.md` |
 | `noise/`, `selene/`, `submit/` | Density-matrix proxy, Selene runs, platform jobs and their statistics |
 | `value/` | Ledgers behind Sections 1, 3 and 6, each script with a test file |
 | `results/` | Every CSV, log, compiled QASM file, job payload and verification report |
 
-- `[F]` Tests. The test table of Appendix 5 lists 19 test files with their commands, results and dates. Examples are `pipelines/test_pass_select.py` with 3 of 3 passed and `value/test_selector_ledger.py` with 4 of 4 passed. Family C and the use case have their own test files `value/test_family_C_selector.py` and `value/test_usecase.py`. The family C proof has `pipelines/test_equiv_family_C.py` with 2 of 2 passed.
+- `[F]` Tests. 33 test files ran on 10 October 2026, 8 as scripts and 25 under pytest, all with return code 0 (`submission/build_logs/tests_summary.txt`). Examples are `pipelines/test_psel4.py` with 4 of 4 passed, `pipelines/test_equiv_psel4_C.py` with 3 of 3 passed and `pipelines/test_pass_select.py` with 3 of 3 passed. Family C and the use case have their own test files `value/test_family_C_selector.py` and `value/test_usecase.py`.
 - `[F]` Generated numbers. Every results table of the full report is produced by `report/make_tables.py` from `results/*.csv`. The value tables are produced by the scripts under `value/` and carry no number typed by hand.
 - `[F]` Clean-clone run. On 8 October the repository was cloned into a scratch directory and the pipeline was rerun with reduced variants of the long compilation steps (`results/repro_2026-10-08/repro_log.md`). The log reports no change in any count, T-count, HQC, fidelity or table cell. The run found two gaps. A fits log was ignored by git and the pyzx fork had no fetch command. `README.md` now gives the fetch command with the commit hash.
-- `[F]` Independent verification. Twelve verification reports by agents that did not produce the results are in `results/verification_2026-10-0*.md`. Each recomputes claims from the raw files and lists mismatches.
-- `[F]` Notebook. The submission cell of `report/notebook_skeleton.py` was executed against the free H2-2SC syntax checker. It compiled tof_3 with PSEL and returned job `AFByb3ZpZGVySm9iAaEdzTywfrOWhGbnlXxd-w` with status COMPLETED. The executed export is `report/notebook_executed.html`. The cell refuses any platform whose name does not end in SC.
+- `[F]` Independent verification. 24 verification reports from 7 to 10 October by agents that did not produce the results are in `results/verification_2026-10-*.md`. Each recomputes claims from the raw files and lists mismatches.
+- `[F]` Notebook. The submission cell of `report/notebook_skeleton.py` was executed against the free H2-2SC syntax checker. It compiled tof_3 with the earlier selector PSEL and returned job `AFByb3ZpZGVySm9iAaEdzTywfrOWhGbnlXxd-w` with status COMPLETED. The executed export is `report/notebook_executed.html`. The cell refuses any platform whose name does not end in SC.
 - `[F]` Seeds and versions. The circuit generators use seed 20261006. The environment table of Appendix 5 pins pytket 2.18.4, pytket-quantinuum 0.59.3 and pyzx 0.10.7.
 
-## 6. Plan for H2 hardware in the finals
+## 6. Plan for the finals
 
-`[F]` `value/finals_plan.py` sizes the runs from the measured H2-2E gain and not from the model prediction (`value/finals_plan.md`, Appendix 6).
+`[F]` On the H2-2E emulator the cheapest compile was not always the most accurate. On cdkm_adder_10 the PSEL4 pick L3 returned the correct sum less often than level 2, with z = -2.90 (Table 3e). `[O]` The finals goal is therefore a fidelity-aware learned selector. It predicts the success of each candidate on the emulator or on hardware and picks on HQC and accuracy together. `[F]` A first classifier on input-circuit features does not beat constant choices on held-out families (Section 4.4). `[O]` The finals model needs structural features and emulator labels.
+
+`[O]` Secondary item. A hardware test of the earlier P2 against P0 result on vbe_adder_3 is sized below. `[F]` `value/finals_plan.py` sizes the runs from the measured H2-2E gain and not from the model prediction (`value/finals_plan.md`, Appendix 6).
 
 | Test | Circuit | Shots per pipeline | Power | HQC |
 |---|---|---|---|---|
@@ -464,11 +469,12 @@ Team Learned ZX Rewriting: C.-F. Kam, A. Mahasinghe, D. De Silva, N. Karunarathn
 - `[F]` Cost is not fidelity. PSEL4 selects on HQC. On cdkm_adder_10 its pick L3 returns the correct sum less often than level 2 on H2-2E, with z = -2.90 over three pre-registered inputs (Table 3e). On modadd_2n_10 the difference has z = -0.22. The non-zero-input vbe_adder_7 difference has z = 1.30 and is not resolved. `[O]` Three circuits cannot settle which compile is more accurate on other circuits.
 - `[F]` The mechanism analysis of Section 3.7 lacks 6 circuits, B1 hwb8 and family C draper_adder_16, draper_adder_28, hrs_mult_5, rgqft_mult_6 and mcx_b95_54. Their level 3 or P2L3 compile did not fit the CPU budget.
 - `[F]` Nothing in this report has run on H2 hardware. All platform results are emulator runs.
-- `[F]` The HQC savings are stated against pytket-quantinuum at optimisation level 2, the default. Against level 3 PSEL costs 9.92 % more on B1 and 8.37 % more on family C. The ZX stage on top of level 3 (PSEL3) saves 3.49 % and 2.34 % (Table SB). PSEL4 saves 3.50 % against level 3 on family C and 0.73 % on B1 (Table P4).
+- `[F]` Most HQC savings are stated against pytket-quantinuum at optimisation level 2, the default. Against level 3 the earlier selector PSEL costs 9.92 % more on B1 and 8.37 % more on family C. The ZX stage on top of level 3 (PSEL3) saves 3.49 % and 2.34 % (Table SB). PSEL4 saves 3.50 % against level 3 on family C and 0.73 % on B1 (Table P4).
 - `[F]` The vbe_adder_3 fidelity gain is not significant at 0.05 after Holm correction over all three H2-2E circuits. grover_5 shows no gain at 4000 shots.
-- `[F]` Family C is count-only apart from the H2-2E runs of vbe_adder_7, cdkm_adder_10 and modadd_2n_10 (Tables 3c to 3e). The PSEL output is proven on 18 of its 20 circuits. hrs_mult_5 is only spot-checked on 64 random basis inputs. The P0 pick of draper_adder_28 has no check. Family B1x has no check.
-- `[F]` The 16.7 % family C saving rests on two multipliers with continuous rotation angles. Without continuous-angle circuits the saving is 7.47 %.
-- `[F]` hwb8 carries 84.5 % of the B1 saving and has no sourced algorithm role.
+- `[F]` Family C is count-only apart from the H2-2E runs of vbe_adder_7, cdkm_adder_10 and modadd_2n_10 (Tables 3c to 3e). The PSEL4 output is proven on 17 of its 20 circuits. The P2 pick of hrs_mult_5 is only spot-checked on 64 random basis inputs. The miter of the L3 pick of rgqft_mult_6 timed out. Family B1x has no check.
+- `[F]` draper_adder_28. PSEL4 picks P2L3 at 2336.2 HQC. Its input was rounded by PyZX by at most 1.50e-06 rad per angle, so its output equals the input only up to that rounding. Its miter timed out after 300 s and the output is unproven. The earlier selector PSEL kept P0 on this circuit.
+- `[F]` The 16.7 % family C saving of the earlier selector PSEL rests on two multipliers with continuous rotation angles. Without continuous-angle circuits that saving is 7.47 %. PSEL4 saves 25.85 % on family C and 11.52 % without continuous angles (Table P4).
+- `[F]` hwb8 carries 84.5 % of the B1 saving of the earlier selector PSEL and has no sourced algorithm role.
 - `[F]` The certificate covers 24 circuits with n at most 5. On the four B1 circuits it leaves most of the remaining T-count unaccounted for.
 - `[F]` No user interview or survey supports the need. `[O]` The USD values of Section 1.5 rest on plan-average prices and not on a quoted marginal price.
 - `[F]` The learned component of this submission is a cost model fitted on proxy fidelities (Appendix 4). This submission contains no learned rewriting.
