@@ -57,7 +57,7 @@
   \begin{itemize}\setlength{\itemsep}{3pt}\large
     \item 15.7\,\% less HQC than pytket-quantinuum's default level 2 over 217 circuits.
     \item 0 circuits costlier than level 2 or level 3.
-    \item The lower-HQC compile needs 17.4\,\% fewer HQC per correct answer on the H2-2E emulator, fewer in 6 of 6 comparisons.
+    \item The lower-HQC compile (the PSEL4 pick in 3 of 6 pairs) needs 17.4\,\% fewer HQC per correct answer on the H2-2E emulator.
     \item USD 95,289 to 115,707 saved on the benchmark ledger at Azure plan averages.
   \end{itemize}
   \vspace{0.35cm}
@@ -229,6 +229,7 @@
     \item HQC is the formula estimate. All fidelity results come from the H2-2E emulator. Nothing has run on H2 hardware.
     \item On cdkm\_adder\_10 the level 3 pick returns the correct sum less often (0.8267 against 0.8692, $z = -2.90$). Accuracy-bound users need a fidelity-aware choice.
     \item The ZX-only gain is 0.26\,\% on the 17 proven family C circuits.
+    \item Per correct answer: three of the six pairs compare P2, not the PSEL4 pick. Inputs are pooled as one binomial.
     \item 2 family C level 3 outputs and 3 PSEL4 outputs are unproven. On draper\_adder\_28 the PSEL4 pick starts from angles PyZX rounded by up to 1.50e-06 rad.
     \item The earlier vbe\_adder\_3 fidelity gain used the all-zero input. Its Holm-adjusted $p$ is 0.052 over three circuits.
     \item No user interview or survey is part of this submission. The selector follows pytket's PassSelector pattern.

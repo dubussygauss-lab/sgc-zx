@@ -1,6 +1,6 @@
 # PSEL4 compiles each H2 circuit four ways and keeps the cheapest
 
-**PSEL4 needs 15.7 % less HQC than pytket-quantinuum's default level 2 over 217 circuits, and on the H2-2E emulator the cheaper compile needs 17.4 % fewer HQC per correct answer, fewer in 6 of 6 comparisons.**
+**PSEL4 needs 15.7 % less HQC than pytket-quantinuum's default level 2 over 217 circuits, and on the H2-2E emulator the cheaper compile (the PSEL4 pick in 3 of 6 pairs) needs 17.4 % fewer HQC per correct answer, fewer in 6 of 6 comparisons.**
 
 <style>table{border-collapse:collapse;margin:0.3em 0;font-size:9.8pt}th,td{border-bottom:1px solid #bbb;padding:1px 8px;text-align:left}th:nth-child(n+2),td:nth-child(n+2){text-align:right}</style>
 
