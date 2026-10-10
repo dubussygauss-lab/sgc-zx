@@ -2,9 +2,15 @@
 
 The main report is `report.pdf` and the technical appendix is `report_full.pdf`.
 
-Team Learned ZX Rewriting. Report title: "A pass selector keeps ZX rewriting only where it lowers the cost of a circuit on Quantinuum H2". Quantinuum Singapore Grand Challenge, submission 1. `report.pdf` is built from `report/report_short.md`. `report_full.pdf` is the full report v5 built from `report/report_v5.md` without its changelog sections. This page was built on 9 October 2026 and is aligned with the main report `report.pdf` and with Section 1 of the technical appendix `report_full.pdf`.
+Team Learned ZX Rewriting. Report title: "PSEL4 keeps ZX rewriting only where it beats pytket level 3 on Quantinuum H2". Quantinuum Singapore Grand Challenge, submission 1. `report.pdf` is built from `report/report_short.md`. `report_full.pdf` is the full report v5 built from `report/report_v5.md` without its changelog sections. This page was built on 9 October 2026 and is aligned with the main report `report.pdf` and with Section 1 of the technical appendix `report_full.pdf`.
 
 `[F]` marks a statement copied from the report or from the `value/` outputs. `[O]` marks a judgement. The script `check_summary_numbers.py` finds every number of this page in `report/report_v5.md` or in `value/`.
+
+## Product, baseline and headline
+
+`[F]` The product is PSEL4, a drop-in pytket pass selector. It compiles each circuit four ways. These are pytket-quantinuum level 2 (P0), PyZX teleport_reduce before level 2 (P2), level 3 (L3) and teleport_reduce before level 3 (P2L3). It keeps the candidate with the lowest HQC. The baseline is pytket level 3. Level 2 and level 3 are always candidates. PSEL4 therefore never costs more HQC than either level on a circuit where both pass its checks. This guarantee is a design property. It is not a measured result.
+
+`[F]` A PyZX miter proves the PSEL4 output equal to its input on 17 of the 20 family C circuits. On these 17 circuits PSEL4 saves 0.80 % against level 3. On all 20 it saves 3.50 %. 87.6 % of that saving comes from 3 picks whose output is not proven (appendix Section 3.8.1, Table P4). The two-candidate selector PSEL keeps the lower HQC of P0 and P2. Its figures in the sections below are against level 2.
 
 ## HQC saved on arithmetic and oracle circuits of 20 to 56 qubits
 
