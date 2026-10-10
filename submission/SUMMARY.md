@@ -16,7 +16,7 @@ Team Learned ZX Rewriting. Report title: "PSEL4 compiles each H2 circuit four wa
 
 `[F]` Guard. Run on every circuit before level 2, the ZX stage costs 6.27 % more HQC on the 180 Trotter circuits and 22.1 % more on the 3 QFT adders of family C. pytket's own ZXGraphlikeOptimisation followed by level 2 costs 59.22 % more than level 2 on 14 B1 circuits. Qiskit level 3 rebased to H2 also costs more than level 2 on B1 and on family C. PSEL4 never pays these losses.
 
-`[F]` Correctness. Outputs are checked exactly up to 20 qubits. In the PSEL4 ledger runs the check of the level 3 candidates stopped at 12 qubits. A PyZX miter proves the PSEL4 output equal to its input on 17 of the 20 family C circuits. Our P0 and P2 give the same counts as the official pytket-quantinuum pass on all 445 compiled rows of families A, B1, B1x and B2.
+`[F]` Correctness. Outputs up to 8 qubits are checked as full unitaries. From 9 to 20 qubits the check compares the output state on the all-zero input only. In the PSEL4 ledger runs the check of the level 3 candidates stopped at 12 qubits. A PyZX miter proves the PSEL4 output equal to its input on 17 of the 20 family C circuits. Our P0 and P2 give the same counts as the official pytket-quantinuum pass on all 445 compiled rows of families A, B1, B1x and B2.
 
 `[F]` Emulator. Of the 22 H2-2E jobs with valid counts two ran the 22-qubit adder vbe_adder_7 on a non-zero input fixed and committed in advance. It returns the correct sum 139 in 0.883 of the shots under level 2 and 0.901 under level 3, the PSEL4 pick. The difference has z = 1.30 and is not resolved at 1000 shots (appendix Section 3.7.3).
 

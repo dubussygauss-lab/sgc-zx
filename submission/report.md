@@ -19,7 +19,7 @@ Team Learned ZX Rewriting: C.-F. Kam, A. Mahasinghe, D. De Silva, N. Karunarathn
 
 `[F]` Guard. Blind ZX rewriting raises HQC. Run on every circuit before level 2, the ZX stage costs 6.27 % more HQC on the 180 Trotter circuits and 22.1 % more on the 3 QFT adders of family C. pytket's own ZXGraphlikeOptimisation followed by level 2 costs 59.22 % more than level 2 on 14 B1 circuits. Qiskit level 3 rebased to H2 also costs more than level 2 on B1 and on family C (Table SB). PSEL4 never pays these losses.
 
-`[F]` Correctness. Outputs are checked exactly up to 20 qubits. In the PSEL4 ledger runs the check of the level 3 candidates stopped at 12 qubits. A PyZX miter proves the PSEL4 output equal to its input on 17 of the 20 family C circuits of 20 to 56 qubits. Our P0 and P2 give the same counts as the official pytket-quantinuum pass on all 445 compiled rows of families A, B1, B1x and B2.
+`[F]` Correctness. Outputs up to 8 qubits are checked as full unitaries. From 9 to 20 qubits the check compares the output state on the all-zero input only. In the PSEL4 ledger runs the check of the level 3 candidates stopped at 12 qubits. A PyZX miter proves the PSEL4 output equal to its input on 17 of the 20 family C circuits of 20 to 56 qubits. Our P0 and P2 give the same counts as the official pytket-quantinuum pass on all 445 compiled rows of families A, B1, B1x and B2.
 
 `[F]` Emulator. The submission holds 22 H2-2E jobs with valid counts. The input of the 22-qubit adder vbe_adder_7 was non-zero and was fixed and committed in advance. On it the adder returns the correct sum 139 in 0.883 of the shots under level 2. Under level 3, the PSEL4 pick, it does so in 0.901 of the shots. The difference has z = 1.30 and is not resolved at 1000 shots (Section 3.2).
 
@@ -393,6 +393,7 @@ Team Learned ZX Rewriting: C.-F. Kam, A. Mahasinghe, D. De Silva, N. Karunarathn
 
 ## 7. Limitations
 
+- `[F]` PSEL4 saving split. Most of the PSEL4 saving against level 2 comes from choosing level 3. The ZX candidates add 0.26 % on the 17 proven family C circuits and 3.21 % on all 20 (`value/psel4_zx_only.md`). Three family C picks have no proof, and 87.6 % of the family C saving against level 3 comes from two of them, hrs_mult_5 and draper_adder_28. The non-zero-input vbe_adder_7 difference has z = 1.30 and is not resolved. The selector's exactness check uses full unitaries up to 8 qubits and the all-zero input state from 9 to 20 qubits.
 - `[F]` Nothing in this report has run on H2 hardware. All platform results are emulator runs.
 - `[F]` The HQC savings are stated against pytket-quantinuum at optimisation level 2, the default. Against level 3 PSEL costs 9.92 % more on B1 and 8.37 % more on family C. The ZX stage on top of level 3 (PSEL3) saves 3.49 % and 2.34 % (Table SB). PSEL4 saves 3.50 % against level 3 on family C and 0.73 % on B1 (Table P4).
 - `[F]` The vbe_adder_3 fidelity gain is not significant at 0.05 after Holm correction over all three H2-2E circuits. grover_5 shows no gain at 4000 shots.

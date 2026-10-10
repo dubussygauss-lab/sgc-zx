@@ -97,7 +97,7 @@
         \item \textbf{P0.} pytket-quantinuum 0.59.3 at optimisation level 2, pytket's default.
         \item \textbf{L3.} The same pass at optimisation level 3.
         \item \textbf{P2 and P2L3.} PyZX teleport\_reduce, then level 2 or level 3.
-        \item A candidate that fails its exactness check or times out is dropped. Ties go to the lower two-qubit count.
+        \item Failed or erroring candidates are dropped. Ties go to the lower two-qubit count.
         \item \textbf{Guarantee.} Level 2 and level 3 are always candidates. PSEL4 therefore never costs more HQC than either on a circuit where both pass its checks. This holds by construction.
       \end{itemize}
     \end{column}
@@ -185,10 +185,10 @@
 \end{frame}
 
 % ---------------------------------------------------------------- 8
-\begin{frame}{Outputs are checked exactly up to 20 qubits and proven on 17 of 20 larger circuits}
+\begin{frame}{Outputs are checked up to 20 qubits and proven on 17 of 20 larger circuits}
   \small
   \begin{itemize}\setlength{\itemsep}{4pt}
-    \item \textbf{Exact checks.} PSEL4 checks every candidate up to 20 qubits. On families A, B1 and B2 every compiled circuit is checked against the uncompiled reference with tolerance 1e-8. All 1260 family A rows, 105 B1 rows and 100 B2 rows pass.
+    \item \textbf{Exact checks.} PSEL4 checks every candidate up to 20 qubits, as a full unitary up to 8 qubits and on the all-zero input from 9 to 20. On families A, B1 and B2 every compiled circuit is checked against the uncompiled reference with tolerance 1e-8. All 1260 family A rows, 105 B1 rows and 100 B2 rows pass.
     \item \textbf{Miter proofs.} A PyZX miter reduction proves the PSEL4 output equal to its input as a full unitary up to global phase on 17 of the 20 family C circuits of 20 to 56 qubits.
     \item \textbf{Not proven.} hrs\_mult\_5 has off-grid angles and passes a check on 64 random basis inputs only. The miters of rgqft\_mult\_6 and draper\_adder\_28 timed out after 300 s.
     \item \textbf{Official pass.} Our level 2 pipelines give the same counts as the official pytket-quantinuum pass on all 445 compiled rows of families A, B1, B1x and B2. Family C was not compiled with the official pass.
